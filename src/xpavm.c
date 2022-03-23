@@ -95,15 +95,15 @@ main(int argc, char **argv) {
 	linkedlist_t *sinks;
 	sink_style_t style_selected, style_normal;
 
-	window = window_create("xpavm");
 	pac = pulseaudio_connect();
-	font = font_load("Iosevka", 12);
 	sinks = sink_get_all_input_sinks(pac);
 
 	if (linkedlist_length(sinks) == 0) {
 		die("no sinks were found");
 	}
 
+	window = window_create("xpavm");
+	font = font_load("Iosevka", 12);
 	style_selected = sink_style_from(0xa0e547, 0x5e5eed, 0x333333);
 	style_normal = sink_style_from(0xffffff, 0x555555, 0x333333);
 	selector = sink_selector_create(sinks, font, 450, 23, &style_normal, &style_selected);
