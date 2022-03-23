@@ -122,21 +122,30 @@ window_create(const char *title) {
 extern void
 window_loop_start(window_t *window) {
 	xcb_generic_event_t *ev;
+	xcb_key_press_event_t *kpev;
+	xcb_client_message_event_t *cmev;
+
 	window->running = 1;
 
 	while (window->running) {
 		if ((ev = xcb_wait_for_event(window->connection))) {
 			switch (ev->response_type & ~0x80) {
 				case XCB_CLIENT_MESSAGE:
-					if (((xcb_client_message_event_t *)(ev))->data.data32[0] == x11_get_atom(window, "WM_DELETE_WINDOW")) {
+					cmev = (xcb_client_message_event_t *)(ev);
+
+					/* end loop if the window manager sent a delete window message */
+					/* https://www.x.org/docs/ICCCM/icccm.pdf */
+					if (cmev->data.data32[0] == x11_get_atom(window, "WM_DELETE_WINDOW")) {
 						window_loop_end(window);
 					}
+
 					break;
 				case XCB_EXPOSE:
 					xcb_image_put(window->connection, window->id, window->gc, window->image, 0, 0, 0);
 					break;
 				case XCB_KEY_PRESS:
-					window->key_pressed(((xcb_key_press_event_t *)(ev))->detail);
+					kpev = (xcb_key_press_event_t *)(ev);
+					window->key_pressed(kpev->detail);
 					break;
 				default:
 					break;
