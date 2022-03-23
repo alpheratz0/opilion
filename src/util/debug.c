@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <unistd.h>
 
 extern void
 warn(const char *err) {
@@ -19,7 +20,14 @@ warnf(const char *err, ...) {
 
 extern void
 die(const char *err) {
-	fprintf(stderr, "xpavm: %s\n", err);
+	if (isatty(STDOUT_FILENO)) {
+		fprintf(stderr, "xpavm: %s\n", err);
+	}
+	else {
+		char command[256];
+		snprintf(command, sizeof(command), "notify-send \"xpavm: %s\"", err);
+		system(command);
+	}
 	exit(1);
 }
 
