@@ -8,6 +8,26 @@
 #include "../util/debug.h"
 #include "window.h"
 
+static xcb_atom_t
+x11_get_atom(window_t *window, const char *name) {
+	xcb_atom_t atom;
+	xcb_intern_atom_reply_t *reply;
+
+	reply = xcb_intern_atom_reply(
+		window->connection,
+		xcb_intern_atom_unchecked(
+			window->connection, 1,
+			strlen(name), name
+		),
+		NULL
+	);
+
+	atom = reply->atom;
+	free(reply);
+
+	return atom;
+}
+
 extern window_t *
 window_create(const char *title) {
 	window_t *window;
@@ -57,13 +77,33 @@ window_create(const char *title) {
 		XCB_ATOM_STRING, 8, strlen(title), title
 	);
 
-	xcb_change_window_attributes(
-		window->connection, window->id, XCB_CW_OVERRIDE_REDIRECT,
-		(const u32[1]) { 0x1 }
+	/* set fullscreen */
+	xcb_atom_t net_wm_state = x11_get_atom(window, "_NET_WM_STATE");
+	xcb_atom_t net_wm_state_fullscreen = x11_get_atom(window, "_NET_WM_STATE_FULLSCREEN");
+
+	xcb_change_property(
+		window->connection,
+		XCB_PROP_MODE_REPLACE,
+		window->id,
+		net_wm_state,
+		XCB_ATOM_ATOM, 32, 1,
+		&net_wm_state_fullscreen
+	);
+
+	/* set wm protocols */
+	xcb_atom_t wm_protocols = x11_get_atom(window, "WM_PROTOCOLS");
+	xcb_atom_t wm_delete_window = x11_get_atom(window, "WM_DELETE_WINDOW");
+
+	xcb_change_property(
+		window->connection,
+		XCB_PROP_MODE_REPLACE,
+		window->id,
+		wm_protocols,
+		XCB_ATOM_ATOM, 32, 1,
+		&wm_delete_window
 	);
 
 	xcb_map_window(window->connection, window->id);
-	xcb_set_input_focus(window->connection, XCB_INPUT_FOCUS_POINTER_ROOT, window->id, XCB_CURRENT_TIME);
 	xcb_flush(window->connection);
 
 	window->running = 0;
@@ -87,6 +127,11 @@ window_loop_start(window_t *window) {
 	while (window->running) {
 		if ((ev = xcb_wait_for_event(window->connection))) {
 			switch (ev->response_type & ~0x80) {
+				case XCB_CLIENT_MESSAGE:
+					if (((xcb_client_message_event_t *)(ev))->data.data32[0] == x11_get_atom(window, "WM_DELETE_WINDOW")) {
+						window_loop_end(window);
+					}
+					break;
 				case XCB_EXPOSE:
 					xcb_image_put(window->connection, window->id, window->gc, window->image, 0, 0, 0);
 					break;
