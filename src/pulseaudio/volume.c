@@ -39,7 +39,7 @@ get_sink_input_info_for_set_volume_callback(pa_context *c, const pa_sink_input_i
 		info = (sink_t *)(connection->userdata);
 		pa_cvolume cv = i->volume;
 		pa_cvolume_set(&cv, i->channel_map.channels, ((info->volume * (PA_VOLUME_NORM / 100))));
-		pa_operation_unref(pa_context_set_sink_input_volume(c, info->id, &cv, set_sink_input_volume_callback, NULL));
+		pa_operation_unref(pa_context_set_sink_input_volume(c, info->id, &cv, set_sink_input_volume_callback, connection));
 	}
 
 }
@@ -91,7 +91,7 @@ get_sink_input_info_for_set_mute_callback(pa_context *c, const pa_sink_input_inf
 
 	if (i) {
 		info = (sink_t *)(connection->userdata);
-		pa_operation_unref(pa_context_set_sink_input_mute(c, info->id, info->mute, set_sink_input_mute_callback, NULL));
+		pa_operation_unref(pa_context_set_sink_input_mute(c, info->id, info->mute, set_sink_input_mute_callback, connection));
 	}
 }
 
