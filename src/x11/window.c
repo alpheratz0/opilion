@@ -33,16 +33,15 @@ extern window_t *
 window_create(const char *wm_name, const char *wm_class) {
 	window_t *window;
 
-	window = malloc(sizeof(window_t));
-	if (!window)
+	if (!(window = malloc(sizeof(window_t)))) {
 		die("error while calling malloc, no memory available");
+	}
 
-	window->connection = xcb_connect(NULL, NULL);
-	if (xcb_connection_has_error(window->connection))
+	if (xcb_connection_has_error((window->connection = xcb_connect(NULL, NULL)))) {
 		die("can't open display");
+	}
 
-	window->screen = xcb_setup_roots_iterator(xcb_get_setup(window->connection)).data;
-	if (!window->screen) {
+	if (!(window->screen = xcb_setup_roots_iterator(xcb_get_setup(window->connection)).data)) {
 		xcb_disconnect(window->connection);
 		die("can't get default screen");
 	}
@@ -75,14 +74,17 @@ window_create(const char *wm_name, const char *wm_class) {
 
 	/* set instance and class name */
 	/* see: https://x.org/releases/X11R7.6/doc/xorg-docs/specs/ICCCM/icccm.html */
-
 	size_t class_size = sizeof(char) * (2 + strlen(wm_class) * 2);
 	char *class = malloc(class_size);
 	sprintf(class, "%s%c%s", wm_class, '\0', wm_class);
 
 	xcb_change_property(
-		window->connection, XCB_PROP_MODE_REPLACE, window->id, XCB_ATOM_WM_CLASS,
-		XCB_ATOM_STRING, 8, class_size, class
+		window->connection,
+		XCB_PROP_MODE_REPLACE,
+		window->id,
+		XCB_ATOM_WM_CLASS,
+		XCB_ATOM_STRING, 8, class_size,
+		class
 	);
 
 	free(class);
