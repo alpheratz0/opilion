@@ -119,7 +119,7 @@ main(int argc, char **argv) {
 		die("no sinks were found");
 	}
 
-	window = window_create("xpavm");
+	window = window_create("xpavm", "xpavm");
 	font = font_load("Iosevka", 12);
 	style_selected = sink_style_from(0xa0e547, 0x5e5eed, 0x333333);
 	style_normal = sink_style_from(0xffffff, 0x555555, 0x333333);

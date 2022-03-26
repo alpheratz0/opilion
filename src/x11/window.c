@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <xcb/xcb.h>
@@ -29,7 +30,7 @@ x11_get_atom(window_t *window, const char *name) {
 }
 
 extern window_t *
-window_create(const char *title) {
+window_create(const char *wm_name, const char *wm_class) {
 	window_t *window;
 
 	window = malloc(sizeof(window_t));
@@ -69,13 +70,22 @@ window_create(const char *title) {
 
 	xcb_change_property(
 		window->connection, XCB_PROP_MODE_REPLACE, window->id, XCB_ATOM_WM_NAME,
-		XCB_ATOM_STRING, 8, strlen(title), title
+		XCB_ATOM_STRING, 8, strlen(wm_name), wm_name
 	);
+
+	/* set instance and class name */
+	/* see: https://x.org/releases/X11R7.6/doc/xorg-docs/specs/ICCCM/icccm.html */
+
+	size_t class_size = sizeof(char) * (2 + strlen(wm_class) * 2);
+	char *class = malloc(class_size);
+	sprintf(class, "%s%c%s", wm_class, '\0', wm_class);
 
 	xcb_change_property(
 		window->connection, XCB_PROP_MODE_REPLACE, window->id, XCB_ATOM_WM_CLASS,
-		XCB_ATOM_STRING, 8, strlen(title), title
+		XCB_ATOM_STRING, 8, class_size, class
 	);
+
+	free(class);
 
 	/* set fullscreen */
 	xcb_atom_t net_wm_state = x11_get_atom(window, "_NET_WM_STATE");
