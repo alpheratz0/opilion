@@ -65,4 +65,4 @@ uninstall:
 clean:
 	@rm -f xpavm xpavm-${VERSION}.tar.gz ${OBJ}
 
-.PHONY: all clean install uninstall
+.PHONY: all clean install uninstall dist
