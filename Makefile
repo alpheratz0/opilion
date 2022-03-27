@@ -1,3 +1,4 @@
+VERSION = 0.1.0
 PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 LDLIBS = -lxcb -lxcb-image -lpulse -lfontconfig -lfreetype
@@ -50,11 +51,18 @@ install: all
 	@cp -f man/xpavm.1 ${DESTDIR}${MANPREFIX}/man1
 	@chmod 644 ${DESTDIR}${MANPREFIX}/man1/xpavm.1
 
+dist: clean
+	@mkdir -p xpavm-${VERSION}
+	@cp -R LICENSE Makefile README man src xpavm-${VERSION}
+	@tar -cf xpavm-${VERSION}.tar xpavm-${VERSION}
+	@gzip xpavm-${VERSION}.tar
+	@rm -rf xpavm-${VERSION}
+
 uninstall:
 	@rm -f ${DESTDIR}${PREFIX}/bin/xpavm
 	@rm -f ${DESTDIR}${MANPREFIX}/man1/xpavm.1
 
 clean:
-	@rm -f xpavm ${OBJ}
+	@rm -f xpavm xpavm-${VERSION}.tar.gz ${OBJ}
 
 .PHONY: all clean install uninstall
