@@ -80,10 +80,11 @@ key_press_callback(u32 key) {
 
 static void
 usage(void) {
-	puts("Usage: xpavm [ -hk ]");
+	puts("Usage: xpavm [ -hkv ]");
 	puts("Options are:");
 	puts("     -h | --help                    display this message and exit");
 	puts("     -k | --keybindings             display the keybindings");
+	puts("     -v | --version                 display the program version");
 	exit(0);
 }
 
@@ -97,6 +98,12 @@ keybindings(void) {
 	exit(0);
 }
 
+static void
+version(void) {
+	puts("xpavm version "VERSION);
+	exit(0);
+}
+
 int
 main(int argc, char **argv) {
 	/* skip program name */
@@ -105,6 +112,7 @@ main(int argc, char **argv) {
 	if (argc > 0) {
 		if (match_opt(*argv, "-k", "--keybindings")) keybindings();
 		else if (match_opt(*argv, "-h", "--help")) usage();
+		else if (match_opt(*argv, "-v", "--version")) version();
 		else dief("invalid option %s", *argv);
 	}
 
