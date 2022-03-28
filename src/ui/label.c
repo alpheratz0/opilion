@@ -18,7 +18,7 @@ label_render_char_onto(bitmap_t *bmp, font_t *font, u32 color, char c, u32 x, u3
 			u32 ymap = y + i - glyph->bitmap_top + font->size;
 			u8 gray = glyph->bitmap.buffer[i*glyph_w+j];
 
-			bitmap_set_safe(bmp, xmap, ymap, color_lerp(bitmap_get(bmp, xmap, ymap), color, gray));
+			bitmap_set(bmp, xmap, ymap, color_lerp(bitmap_get(bmp, xmap, ymap), color, gray));
 		}
 	}
 }
