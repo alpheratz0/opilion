@@ -2,6 +2,7 @@
 #define __XPAVM_BASE_LINKEDLIST_H__
 
 #include <stdint.h>
+
 #include "../util/numdef.h"
 
 typedef struct node linkedlist_t;

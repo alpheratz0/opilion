@@ -1,5 +1,6 @@
 #include <pulse/pulseaudio.h>
 #include <pulse/volume.h>
+
 #include "../util/numdef.h"
 #include "../util/debug.h"
 #include "connection.h"

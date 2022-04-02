@@ -2,6 +2,7 @@
 #include <string.h>
 #include <freetype/freetype.h>
 #include <fontconfig/fontconfig.h>
+
 #include "../util/debug.h"
 #include "../util/numdef.h"
 #include "font.h"

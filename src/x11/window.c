@@ -4,6 +4,7 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_image.h>
 #include <xcb/xproto.h>
+
 #include "../base/bitmap.h"
 #include "../util/numdef.h"
 #include "../util/debug.h"

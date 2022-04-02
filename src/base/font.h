@@ -2,6 +2,7 @@
 #define __XPAVM_BASE_FONT_H__
 
 #include <freetype/freetype.h>
+
 #include "../util/numdef.h"
 
 typedef struct font font_t;

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "../util/numdef.h"
 #include "linkedlist.h"
 

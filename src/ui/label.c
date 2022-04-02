@@ -1,4 +1,5 @@
 #include <freetype/freetype.h>
+
 #include "../base/bitmap.h"
 #include "../base/font.h"
 #include "../util/debug.h"

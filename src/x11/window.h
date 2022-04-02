@@ -3,6 +3,7 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_image.h>
+
 #include "../base/bitmap.h"
 #include "../util/numdef.h"
 

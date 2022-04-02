@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <pulse/pulseaudio.h>
+
 #include "../util/debug.h"
 #include "connection.h"
 
