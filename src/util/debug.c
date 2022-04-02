@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #include <unistd.h>
 
+#include "debug.h"
+
 extern void
 warn(const char *err) {
 	fprintf(stderr, "xpavm: %s\n", err);
