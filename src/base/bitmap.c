@@ -29,8 +29,9 @@ bitmap_create(u32 width, u32 height, u32 color) {
 
 extern void
 bitmap_set(bitmap_t *bmp, u32 x, u32 y, u32 color) {
-	if (x < bmp->width && y < bmp->height)
+	if (x < bmp->width && y < bmp->height) {
 		bmp->px[y*bmp->width+x] = color;
+	}
 }
 
 extern void
