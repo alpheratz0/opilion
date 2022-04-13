@@ -1,4 +1,5 @@
-#include <freetype/freetype.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 #include "../base/bitmap.h"
 #include "../base/font.h"

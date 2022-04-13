@@ -1,7 +1,8 @@
 #ifndef __XPAVM_BASE_FONT_H__
 #define __XPAVM_BASE_FONT_H__
 
-#include <freetype/freetype.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 #include "../util/numdef.h"
 

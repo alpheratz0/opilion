@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
-#include <freetype/freetype.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include <fontconfig/fontconfig.h>
 
 #include "../util/debug.h"
