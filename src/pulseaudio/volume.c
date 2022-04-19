@@ -56,7 +56,7 @@ sink_set_volume(pulseaudio_connection_t *connection, sink_t *info, u32 volume) {
 extern void
 sink_set_volume_relative(pulseaudio_connection_t *connection, sink_t *info, i32 relative) {
 	if (relative < 0 && (relative + (i32)(info->volume)) < 0) sink_set_volume(connection, info, 0);
-	else if(relative > 0 && (relative + info->volume) > 100) sink_set_volume(connection, info, 100);
+	else if (relative > 0 && (relative + info->volume) > 100) sink_set_volume(connection, info, 100);
 	else sink_set_volume(connection, info, info->volume + relative);
 }
 
