@@ -2,11 +2,6 @@ xpavm
 =====
 pulseaudio volume manager, preview: https://i.imgur.com/Z1nPTpL.mp4
 
-keybindings
-===========
-to see the keybidings use
-$ xpavm -k
-
 build
 =====
 in order to build xpavm you will need xcb, pulseaudio, fontconfig and freetype headers
