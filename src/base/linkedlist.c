@@ -35,10 +35,14 @@ linkedlist_length(linkedlist_t *list) {
 
 extern void
 linkedlist_free(linkedlist_t *list) {
-	if (list) {
-		if (list->next) {
-			linkedlist_free(list->next);
-		}
-		free(list);
+	linkedlist_t *head;
+	linkedlist_t *temp;
+
+	head = list;
+
+	while (head) {
+		temp = head;
+		head = head->next;
+		free(temp);
 	}
 }
