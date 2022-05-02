@@ -1,0 +1,10 @@
+[Desktop Entry]
+Categories=AudioVideo;Audio;
+Type=Application
+TryExec=xpavm
+Exec=xpavm
+GenericName=Pulseaudio Volume Manager
+Name=xpavm
+Comment=control pulseaudio sink inputs volume
+Terminal=false
+StartupWMClass=xpavm
