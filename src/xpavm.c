@@ -103,14 +103,20 @@ key_press_callback(u32 key)
 	window_force_redraw(window);
 }
 
+static inline void
+print_opt(const char *sh, const char *lo, const char *desc)
+{
+	printf("%7s | %-25s %s\n", sh, lo, desc);
+}
+
 static void
 usage(void)
 {
 	puts("Usage: xpavm [ -hkv ]");
 	puts("Options are:");
-	puts("     -h | --help                    display this message and exit");
-	puts("     -k | --keybindings             display the keybindings");
-	puts("     -v | --version                 display the program version");
+	print_opt("-h", "--help", "display this message and exit");
+	print_opt("-k", "--keybindings", "display the keybindings");
+	print_opt("-v", "--version", "display the program version");
 	exit(0);
 }
 
