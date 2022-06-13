@@ -129,20 +129,17 @@ version(void) {
 
 int
 main(int argc, char **argv) {
-	/* skip program name */
-	--argc; ++argv;
+	font_t *font;
+	linkedlist_t *sinks;
+	sink_style_t style_selected, style_normal;
 
-	if (argc > 0) {
+	if (++argv, --argc > 0) {
 		if (match_opt(*argv, "-k", "--keybindings")) keybindings();
 		else if (match_opt(*argv, "-h", "--help")) usage();
 		else if (match_opt(*argv, "-v", "--version")) version();
 		else if (**argv == '-') dief("invalid option %s", *argv);
 		else dief("unexpected argument: %s", *argv);
 	}
-
-	font_t *font;
-	linkedlist_t *sinks;
-	sink_style_t style_selected, style_normal;
 
 	pac = pulseaudio_connect();
 	sinks = sink_get_all_input_sinks(pac);
