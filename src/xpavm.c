@@ -136,7 +136,8 @@ main(int argc, char **argv) {
 		if (match_opt(*argv, "-k", "--keybindings")) keybindings();
 		else if (match_opt(*argv, "-h", "--help")) usage();
 		else if (match_opt(*argv, "-v", "--version")) version();
-		else dief("invalid option %s", *argv);
+		else if (**argv == '-') dief("invalid option %s", *argv);
+		else dief("unexpected argument: %s", *argv);
 	}
 
 	font_t *font;
