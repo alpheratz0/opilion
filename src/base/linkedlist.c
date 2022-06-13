@@ -7,7 +7,7 @@
 extern void
 linkedlist_append(linkedlist_t **ref, void *data)
 {
-	while (*ref) {
+	while (NULL != *ref) {
 		ref = &((*ref)->next);
 	}
 
@@ -22,6 +22,7 @@ linkedlist_get(linkedlist_t *list, u32 pos)
 	while (pos--) {
 		list = list->next;
 	}
+
 	return list->data;
 }
 
@@ -29,7 +30,7 @@ extern u32
 linkedlist_length(linkedlist_t *list)
 {
 	for (u32 length = 0;;++length) {
-		if (!list) {
+		if (NULL == list) {
 			return length;
 		}
 		list = list->next;

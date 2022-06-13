@@ -1,7 +1,7 @@
 #include "numdef.h"
 #include "color.h"
 
-static u8
+static inline u8
 blerp(u8 from, u8 to, u8 v)
 {
 	return from + ((to - from) * v) / 0xff;

@@ -9,14 +9,14 @@
 typedef struct sink sink_t;
 
 struct sink {
-	str application_name;
+	str appname;
 	u32 id;
 	u32 volume;
 	u32 mute;
 };
 
 extern linkedlist_t *
-sink_get_all_input_sinks(pulseaudio_connection_t *connection);
+sink_get_all_input_sinks(pulseaudio_connection_t *pac);
 
 extern void
 sink_list_free(linkedlist_t *sinks);

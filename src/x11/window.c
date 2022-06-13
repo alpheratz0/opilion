@@ -36,7 +36,7 @@ window_create(const char *wm_name, const char *wm_class)
 {
 	window_t *window;
 
-	if (!(window = malloc(sizeof(window_t)))) {
+	if (NULL == (window = malloc(sizeof(window_t)))) {
 		die("error while calling malloc, no memory available");
 	}
 
@@ -44,7 +44,7 @@ window_create(const char *wm_name, const char *wm_class)
 		die("can't open display");
 	}
 
-	if (!(window->screen = xcb_setup_roots_iterator(xcb_get_setup(window->connection)).data)) {
+	if (NULL == (window->screen = xcb_setup_roots_iterator(xcb_get_setup(window->connection)).data)) {
 		xcb_disconnect(window->connection);
 		die("can't get default screen");
 	}

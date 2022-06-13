@@ -13,9 +13,9 @@ struct pulseaudio_connection {
 };
 
 extern pulseaudio_connection_t *
-pulseaudio_connect();
+pulseaudio_connect(void);
 
 extern void
-pulseaudio_disconnect(pulseaudio_connection_t *connection);
+pulseaudio_disconnect(pulseaudio_connection_t *pac);
 
 #endif

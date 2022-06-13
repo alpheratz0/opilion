@@ -25,11 +25,12 @@ warnf(const char *err, ...)
 extern void
 die(const char *err)
 {
+	char command[256];
+
 	if (isatty(STDOUT_FILENO)) {
 		fprintf(stderr, "xpavm: %s\n", err);
 	}
 	else {
-		char command[256];
 		snprintf(command, sizeof(command), "notify-send \"xpavm: %s\"", err);
 		system(command);
 	}

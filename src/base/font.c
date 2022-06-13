@@ -14,6 +14,7 @@ font_search(const char *family)
 	FcPattern *pattern;
 	FcPattern *match;
 	FcResult result;
+	FcValue v;
 	char *path = NULL;
 
 	if ((pattern = FcNameParse((const FcChar8 *)(family)))) {
@@ -21,8 +22,6 @@ font_search(const char *family)
 		FcDefaultSubstitute(pattern);
 
 		if ((match = FcFontMatch(0, pattern, &result))) {
-			FcValue v;
-
 			FcPatternGet(match, FC_FAMILY, 0, &v);
 
 			if (strcmp(family, (char *)(v.u.s)) == 0) {
@@ -46,11 +45,11 @@ font_load(const char *family, u32 size)
 	char *path;
 	font_t *font;
 
-	if (!(path = font_search(family))) {
+	if (NULL == (path = font_search(family))) {
 		dief("font family not found: %s", family);
 	}
 
-	if (!(font = malloc(sizeof(font_t)))) {
+	if (NULL == (font = malloc(sizeof(font_t)))) {
 		die("error while calling malloc, no memory available");
 	}
 
@@ -76,7 +75,8 @@ font_load(const char *family, u32 size)
 
 	font->size = size;
 	font->width = font->face->glyph->advance.x >> 6;
-	font->height = (font->face->size->metrics.ascender - font->face->size->metrics.descender) >> 6;
+	font->height = (font->face->size->metrics.ascender -
+	                font->face->size->metrics.descender) >> 6;
 
 	free(path);
 

@@ -24,21 +24,19 @@ sink_selector_create(linkedlist_t *sinks, font_t *font, u32 width, u32 height, s
 {
 	sink_selector_t *selector;
 
-	if ((selector = malloc(sizeof(sink_selector_t)))) {
-		selector->sinks = sinks;
-		selector->font = font;
-		selector->width = width;
-		selector->height = height;
-		selector->snormal = snormal;
-		selector->sselected = sselected;
-		selector->index = 0;
-
-		return selector;
+	if (NULL == (selector = malloc(sizeof(sink_selector_t)))) {
+		die("error while calling malloc, no memory available");
 	}
 
-	die("error while calling malloc, no memory available");
+	selector->sinks = sinks;
+	selector->font = font;
+	selector->width = width;
+	selector->height = height;
+	selector->snormal = snormal;
+	selector->sselected = sselected;
+	selector->index = 0;
 
-	return (void *)(0);
+	return selector;
 }
 
 extern sink_t *
@@ -64,36 +62,39 @@ sink_selector_select_down(sink_selector_t *selector)
 extern void
 sink_selector_render_onto(sink_selector_t *selector, bitmap_t *bmp)
 {
-	u32 nsinks = linkedlist_length(selector->sinks);
-	if (nsinks != 0) {
-		sink_t *current_sink;
-		sink_style_t *current_style;
-		u32 height = nsinks * selector->height + 30 * (nsinks - 1);
-		u32 start_x = (bmp->width - selector->width) / 2;
-		u32 start_y = (bmp->height - height) / 2;
+	u32 nsinks, height, start_x, start_y, current_x, current_y;
+	sink_t *current_sink;
+	sink_style_t *current_style;
+	char vstr[5];
 
-		u32 current_x = start_x;
-		u32 current_y = start_y;
+	if ((nsinks = linkedlist_length(selector->sinks)) != 0) {
+		height = nsinks * selector->height + 30 * (nsinks - 1);
+		start_x = (bmp->width - selector->width) / 2;
+		start_y = (bmp->height - height) / 2;
+
+		current_x = start_x;
+		current_y = start_y;
 
 		for (u32 i = 0; i < nsinks; ++i) {
 			current_sink = linkedlist_get_as(selector->sinks, i, sink_t);
-			current_style = i == selector->index ? selector->sselected : selector->snormal;
-			label_render_onto(bmp, selector->font, current_style->text_color, current_sink->application_name, current_x, current_y);
+			current_style = i == selector->index ? selector->sselected :
+				selector->snormal;
+			label_render_onto(bmp, selector->font, current_style->text_color,
+					current_sink->appname, current_x, current_y);
 
 			if (current_sink->mute) {
 				label_render_onto(
 					bmp, selector->font, current_style->text_color, "muted",
-					current_x + selector->width - selector->font->width * (sizeof("muted") - 1),
-					current_y
+					current_x + selector->width - selector->font->width *
+					(sizeof("muted") - 1), current_y
 				);
 			}
 			else {
-				char vstr[5];
 				snprintf(vstr, sizeof(vstr), "%d%%", current_sink->volume);
 				label_render_onto(
 					bmp, selector->font, current_style->text_color, vstr,
-					current_x + selector->width - selector->font->width * strlen(vstr),
-					current_y
+					current_x + selector->width - selector->font->width *
+					strlen(vstr), current_y
 				);
 			}
 

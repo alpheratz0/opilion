@@ -12,10 +12,10 @@ bitmap_create(u32 width, u32 height, u32 color)
 {
 	bitmap_t *bmp;
 
-	if ((bmp = malloc(sizeof(bitmap_t)))) {
+	if (NULL != (bmp = malloc(sizeof(bitmap_t)))) {
 		bmp->width = width;
 		bmp->height = height;
-		if ((bmp->px = malloc(4*width*height))) {
+		if (NULL != (bmp->px = malloc(4*width*height))) {
 			for (u32 i = 0; i < width * height; ++i) {
 				bmp->px[i] = color;
 			}
@@ -42,6 +42,7 @@ bitmap_get(bitmap_t *bmp, u32 x, u32 y)
 	if (x < bmp->width && y < bmp->height) {
 		return bmp->px[y*bmp->width+x];
 	}
+
 	return 0;
 }
 

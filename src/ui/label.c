@@ -11,17 +11,26 @@
 static void
 label_render_char_onto(bitmap_t *bmp, font_t *font, u32 color, char c, u32 x, u32 y)
 {
-	FT_GlyphSlot glyph = font_get_glyph(font, c);
-	u32 glyph_h = glyph->bitmap.rows;
-	u32 glyph_w = glyph->bitmap.width;
+	FT_GlyphSlot glyph;
+	u32 width, height, xmap, ymap, gray;
 
-	for (u32 i = 0; i < glyph_h; ++i) {
-		for (u32 j = 0; j < glyph_w; ++j) {
-			u32 xmap = x + j + glyph->bitmap_left;
-			u32 ymap = y + i - glyph->bitmap_top + font->size;
-			u8 gray = glyph->bitmap.buffer[i*glyph_w+j];
+	glyph = font_get_glyph(font, c);
+	height = glyph->bitmap.rows;
+	width = glyph->bitmap.width;
 
-			bitmap_set(bmp, xmap, ymap, color_lerp(bitmap_get(bmp, xmap, ymap), color, gray));
+	for (u32 i = 0; i < height; ++i) {
+		for (u32 j = 0; j < width; ++j) {
+			xmap = x + j + glyph->bitmap_left;
+			ymap = y + i - glyph->bitmap_top + font->size;
+			gray = glyph->bitmap.buffer[i*width+j];
+
+			bitmap_set(
+				bmp, xmap, ymap,
+				color_lerp(
+					bitmap_get(bmp, xmap, ymap),
+					color, gray
+				)
+			);
 		}
 	}
 }
@@ -29,7 +38,11 @@ label_render_char_onto(bitmap_t *bmp, font_t *font, u32 color, char c, u32 x, u3
 extern void
 label_render_onto(bitmap_t *bmp, font_t *font, u32 color, char *text, u32 x, u32 y)
 {
-	for (size_t i = 0; i < strlen(text) && text[i] != '\n'; ++i) {
+	size_t len;
+
+	len = strlen(text);
+
+	for (size_t i = 0; i < len && text[i] != '\n'; ++i) {
 		label_render_char_onto(bmp, font, color, text[i], x + i * font->width, y);
 	}
 }

@@ -5,43 +5,41 @@
 #include "connection.h"
 
 static void
-context_state_callback(__attribute__ ((unused)) pa_context *c, void *userdata)
+context_state_cb(__attribute__((unused)) pa_context *c, void *userdata)
 {
 	pa_threaded_mainloop_signal((pa_threaded_mainloop *)(userdata), 0);
 }
 
 extern pulseaudio_connection_t *
-pulseaudio_connect()
+pulseaudio_connect(void)
 {
-	pulseaudio_connection_t *connection;
+	pulseaudio_connection_t *pac;
 
-	if ((connection = malloc(sizeof(pulseaudio_connection_t)))) {
-		connection->mainloop = pa_threaded_mainloop_new();
-		connection->api = pa_threaded_mainloop_get_api(connection->mainloop);
-		connection->context = pa_context_new(connection->api, NULL);
-
-		pa_context_set_state_callback(connection->context, context_state_callback, connection->mainloop);
-		pa_threaded_mainloop_lock(connection->mainloop);
-		pa_threaded_mainloop_start(connection->mainloop);
-		pa_context_connect(connection->context, NULL, PA_CONTEXT_NOFAIL, NULL);
-
-		while (pa_context_get_state(connection->context) != PA_CONTEXT_READY) {
-			pa_threaded_mainloop_wait(connection->mainloop);
-		}
-
-		return connection;
+	if (NULL == (pac = malloc(sizeof(pulseaudio_connection_t)))) {
+		die("error while calling malloc, no memory available");
 	}
 
-	die("error while calling malloc, no memory available");
+	pac->mainloop = pa_threaded_mainloop_new();
+	pac->api = pa_threaded_mainloop_get_api(pac->mainloop);
+	pac->context = pa_context_new(pac->api, NULL);
 
-	return (void *)(0);
+	pa_context_set_state_callback(pac->context, context_state_cb, pac->mainloop);
+	pa_threaded_mainloop_lock(pac->mainloop);
+	pa_threaded_mainloop_start(pac->mainloop);
+	pa_context_connect(pac->context, NULL, PA_CONTEXT_NOFAIL, NULL);
+
+	while (pa_context_get_state(pac->context) != PA_CONTEXT_READY) {
+		pa_threaded_mainloop_wait(pac->mainloop);
+	}
+
+	return pac;
 }
 
 extern void
-pulseaudio_disconnect(pulseaudio_connection_t *connection)
+pulseaudio_disconnect(pulseaudio_connection_t *pac)
 {
-	pa_context_unref(connection->context);
-	pa_threaded_mainloop_unlock(connection->mainloop);
-	pa_threaded_mainloop_free(connection->mainloop);
-	free(connection);
+	pa_context_unref(pac->context);
+	pa_threaded_mainloop_unlock(pac->mainloop);
+	pa_threaded_mainloop_free(pac->mainloop);
+	free(pac);
 }
