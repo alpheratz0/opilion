@@ -7,7 +7,8 @@
 #include "sink.h"
 
 static void
-set_sink_input_volume_callback(pa_context *c, int eol, void *userdata) {
+set_sink_input_volume_callback(pa_context *c, int eol, void *userdata)
+{
 	pulseaudio_connection_t *connection;
 
 	connection = (pulseaudio_connection_t *)(userdata);
@@ -19,7 +20,8 @@ set_sink_input_volume_callback(pa_context *c, int eol, void *userdata) {
 }
 
 static void
-get_sink_input_info_for_set_volume_callback(pa_context *c, const pa_sink_input_info *i, int eol, void *userdata) {
+get_sink_input_info_for_set_volume_callback(pa_context *c, const pa_sink_input_info *i, int eol, void *userdata)
+{
 	sink_t *info;
 	pulseaudio_connection_t *connection;
 
@@ -46,7 +48,8 @@ get_sink_input_info_for_set_volume_callback(pa_context *c, const pa_sink_input_i
 }
 
 extern void
-sink_set_volume(pulseaudio_connection_t *connection, sink_t *info, u32 volume) {
+sink_set_volume(pulseaudio_connection_t *connection, sink_t *info, u32 volume)
+{
 	info->volume = volume;
 	connection->userdata = info;
 	pa_operation_unref(pa_context_get_sink_input_info(connection->context, info->id, get_sink_input_info_for_set_volume_callback, connection));
@@ -54,14 +57,16 @@ sink_set_volume(pulseaudio_connection_t *connection, sink_t *info, u32 volume) {
 }
 
 extern void
-sink_set_volume_relative(pulseaudio_connection_t *connection, sink_t *info, i32 relative) {
+sink_set_volume_relative(pulseaudio_connection_t *connection, sink_t *info, i32 relative)
+{
 	if (relative < 0 && (relative + (i32)(info->volume)) < 0) sink_set_volume(connection, info, 0);
 	else if (relative > 0 && (relative + info->volume) > 100) sink_set_volume(connection, info, 100);
 	else sink_set_volume(connection, info, info->volume + relative);
 }
 
 static void
-set_sink_input_mute_callback(pa_context *c, int eol, void *userdata) {
+set_sink_input_mute_callback(pa_context *c, int eol, void *userdata)
+{
 	pulseaudio_connection_t *connection;
 
 	connection = (pulseaudio_connection_t *)(userdata);
@@ -73,7 +78,8 @@ set_sink_input_mute_callback(pa_context *c, int eol, void *userdata) {
 }
 
 static void
-get_sink_input_info_for_set_mute_callback(pa_context *c, const pa_sink_input_info *i, int eol, void *userdata) {
+get_sink_input_info_for_set_mute_callback(pa_context *c, const pa_sink_input_info *i, int eol, void *userdata)
+{
 	sink_t *info;
 	pulseaudio_connection_t *connection;
 
@@ -97,7 +103,8 @@ get_sink_input_info_for_set_mute_callback(pa_context *c, const pa_sink_input_inf
 }
 
 extern void
-sink_set_mute(pulseaudio_connection_t *connection, sink_t *info, u32 mute) {
+sink_set_mute(pulseaudio_connection_t *connection, sink_t *info, u32 mute)
+{
 	info->mute = mute;
 	connection->userdata = info;
 	pa_operation_unref(pa_context_get_sink_input_info(connection->context, info->id, get_sink_input_info_for_set_mute_callback, connection));

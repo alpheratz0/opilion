@@ -10,7 +10,8 @@
 #include "sink_selector.h"
 
 extern sink_style_t
-sink_style_from(u32 text_color, u32 bar_filled_color, u32 bar_not_filled_color) {
+sink_style_from(u32 text_color, u32 bar_filled_color, u32 bar_not_filled_color)
+{
 	sink_style_t style;
 	style.text_color = text_color;
 	style.bar_filled_color = bar_filled_color;
@@ -19,7 +20,8 @@ sink_style_from(u32 text_color, u32 bar_filled_color, u32 bar_not_filled_color) 
 }
 
 extern sink_selector_t *
-sink_selector_create(linkedlist_t *sinks, font_t *font, u32 width, u32 height, sink_style_t *snormal, sink_style_t *sselected) {
+sink_selector_create(linkedlist_t *sinks, font_t *font, u32 width, u32 height, sink_style_t *snormal, sink_style_t *sselected)
+{
 	sink_selector_t *selector;
 
 	if ((selector = malloc(sizeof(sink_selector_t)))) {
@@ -40,24 +42,28 @@ sink_selector_create(linkedlist_t *sinks, font_t *font, u32 width, u32 height, s
 }
 
 extern sink_t *
-sink_selector_get_selected(sink_selector_t *selector) {
+sink_selector_get_selected(sink_selector_t *selector)
+{
 	return linkedlist_get_as(selector->sinks, selector->index, sink_t);
 }
 
 extern void
-sink_selector_select_up(sink_selector_t *selector) {
+sink_selector_select_up(sink_selector_t *selector)
+{
 	if (selector->index == 0) selector->index = linkedlist_length(selector->sinks) - 1;
 	else selector->index--;
 }
 
 extern void
-sink_selector_select_down(sink_selector_t *selector) {
+sink_selector_select_down(sink_selector_t *selector)
+{
 	if (selector->index == (linkedlist_length(selector->sinks) - 1)) selector->index = 0;
 	else selector->index++;
 }
 
 extern void
-sink_selector_render_onto(sink_selector_t *selector, bitmap_t *bmp) {
+sink_selector_render_onto(sink_selector_t *selector, bitmap_t *bmp)
+{
 	u32 nsinks = linkedlist_length(selector->sinks);
 	if (nsinks != 0) {
 		sink_t *current_sink;
@@ -111,6 +117,7 @@ sink_selector_render_onto(sink_selector_t *selector, bitmap_t *bmp) {
 }
 
 extern void
-sink_selector_free(sink_selector_t *selector) {
+sink_selector_free(sink_selector_t *selector)
+{
 	free(selector);
 }

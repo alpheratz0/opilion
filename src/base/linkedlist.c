@@ -5,7 +5,8 @@
 #include "linkedlist.h"
 
 extern void
-linkedlist_append(linkedlist_t **ref, void *data) {
+linkedlist_append(linkedlist_t **ref, void *data)
+{
 	while (*ref) {
 		ref = &((*ref)->next);
 	}
@@ -16,7 +17,8 @@ linkedlist_append(linkedlist_t **ref, void *data) {
 }
 
 extern void *
-linkedlist_get(linkedlist_t *list, u32 pos) {
+linkedlist_get(linkedlist_t *list, u32 pos)
+{
 	while (pos--) {
 		list = list->next;
 	}
@@ -24,7 +26,8 @@ linkedlist_get(linkedlist_t *list, u32 pos) {
 }
 
 extern u32
-linkedlist_length(linkedlist_t *list) {
+linkedlist_length(linkedlist_t *list)
+{
 	for (u32 length = 0;;++length) {
 		if (!list) {
 			return length;
@@ -34,7 +37,8 @@ linkedlist_length(linkedlist_t *list) {
 }
 
 extern void
-linkedlist_free(linkedlist_t *list) {
+linkedlist_free(linkedlist_t *list)
+{
 	linkedlist_t *head;
 	linkedlist_t *temp;
 

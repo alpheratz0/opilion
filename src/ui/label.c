@@ -9,7 +9,8 @@
 #include "label.h"
 
 static void
-label_render_char_onto(bitmap_t *bmp, font_t *font, u32 color, char c, u32 x, u32 y) {
+label_render_char_onto(bitmap_t *bmp, font_t *font, u32 color, char c, u32 x, u32 y)
+{
 	FT_GlyphSlot glyph = font_get_glyph(font, c);
 	u32 glyph_h = glyph->bitmap.rows;
 	u32 glyph_w = glyph->bitmap.width;
@@ -26,7 +27,8 @@ label_render_char_onto(bitmap_t *bmp, font_t *font, u32 color, char c, u32 x, u3
 }
 
 extern void
-label_render_onto(bitmap_t *bmp, font_t *font, u32 color, char *text, u32 x, u32 y) {
+label_render_onto(bitmap_t *bmp, font_t *font, u32 color, char *text, u32 x, u32 y)
+{
 	for (size_t i = 0; i < strlen(text) && text[i] != '\n'; ++i) {
 		label_render_char_onto(bmp, font, color, text[i], x + i * font->width, y);
 	}

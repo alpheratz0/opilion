@@ -10,7 +10,8 @@
 #include "sink.h"
 
 static sink_t *
-sink_create(const char *application_name, u32 id, u32 volume, u32 mute) {
+sink_create(const char *application_name, u32 id, u32 volume, u32 mute)
+{
 	sink_t *info;
 
 	if ((info = malloc(sizeof(sink_t)))) {
@@ -28,7 +29,8 @@ sink_create(const char *application_name, u32 id, u32 volume, u32 mute) {
 }
 
 static void
-get_sink_input_info_callback(pa_context *c, const pa_sink_input_info *i, int eol, void *userdata) {
+get_sink_input_info_callback(pa_context *c, const pa_sink_input_info *i, int eol, void *userdata)
+{
 	sink_t *info;
 	pulseaudio_connection_t *connection;
 
@@ -57,7 +59,8 @@ get_sink_input_info_callback(pa_context *c, const pa_sink_input_info *i, int eol
 }
 
 extern linkedlist_t *
-sink_get_all_input_sinks(pulseaudio_connection_t *connection) {
+sink_get_all_input_sinks(pulseaudio_connection_t *connection)
+{
 	connection->userdata = NULL;
 	pa_operation_unref(pa_context_get_sink_input_info_list(connection->context, get_sink_input_info_callback, connection));
 	pa_threaded_mainloop_wait(connection->mainloop);
@@ -65,7 +68,8 @@ sink_get_all_input_sinks(pulseaudio_connection_t *connection) {
 }
 
 extern void
-sink_list_free(linkedlist_t *sinks) {
+sink_list_free(linkedlist_t *sinks)
+{
 	u32 length;
 	sink_t *sink;
 

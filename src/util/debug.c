@@ -6,12 +6,14 @@
 #include "debug.h"
 
 extern void
-warn(const char *err) {
+warn(const char *err)
+{
 	fprintf(stderr, "xpavm: %s\n", err);
 }
 
 extern void
-warnf(const char *err, ...) {
+warnf(const char *err, ...)
+{
 	va_list list;
 	fputs("xpavm: ", stderr);
 	va_start(list, err);
@@ -21,7 +23,8 @@ warnf(const char *err, ...) {
 }
 
 extern void
-die(const char *err) {
+die(const char *err)
+{
 	if (isatty(STDOUT_FILENO)) {
 		fprintf(stderr, "xpavm: %s\n", err);
 	}
@@ -34,7 +37,8 @@ die(const char *err) {
 }
 
 extern void
-dief(const char *err, ...) {
+dief(const char *err, ...)
+{
 	va_list list;
 	fputs("xpavm: ", stderr);
 	va_start(list, err);

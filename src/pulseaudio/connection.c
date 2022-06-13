@@ -5,12 +5,14 @@
 #include "connection.h"
 
 static void
-context_state_callback(__attribute__ ((unused)) pa_context *c, void *userdata) {
+context_state_callback(__attribute__ ((unused)) pa_context *c, void *userdata)
+{
 	pa_threaded_mainloop_signal((pa_threaded_mainloop *)(userdata), 0);
 }
 
 extern pulseaudio_connection_t *
-pulseaudio_connect() {
+pulseaudio_connect()
+{
 	pulseaudio_connection_t *connection;
 
 	if ((connection = malloc(sizeof(pulseaudio_connection_t)))) {
@@ -36,7 +38,8 @@ pulseaudio_connect() {
 }
 
 extern void
-pulseaudio_disconnect(pulseaudio_connection_t *connection) {
+pulseaudio_disconnect(pulseaudio_connection_t *connection)
+{
 	pa_context_unref(connection->context);
 	pa_threaded_mainloop_unlock(connection->mainloop);
 	pa_threaded_mainloop_free(connection->mainloop);

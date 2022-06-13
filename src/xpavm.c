@@ -60,13 +60,15 @@ static pulseaudio_connection_t *pac;
 static sink_selector_t *selector;
 
 static bool
-match_opt(const char *in, const char *sh, const char *lo) {
+match_opt(const char *in, const char *sh, const char *lo)
+{
 	return (strcmp(in, sh) == 0) ||
 		   (strcmp(in, lo) == 0);
 }
 
 static void
-key_press_callback(u32 key) {
+key_press_callback(u32 key)
+{
 	sink_t *sink;
 	sink = sink_selector_get_selected(selector);
 
@@ -102,7 +104,8 @@ key_press_callback(u32 key) {
 }
 
 static void
-usage(void) {
+usage(void)
+{
 	puts("Usage: xpavm [ -hkv ]");
 	puts("Options are:");
 	puts("     -h | --help                    display this message and exit");
@@ -112,7 +115,8 @@ usage(void) {
 }
 
 static void
-keybindings(void) {
+keybindings(void)
+{
 	puts("Keybindings are:");
 	puts("j/k: sink selection");
 	puts("h/l: decrease/increase volume");
@@ -122,13 +126,15 @@ keybindings(void) {
 }
 
 static void
-version(void) {
+version(void)
+{
 	puts("xpavm version "VERSION);
 	exit(0);
 }
 
 int
-main(int argc, char **argv) {
+main(int argc, char **argv)
+{
 	font_t *font;
 	linkedlist_t *sinks;
 	sink_style_t style_selected, style_normal;
