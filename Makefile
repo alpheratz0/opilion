@@ -1,11 +1,11 @@
-VERSION = 0.1.4
+VERSION = 0.1.4-rev+${shell git rev-parse --short=16 HEAD}
 PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 APPPREFIX = ${PREFIX}/share/applications
 LDLIBS = -lxcb -lxcb-image -lpulse -lfontconfig -lfreetype
 LDFLAGS = -s ${LDLIBS}
 INCS = -I/usr/include -I/usr/include/freetype2
-CFLAGS = -std=c99 -pedantic -Wall -Wextra -Os ${INCS} -D_XOPEN_SOURCE=500 -DVERSION=\"${VERSION}\"
+CFLAGS = -std=c99 -pedantic -Wall -Wextra -Os ${INCS} -D_XOPEN_SOURCE=500 -DVERSION="\"${VERSION}\""
 CC = cc
 
 SRC = src/xpavm.c \
