@@ -9,4 +9,4 @@ $ make
 
 install
 =======
-$ sudo make install clean
+# make install
