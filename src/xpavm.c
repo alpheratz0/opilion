@@ -143,7 +143,7 @@ main(int argc, char **argv)
 {
 	font_t *font;
 	linkedlist_t *sinks;
-	sink_style_t style_selected, style_normal;
+	sink_style_t snormal, sselected;
 
 	if (++argv, --argc > 0) {
 		if (match_opt(*argv, "-k", "--keybindings")) keybindings();
@@ -162,9 +162,9 @@ main(int argc, char **argv)
 
 	window = window_create("xpavm", "xpavm");
 	font = font_load("Iosevka", 12);
-	style_selected = sink_style_from(0xa0e547, 0x5e5eed, 0x333333);
-	style_normal = sink_style_from(0xffffff, 0x555555, 0x333333);
-	selector = sink_selector_create(sinks, font, 450, 23, &style_normal, &style_selected);
+	snormal = sink_style_from(0xffffff, 0x555555, 0x333333);
+	sselected = sink_style_from(0xa0e547, 0x5e5eed, 0x333333);
+	selector = sink_selector_create(sinks, font, 450, 23, &snormal, &sselected);
 
 	sink_selector_render_onto(selector, window->bmp);
 	window_set_key_press_callback(window, key_press_callback);

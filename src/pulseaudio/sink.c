@@ -12,24 +12,24 @@
 static sink_t *
 sink_create(const char *appname, u32 id, u32 volume, u32 mute)
 {
-	sink_t *info;
+	sink_t *sink;
 
-	if (NULL == (info = malloc(sizeof(sink_t)))) {
+	if (NULL == (sink = malloc(sizeof(sink_t)))) {
 		die("error while calling malloc, no memory available");
 	}
 
-	info->appname = strdup(appname);
-	info->id = id;
-	info->volume = volume;
-	info->mute = mute;
+	sink->appname = strdup(appname);
+	sink->id = id;
+	sink->volume = volume;
+	sink->mute = mute;
 
-	return info;
+	return sink;
 }
 
 static void
 get_sink_input_info_cb(pa_context *c, const pa_sink_input_info *i, int eol, void *userdata)
 {
-	sink_t *info;
+	sink_t *sink;
 	pulseaudio_connection_t *pac;
 
 	pac = (pulseaudio_connection_t *)(userdata);
@@ -45,14 +45,14 @@ get_sink_input_info_cb(pa_context *c, const pa_sink_input_info *i, int eol, void
 	}
 
 	if (i) {
-		info = sink_create(
+		sink = sink_create(
 			pa_proplist_gets(i->proplist, "application.name"),
 			i->index,
 			i->volume.values[0] / (PA_VOLUME_NORM / 100),
 			i->mute != 0 ? 1 : 0
 		);
 
-		linkedlist_append((linkedlist_t **)(&(pac->userdata)), info);
+		linkedlist_append((linkedlist_t **)(&(pac->userdata)), sink);
 	}
 }
 

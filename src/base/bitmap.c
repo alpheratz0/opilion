@@ -12,20 +12,20 @@ bitmap_create(u32 width, u32 height, u32 color)
 {
 	bitmap_t *bmp;
 
-	if (NULL != (bmp = malloc(sizeof(bitmap_t)))) {
-		bmp->width = width;
-		bmp->height = height;
-		if (NULL != (bmp->px = malloc(4*width*height))) {
-			for (u32 i = 0; i < width * height; ++i) {
-				bmp->px[i] = color;
-			}
-			return bmp;
-		}
+	if (NULL == (bmp = malloc(sizeof(bitmap_t)))) {
+		die("error while calling malloc, no memory available");
 	}
 
-	die("error while calling malloc, no memory available");
+	bmp->width = width;
+	bmp->height = height;
 
-	return (void *)(0);
+	if (NULL == (bmp->px = malloc(4*width*height))) {
+		die("error while calling malloc, no memory available");
+	}
+
+	bitmap_clear(bmp, color);
+
+	return bmp;
 }
 
 extern void
@@ -49,13 +49,14 @@ bitmap_get(bitmap_t *bmp, u32 x, u32 y)
 extern void
 bitmap_rect(bitmap_t *bmp, u32 x, u32 y, u32 width, u32 height, u32 color)
 {
-	u32 offset;
+	/* top left corner */
+	u32 tlcorner;
 
-	offset = y * bmp->width + x;
+	tlcorner = y * bmp->width + x;
 
 	for (u32 i = 0; i < width; ++i) {
 		for (u32 j = 0; j < height; ++j) {
-			bmp->px[offset+j*bmp->width+i] = color;
+			bmp->px[tlcorner+j*bmp->width+i] = color;
 		}
 	}
 }
