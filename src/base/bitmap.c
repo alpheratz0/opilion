@@ -49,14 +49,9 @@ bitmap_get(bitmap_t *bmp, u32 x, u32 y)
 extern void
 bitmap_rect(bitmap_t *bmp, u32 x, u32 y, u32 width, u32 height, u32 color)
 {
-	/* top left corner */
-	u32 tlcorner;
-
-	tlcorner = y * bmp->width + x;
-
 	for (u32 i = 0; i < width; ++i) {
 		for (u32 j = 0; j < height; ++j) {
-			bmp->px[tlcorner+j*bmp->width+i] = color;
+			bmp->px[(j+y)*bmp->width+i+x] = color;
 		}
 	}
 }
