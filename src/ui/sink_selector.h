@@ -50,8 +50,7 @@ extern void
 sink_selector_select_down(sink_selector_t *selector);
 
 extern void
-sink_selector_render_onto(sink_selector_t *selector,
-                          bitmap_t *bmp);
+sink_selector_render_onto(sink_selector_t *selector, bitmap_t *bmp);
 
 extern void
 sink_selector_free(sink_selector_t *selector);

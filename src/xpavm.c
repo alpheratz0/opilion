@@ -42,6 +42,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 #include <sys/file.h>
 
@@ -53,7 +54,6 @@
 #include "pulseaudio/volume.h"
 #include "ui/sink_selector.h"
 #include "util/debug.h"
-#include "util/numdef.h"
 #include "x11/keys.h"
 #include "x11/window.h"
 
@@ -69,7 +69,7 @@ match_opt(const char *in, const char *sh, const char *lo)
 }
 
 static void
-key_press_callback(u32 key)
+key_press_callback(uint32_t key)
 {
 	sink_t *sink;
 	sink = sink_selector_get_selected(selector);

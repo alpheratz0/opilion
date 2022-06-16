@@ -34,8 +34,6 @@ ${OBJ}:	src/base/linkedlist.h \
 		src/pulseaudio/volume.h \
 		src/util/debug.h \
 		src/util/color.h \
-		src/util/numdef.h \
-		src/util/strdef.h \
 		src/ui/label.h \
 		src/ui/sink_selector.h \
 		src/x11/keys.h \

@@ -1,7 +1,7 @@
 #ifndef __XPAVM_BASE_LINKEDLIST_H__
 #define __XPAVM_BASE_LINKEDLIST_H__
 
-#include "../util/numdef.h"
+#include <stdint.h>
 
 typedef struct node linkedlist_t;
 typedef struct node node_t;
@@ -15,11 +15,12 @@ extern void
 linkedlist_append(linkedlist_t **ref, void *data);
 
 extern void *
-linkedlist_get(linkedlist_t *list, u32 pos);
+linkedlist_get(linkedlist_t *list, uint32_t pos);
 
-#define linkedlist_get_as(list, pos, ptype) ((ptype *)(linkedlist_get(list, pos)))
+#define linkedlist_get_as(list, pos, ptype) \
+	((ptype *)(linkedlist_get(list, pos)))
 
-extern u32
+extern uint32_t
 linkedlist_length(linkedlist_t *list);
 
 extern void

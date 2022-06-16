@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "../util/debug.h"
-#include "../util/numdef.h"
 #include "linkedlist.h"
 
 extern void
@@ -21,7 +21,7 @@ linkedlist_append(linkedlist_t **ref, void *data)
 }
 
 extern void *
-linkedlist_get(linkedlist_t *list, u32 pos)
+linkedlist_get(linkedlist_t *list, uint32_t pos)
 {
 	while (pos-- > 0 && NULL != list) {
 		list = list->next;
@@ -30,10 +30,10 @@ linkedlist_get(linkedlist_t *list, u32 pos)
 	return list->data;
 }
 
-extern u32
+extern uint32_t
 linkedlist_length(linkedlist_t *list)
 {
-	u32 length;
+	uint32_t length;
 
 	for (length = 0; NULL != list; ++length) {
 		list = list->next;

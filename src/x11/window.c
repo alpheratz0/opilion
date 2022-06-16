@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <xcb/xcb.h>
 #include <xcb/xcb_image.h>
 #include <xcb/xproto.h>
 
 #include "../base/bitmap.h"
-#include "../util/numdef.h"
 #include "../util/debug.h"
 #include "window.h"
 
@@ -57,7 +57,7 @@ window_create(const char *wm_name, const char *wm_class)
 		window->screen->root, 0, 0, window->bmp->width, window->bmp->height, 0,
 		XCB_WINDOW_CLASS_INPUT_OUTPUT, window->screen->root_visual,
 		XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK,
-		(const u32[2]) {
+		(const uint32_t[2]) {
 			0x000000,
 			XCB_EVENT_MASK_EXPOSURE |
 			XCB_EVENT_MASK_KEY_PRESS |
@@ -126,7 +126,7 @@ window_create(const char *wm_name, const char *wm_class)
 	window->image = xcb_image_create_native(
 		window->connection, window->bmp->width, window->bmp->height,
 		XCB_IMAGE_FORMAT_Z_PIXMAP, window->screen->root_depth,
-		window->bmp->px, 4*window->bmp->width*window->bmp->height, (u8 *)(window->bmp->px)
+		window->bmp->px, 4*window->bmp->width*window->bmp->height, (uint8_t *)(window->bmp->px)
 	);
 
 	xcb_create_gc(window->connection, window->gc, window->id, 0, 0);

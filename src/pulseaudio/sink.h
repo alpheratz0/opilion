@@ -1,18 +1,18 @@
 #ifndef __XPAVM_PULSEAUDIO_SINK_H__
 #define __XPAVM_PULSEAUDIO_SINK_H__
 
+#include <stdint.h>
+
 #include "../base/linkedlist.h"
-#include "../util/numdef.h"
-#include "../util/strdef.h"
 #include "connection.h"
 
 typedef struct sink sink_t;
 
 struct sink {
-	str appname;
-	u32 id;
-	u32 volume;
-	u32 mute;
+	char *appname;
+	uint32_t id;
+	uint32_t volume;
+	uint32_t mute;
 };
 
 extern linkedlist_t *

@@ -1,18 +1,21 @@
-#include "numdef.h"
+#include <stdint.h>
+
 #include "color.h"
 
-static inline u8
-blerp(u8 from, u8 to, u8 v)
+static inline uint8_t
+blerp(uint8_t from, uint8_t to, uint8_t v)
 {
 	return from + ((to - from) * v) / 0xff;
 }
 
-extern u32
-color_lerp(u32 from, u32 to, u8 v)
+extern uint32_t
+color_lerp(uint32_t from, uint32_t to, uint8_t v)
 {
-	u8 r = blerp((from >> 16) & 0xff, (to >> 16) & 0xff, v);
-	u8 g = blerp((from >> 8) & 0xff, (to >> 8) & 0xff, v);
-	u8 b = blerp(from & 0xff, to & 0xff, v);
+	uint8_t r, g, b;
+
+	r = blerp((from >> 16) & 0xff, (to >> 16) & 0xff, v);
+	g = blerp((from >> 8) & 0xff, (to >> 8) & 0xff, v);
+	b = blerp(from & 0xff, to & 0xff, v);
 
 	return (r << 16) | (g << 8) | b;
 }

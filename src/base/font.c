@@ -1,11 +1,11 @@
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <fontconfig/fontconfig.h>
 
 #include "../util/debug.h"
-#include "../util/numdef.h"
 #include "font.h"
 
 #define CHKFTERR(name,err) do {                                 \
@@ -48,7 +48,7 @@ font_search(const char *family)
 }
 
 extern font_t *
-font_load(const char *family, u32 size)
+font_load(const char *family, uint32_t size)
 {
 	char *path;
 	FT_Library lib;

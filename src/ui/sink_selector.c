@@ -76,8 +76,7 @@ sink_selector_select_down(sink_selector_t *selector)
 }
 
 static void
-sink_volume_format(sink_t *sink,
-                   char *volstr)
+sink_volume_format(sink_t *sink, char *volstr)
 {
 	if (sink->mute) {
 		strcpy(volstr, "muted");
@@ -88,10 +87,7 @@ sink_volume_format(sink_t *sink,
 }
 
 static void
-sink_render_onto(sink_t *sink,
-                 sink_style_t *style,
-                 uint32_t y,
-                 bitmap_t *bmp)
+sink_render_onto(sink_t *sink, sink_style_t *style, uint32_t y, bitmap_t *bmp)
 {
 	uint32_t x;
 	char volstr[128];
@@ -126,8 +122,7 @@ sink_render_onto(sink_t *sink,
 }
 
 extern void
-sink_selector_render_onto(sink_selector_t *selector,
-                          bitmap_t *bmp)
+sink_selector_render_onto(sink_selector_t *selector, bitmap_t *bmp)
 {
 	linkedlist_t *temp;
 	sink_t *sink;

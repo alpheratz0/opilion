@@ -1,16 +1,16 @@
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <pulse/pulseaudio.h>
 #include <pulse/volume.h>
 
-#include "../util/numdef.h"
 #include "../util/debug.h"
 #include "../base/linkedlist.h"
 #include "connection.h"
 #include "sink.h"
 
 static sink_t *
-sink_create(const char *appname, u32 id, u32 volume, u32 mute)
+sink_create(const char *appname, uint32_t id, uint32_t volume, uint32_t mute)
 {
 	sink_t *sink;
 
@@ -27,12 +27,15 @@ sink_create(const char *appname, u32 id, u32 volume, u32 mute)
 }
 
 static void
-get_sink_input_info_cb(pa_context *c, const pa_sink_input_info *i, int eol, void *userdata)
+get_sink_input_info_cb(pa_context *c,
+                       const pa_sink_input_info *i,
+                       int eol,
+                       void *userdata)
 {
 	sink_t *sink;
 	pulseaudio_connection_t *pac;
 
-	pac = (pulseaudio_connection_t *)(userdata);
+	pac = userdata;
 
 	if (eol < 0) {
 		dief("failed to get sink input information: %s",
@@ -41,6 +44,7 @@ get_sink_input_info_cb(pa_context *c, const pa_sink_input_info *i, int eol, void
 
 	if (eol > 0) {
 		pa_threaded_mainloop_signal(pac->mainloop, 0);
+
 		return;
 	}
 
@@ -52,28 +56,31 @@ get_sink_input_info_cb(pa_context *c, const pa_sink_input_info *i, int eol, void
 			i->mute != 0 ? 1 : 0
 		);
 
-		linkedlist_append((linkedlist_t **)(&(pac->userdata)), sink);
+		linkedlist_append((linkedlist_t **)(&pac->userdata), sink);
 	}
 }
 
 extern linkedlist_t *
 sink_get_all_input_sinks(pulseaudio_connection_t *pac)
 {
-	pa_operation *o;
+	pa_operation *po;
 	linkedlist_t *sinks;
 
 	pac->userdata = NULL;
-	o = pa_context_get_sink_input_info_list(pac->context, get_sink_input_info_cb, pac);
 
-	if (NULL == o) {
+	po = pa_context_get_sink_input_info_list(
+		pac->context, get_sink_input_info_cb, pac
+	);
+
+	if (NULL == po) {
 		dief("pa_context_get_sink_input_info_list failed: %s",
 				pa_strerror(pa_context_errno(pac->context)));
 	}
 
-	pa_operation_unref(o);
+	pa_operation_unref(po);
 	pa_threaded_mainloop_wait(pac->mainloop);
 
-	sinks = (linkedlist_t *)(pac->userdata);
+	sinks = pac->userdata;
 
 	return sinks;
 }
