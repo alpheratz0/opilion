@@ -22,7 +22,7 @@ struct window {
 };
 
 extern window_t *
-window_create(const char *wm_name, const char *wm_class);
+window_create(const char *title, const char *class);
 
 extern void
 window_loop_start(window_t *window);
