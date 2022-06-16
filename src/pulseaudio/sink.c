@@ -44,7 +44,7 @@ get_sink_input_info_cb(pa_context *c, const pa_sink_input_info *i, int eol, void
 		return;
 	}
 
-	if (i) {
+	if (NULL != i) {
 		sink = sink_create(
 			pa_proplist_gets(i->proplist, "application.name"),
 			i->index,
@@ -59,22 +59,36 @@ get_sink_input_info_cb(pa_context *c, const pa_sink_input_info *i, int eol, void
 extern linkedlist_t *
 sink_get_all_input_sinks(pulseaudio_connection_t *pac)
 {
+	pa_operation *o;
+	linkedlist_t *sinks;
+
 	pac->userdata = NULL;
-	pa_operation_unref(pa_context_get_sink_input_info_list(pac->context, get_sink_input_info_cb, pac));
+	o = pa_context_get_sink_input_info_list(pac->context, get_sink_input_info_cb, pac);
+
+	if (NULL == o) {
+		dief("pa_context_get_sink_input_info_list failed: %s",
+				pa_strerror(pa_context_errno(pac->context)));
+	}
+
+	pa_operation_unref(o);
 	pa_threaded_mainloop_wait(pac->mainloop);
-	return (linkedlist_t *)(pac->userdata);
+
+	sinks = (linkedlist_t *)(pac->userdata);
+
+	return sinks;
 }
 
 extern void
 sink_list_free(linkedlist_t *sinks)
 {
-	u32 length;
+	linkedlist_t *temp;
 	sink_t *sink;
 
-	length = linkedlist_length(sinks);
+	temp = sinks;
 
-	for (u32 i = 0; i < length; ++i) {
-		sink = linkedlist_get_as(sinks, i, sink_t);
+	while (NULL != temp) {
+		sink = temp->data;
+		temp = temp->next;
 		free(sink->appname);
 		free(sink);
 	}
