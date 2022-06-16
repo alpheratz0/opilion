@@ -25,6 +25,7 @@ get_sink_input_info_for_set_volume_cb(pa_context *c, const pa_sink_input_info *i
 {
 	sink_t *info;
 	pulseaudio_connection_t *pac;
+	pa_operation *o;
 
 	pac = (pulseaudio_connection_t *)(userdata);
 
@@ -40,20 +41,38 @@ get_sink_input_info_for_set_volume_cb(pa_context *c, const pa_sink_input_info *i
 		return;
 	}
 
-	if (i) {
+	if (NULL != i) {
 		info = (sink_t *)(pac->userdata);
 		pa_cvolume cv = i->volume;
 		pa_cvolume_set(&cv, i->channel_map.channels, ((info->volume * (PA_VOLUME_NORM / 100))));
-		pa_operation_unref(pa_context_set_sink_input_volume(c, info->id, &cv, set_sink_input_volume_cb, pac));
+
+		o = pa_context_set_sink_input_volume(c, info->id, &cv, set_sink_input_volume_cb, pac);
+
+		if (NULL == o) {
+			dief("pa_context_set_sink_input_volume failed: %s",
+					pa_strerror(pa_context_errno(pac->context)));
+		}
+
+		pa_operation_unref(o);
 	}
 }
 
 extern void
 sink_set_volume(pulseaudio_connection_t *pac, sink_t *info, u32 volume)
 {
+	pa_operation *o;
+
 	info->volume = volume;
 	pac->userdata = info;
-	pa_operation_unref(pa_context_get_sink_input_info(pac->context, info->id, get_sink_input_info_for_set_volume_cb, pac));
+
+	o = pa_context_get_sink_input_info(pac->context, info->id, get_sink_input_info_for_set_volume_cb, pac);
+
+	if (NULL == o) {
+		dief("pa_context_get_sink_input_info failed: %s",
+				pa_strerror(pa_context_errno(pac->context)));
+	}
+
+	pa_operation_unref(o);
 	pa_threaded_mainloop_wait(pac->mainloop);
 }
 
@@ -84,6 +103,7 @@ get_sink_input_info_for_set_mute_cb(pa_context *c, const pa_sink_input_info *i, 
 {
 	sink_t *info;
 	pulseaudio_connection_t *pac;
+	pa_operation *o;
 
 	pac = (pulseaudio_connection_t *)(userdata);
 
@@ -99,17 +119,33 @@ get_sink_input_info_for_set_mute_cb(pa_context *c, const pa_sink_input_info *i, 
 		return;
 	}
 
-	if (i) {
+	if (NULL != i) {
 		info = (sink_t *)(pac->userdata);
-		pa_operation_unref(pa_context_set_sink_input_mute(c, info->id, info->mute, set_sink_input_mute_cb, pac));
+		o = pa_context_set_sink_input_mute(c, info->id, info->mute, set_sink_input_mute_cb, pac);
+
+		if (NULL == o) {
+			dief("pa_context_set_sink_input_mute failed: %s",
+					pa_strerror(pa_context_errno(pac->context)));
+		}
+
+		pa_operation_unref(o);
 	}
 }
 
 extern void
 sink_set_mute(pulseaudio_connection_t *pac, sink_t *info, u32 mute)
 {
+	pa_operation *o;
+
 	info->mute = mute;
 	pac->userdata = info;
-	pa_operation_unref(pa_context_get_sink_input_info(pac->context, info->id, get_sink_input_info_for_set_mute_cb, pac));
+	o = pa_context_get_sink_input_info(pac->context, info->id, get_sink_input_info_for_set_mute_cb, pac);
+
+	if (NULL == o) {
+		dief("pa_context_get_sink_input_info failed: %s",
+				pa_strerror(pa_context_errno(pac->context)));
+	}
+
+	pa_operation_unref(o);
 	pa_threaded_mainloop_wait(pac->mainloop);
 }
