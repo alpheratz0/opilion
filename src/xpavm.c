@@ -179,9 +179,9 @@ main(int argc, char **argv)
 
 	window = window_create("xpavm", "xpavm");
 	font = font_load("Iosevka", 12);
-	snormal = sink_style_from(0xffffff, 0x555555, 0x333333);
-	sselected = sink_style_from(0xa0e547, 0x5e5eed, 0x333333);
-	selector = sink_selector_create(sinks, font, 450, 23, &snormal, &sselected);
+	snormal = sink_style_from(font, 450, 23, 0xffffff, 0x555555, 0x333333);
+	sselected = sink_style_from(font, 450, 23, 0xa0e547, 0x5e5eed, 0x333333);
+	selector = sink_selector_create(sinks, &snormal, &sselected);
 
 	sink_selector_render_onto(selector, window->bmp);
 	window_set_key_press_callback(window, key_press_callback);

@@ -1,26 +1,39 @@
 #include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
 
 #include "../base/bitmap.h"
 #include "../base/font.h"
 #include "../base/linkedlist.h"
 #include "../pulseaudio/sink.h"
 #include "../util/debug.h"
-#include "../util/numdef.h"
 #include "label.h"
 #include "sink_selector.h"
 
 extern sink_style_t
-sink_style_from(u32 text_color, u32 bar_filled_color, u32 bar_not_filled_color)
+sink_style_from(font_t *font,
+                uint32_t width,
+                uint32_t height,
+                uint32_t foreground,
+                uint32_t bar_filled,
+                uint32_t bar_unfilled)
 {
 	sink_style_t style;
-	style.text_color = text_color;
-	style.bar_filled_color = bar_filled_color;
-	style.bar_not_filled_color = bar_not_filled_color;
+
+	style.font = font;
+	style.width = width;
+	style.height = height;
+	style.foreground = foreground;
+	style.bar_filled = bar_filled;
+	style.bar_unfilled = bar_unfilled;
+
 	return style;
 }
 
 extern sink_selector_t *
-sink_selector_create(linkedlist_t *sinks, font_t *font, u32 width, u32 height, sink_style_t *snormal, sink_style_t *sselected)
+sink_selector_create(linkedlist_t *sinks,
+                     sink_style_t *snormal,
+                     sink_style_t *sselected)
 {
 	sink_selector_t *selector;
 
@@ -29,11 +42,9 @@ sink_selector_create(linkedlist_t *sinks, font_t *font, u32 width, u32 height, s
 	}
 
 	selector->sinks = sinks;
-	selector->font = font;
-	selector->width = width;
-	selector->height = height;
 	selector->snormal = snormal;
 	selector->sselected = sselected;
+	selector->length = linkedlist_length(sinks);
 	selector->index = 0;
 
 	return selector;
@@ -42,78 +53,119 @@ sink_selector_create(linkedlist_t *sinks, font_t *font, u32 width, u32 height, s
 extern sink_t *
 sink_selector_get_selected(sink_selector_t *selector)
 {
-	return linkedlist_get_as(selector->sinks, selector->index, sink_t);
+	sink_t *selected;
+
+	selected = linkedlist_get_as(selector->sinks, selector->index, sink_t);
+
+	return selected;
 }
 
 extern void
 sink_selector_select_up(sink_selector_t *selector)
 {
-	if (selector->index == 0) selector->index = linkedlist_length(selector->sinks) - 1;
-	else selector->index--;
+	selector->index = selector->index == 0 ?
+		linkedlist_length(selector->sinks) - 1 :
+		selector->index - 1;
 }
 
 extern void
 sink_selector_select_down(sink_selector_t *selector)
 {
-	if (selector->index == (linkedlist_length(selector->sinks) - 1)) selector->index = 0;
-	else selector->index++;
+	selector->index = selector->index == selector->length - 1 ?
+		0 : selector->index + 1;
+}
+
+static void
+sink_volume_format(sink_t *sink,
+                   char *volstr)
+{
+	if (sink->mute) {
+		strcpy(volstr, "muted");
+		return;
+	}
+
+	sprintf(volstr, "%u%%", sink->volume);
+}
+
+static void
+sink_render_onto(sink_t *sink,
+                 sink_style_t *style,
+                 uint32_t y,
+                 bitmap_t *bmp)
+{
+	uint32_t x;
+	char volstr[128];
+
+	/* centered */
+	x = (bmp->width - style->width) / 2;
+
+	sink_volume_format(sink, volstr);
+
+	/* application name (top left corner) */
+	label_render_onto(
+		bmp, style->font, style->foreground,
+		sink->appname, x, y
+	);
+
+	/* application volume (top right corner) */
+	label_render_onto(
+		bmp, style->font, style->foreground, volstr,
+		x + style->width - style->font->width * strlen(volstr), y
+	);
+
+	/* volume bar */
+	bitmap_rect(
+		bmp, x, y + style->font->height, style->width,
+		style->height - style->font->height, style->bar_unfilled
+	);
+
+	bitmap_rect(
+		bmp, x, y + style->font->height, (style->width * sink->volume) / 100,
+		style->height - style->font->height, style->bar_filled
+	);
 }
 
 extern void
-sink_selector_render_onto(sink_selector_t *selector, bitmap_t *bmp)
+sink_selector_render_onto(sink_selector_t *selector,
+                          bitmap_t *bmp)
 {
-	u32 nsinks, height, start_x, start_y, current_x, current_y;
-	sink_t *current_sink;
-	sink_style_t *current_style;
-	char vstr[5];
+	linkedlist_t *temp;
+	sink_t *sink;
+	sink_style_t *style;
+	uint32_t margin, index, y;
 
-	if ((nsinks = linkedlist_length(selector->sinks)) != 0) {
-		height = nsinks * selector->height + 30 * (nsinks - 1);
-		start_x = (bmp->width - selector->width) / 2;
-		start_y = (bmp->height - height) / 2;
+	index = 0;
+	margin = 30;
+	temp = selector->sinks;
 
-		current_x = start_x;
-		current_y = start_y;
+	/* total available space */
+	y = bmp->height;
 
-		for (u32 i = 0; i < nsinks; ++i) {
-			current_sink = linkedlist_get_as(selector->sinks, i, sink_t);
-			current_style = i == selector->index ? selector->sselected :
-				selector->snormal;
-			label_render_onto(bmp, selector->font, current_style->text_color,
-					current_sink->appname, current_x, current_y);
+	/* space used by non selected sinks */
+	y -= (selector->length - 1) * (selector->snormal->height);
 
-			if (current_sink->mute) {
-				label_render_onto(
-					bmp, selector->font, current_style->text_color, "muted",
-					current_x + selector->width - selector->font->width *
-					(sizeof("muted") - 1), current_y
-				);
-			}
-			else {
-				snprintf(vstr, sizeof(vstr), "%d%%", current_sink->volume);
-				label_render_onto(
-					bmp, selector->font, current_style->text_color, vstr,
-					current_x + selector->width - selector->font->width *
-					strlen(vstr), current_y
-				);
-			}
+	/* space used by selected sinks */
+	y -= (selector->sselected->height);
 
-			bitmap_rect(
-				bmp, current_x, current_y + selector->font->height,
-				selector->width, selector->height - selector->font->height,
-				current_style->bar_not_filled_color
-			);
+	/* space used by margin */
+	y -= (selector->length - 1) * (margin);
 
-			bitmap_rect(
-				bmp, current_x, current_y + selector->font->height,
-				(selector->width * current_sink->volume) / 100,
-				selector->height - selector->font->height,
-				current_style->bar_filled_color
-			);
+	/* center it */
+	y /= 2;
 
-			current_x = start_x;
-			current_y += selector->height + 30;
+	while (NULL != temp) {
+		sink = temp->data;
+		temp = temp->next;
+		style = selector->snormal;
+
+		if (index == selector->index) {
+			style = selector->sselected;
 		}
+
+		sink_render_onto(sink, style, y, bmp);
+
+		y += style->height + margin;
+		++index;
 	}
 }
 
