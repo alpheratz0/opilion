@@ -31,7 +31,7 @@ die(const char *err)
 		fprintf(stderr, "xpavm: %s\n", err);
 	}
 	else {
-		snprintf(command, sizeof(command), "notify-send \"xpavm: %s\"", err);
+		snprintf(command, sizeof(command), "notify-send \"xpavm\" \"%s\"", err);
 		system(command);
 	}
 	exit(1);
