@@ -38,10 +38,12 @@
 
 */
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/file.h>
 
 #include "base/bitmap.h"
 #include "base/font.h"
@@ -138,6 +140,17 @@ version(void)
 	exit(0);
 }
 
+static int
+is_instance_running(void)
+{
+	int pidfd, rc;
+
+	pidfd = open("/tmp/xpavm.pid", O_CREAT | O_RDWR, 0666);
+	rc = flock(pidfd, LOCK_EX | LOCK_NB);
+
+	return rc && errno == EWOULDBLOCK;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -151,6 +164,10 @@ main(int argc, char **argv)
 		else if (match_opt(*argv, "-v", "--version")) version();
 		else if (**argv == '-') dief("invalid option %s", *argv);
 		else dief("unexpected argument: %s", *argv);
+	}
+
+	if (is_instance_running()) {
+		die("another instance is already running");
 	}
 
 	pac = pulseaudio_connect();
