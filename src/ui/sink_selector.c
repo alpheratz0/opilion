@@ -103,14 +103,14 @@ sink_render_onto(sink_t *sink,
 
 	/* application name (top left corner) */
 	label_render_onto(
-		bmp, style->font, style->foreground,
-		sink->appname, x, y
+		sink->appname, style->font, style->foreground,
+		x, y, bmp
 	);
 
 	/* application volume (top right corner) */
 	label_render_onto(
-		bmp, style->font, style->foreground, volstr,
-		x + style->width - style->font->width * strlen(volstr), y
+		volstr, style->font, style->foreground,
+		x + style->width - style->font->width * strlen(volstr), y, bmp
 	);
 
 	/* volume bar */
