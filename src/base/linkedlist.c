@@ -1,25 +1,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../util/debug.h"
 #include "../util/numdef.h"
 #include "linkedlist.h"
 
 extern void
 linkedlist_append(linkedlist_t **ref, void *data)
 {
-	while (NULL != *ref) {
-		ref = &((*ref)->next);
+	while (NULL != ref[0]) {
+		ref = &ref[0]->next;
 	}
 
-	*ref = malloc(sizeof(node_t));
-	(*ref)->data = data;
-	(*ref)->next = NULL;
+	if (NULL == (ref[0] = malloc(sizeof(node_t)))) {
+		die("error while calling malloc, no memory available");
+	}
+
+	ref[0]->data = data;
+	ref[0]->next = NULL;
 }
 
 extern void *
 linkedlist_get(linkedlist_t *list, u32 pos)
 {
-	while (pos--) {
+	while (pos-- > 0 && NULL != list) {
 		list = list->next;
 	}
 
@@ -29,19 +33,19 @@ linkedlist_get(linkedlist_t *list, u32 pos)
 extern u32
 linkedlist_length(linkedlist_t *list)
 {
-	for (u32 length = 0;;++length) {
-		if (NULL == list) {
-			return length;
-		}
+	u32 length;
+
+	for (length = 0; NULL != list; ++length) {
 		list = list->next;
 	}
+
+	return length;
 }
 
 extern void
 linkedlist_free(linkedlist_t *list)
 {
-	linkedlist_t *head;
-	linkedlist_t *temp;
+	linkedlist_t *head, *temp;
 
 	head = list;
 
