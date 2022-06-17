@@ -140,7 +140,7 @@ version(void)
 	exit(0);
 }
 
-static int
+static bool
 is_instance_running(void)
 {
 	int pidfd, rc;
