@@ -1,8 +1,5 @@
-#include <errno.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <string.h>
 
 #include "../util/debug.h"
 #include "bitmap.h"
@@ -19,7 +16,7 @@ bitmap_create(uint32_t width, uint32_t height, uint32_t color)
 	bmp->width = width;
 	bmp->height = height;
 
-	if (NULL == (bmp->px = malloc(4*width*height))) {
+	if (NULL == (bmp->px = malloc(sizeof(uint32_t) * width * height))) {
 		die("error while calling malloc, no memory available");
 	}
 
