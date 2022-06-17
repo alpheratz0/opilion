@@ -12,7 +12,7 @@ sink_set_volume(pulseaudio_connection_t *pac, sink_t *info, uint32_t volume);
 extern void
 sink_set_volume_relative(pulseaudio_connection_t *pac,
                          sink_t *info,
-                         int32_t relative);
+                         int32_t delta);
 
 extern void
 sink_set_mute(pulseaudio_connection_t *pac, sink_t *info, uint32_t mute);

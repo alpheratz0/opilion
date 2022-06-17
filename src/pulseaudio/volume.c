@@ -97,18 +97,18 @@ sink_set_volume(pulseaudio_connection_t *pac, sink_t *info, uint32_t volume)
 extern void
 sink_set_volume_relative(pulseaudio_connection_t *pac,
                          sink_t *info,
-                         int32_t relative)
+                         int32_t delta)
 {
 #define clamp(v,min,max) (v>max?max:v<min?min:v)
 
-	int32_t target_vol;
+	int32_t volume;
 
-	target_vol = relative + (int32_t)(info->volume);
-	target_vol = clamp(target_vol, 0, 100);
+	volume = delta + (int32_t)(info->volume);
+	volume = clamp(volume, 0, 100);
 
 #undef clamp
 
-	sink_set_volume(pac, info, (uint32_t)(target_vol));
+	sink_set_volume(pac, info, (uint32_t)(volume));
 }
 
 static void
