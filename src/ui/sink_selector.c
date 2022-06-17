@@ -76,7 +76,7 @@ sink_selector_select_down(sink_selector_t *selector)
 }
 
 static void
-sink_volume_format(sink_t *sink, char *volstr)
+sink_selector_sink_volume_format(sink_t *sink, char *volstr)
 {
 	if (sink->mute) {
 		strcpy(volstr, "muted");
@@ -87,7 +87,10 @@ sink_volume_format(sink_t *sink, char *volstr)
 }
 
 static void
-sink_render_onto(sink_t *sink, sink_style_t *style, uint32_t y, bitmap_t *bmp)
+sink_selector_sink_render_onto(sink_t *sink,
+                               sink_style_t *style,
+                               uint32_t y,
+                               bitmap_t *bmp)
 {
 	uint32_t x;
 	char volstr[128];
@@ -95,7 +98,7 @@ sink_render_onto(sink_t *sink, sink_style_t *style, uint32_t y, bitmap_t *bmp)
 	/* centered */
 	x = (bmp->width - style->width) / 2;
 
-	sink_volume_format(sink, volstr);
+	sink_selector_sink_volume_format(sink, volstr);
 
 	/* application name (top left corner) */
 	label_render_onto(
@@ -157,7 +160,7 @@ sink_selector_render_onto(sink_selector_t *selector, bitmap_t *bmp)
 			style = selector->sselected;
 		}
 
-		sink_render_onto(sink, style, y, bmp);
+		sink_selector_sink_render_onto(sink, style, y, bmp);
 
 		y += style->height + margin;
 		++index;
