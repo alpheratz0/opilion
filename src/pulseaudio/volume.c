@@ -32,7 +32,7 @@ get_sink_input_info_for_set_volume_cb(pa_context *c,
 	pa_operation *po;
 	pa_cvolume cv;
 
-	pac = (pulseaudio_connection_t *)(userdata);
+	pac = userdata;
 
 	if (eol < 0) {
 		warnf("pa_context_get_sink_input_info failed: %s",
@@ -153,7 +153,7 @@ get_sink_input_info_for_set_mute_cb(pa_context *c,
 	}
 
 	if (NULL != i) {
-		info = (sink_t *)(pac->userdata);
+		info = pac->userdata;
 
 		po = pa_context_set_sink_input_mute(
 			c, info->id, info->mute,

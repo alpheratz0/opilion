@@ -7,7 +7,11 @@
 static void
 context_state_cb(__attribute__((unused)) pa_context *c, void *userdata)
 {
-	pa_threaded_mainloop_signal((pa_threaded_mainloop *)(userdata), 0);
+	pa_threaded_mainloop *mainloop;
+
+	mainloop = userdata;
+
+	pa_threaded_mainloop_signal(mainloop, 0);
 }
 
 extern pulseaudio_connection_t *
