@@ -134,7 +134,7 @@ get_sink_input_info_for_set_mute_cb(pa_context *c,
 {
 	sink_t *info;
 	pulseaudio_connection_t *pac;
-	pa_operation *o;
+	pa_operation *po;
 
 	pac = userdata;
 
@@ -155,17 +155,17 @@ get_sink_input_info_for_set_mute_cb(pa_context *c,
 	if (NULL != i) {
 		info = (sink_t *)(pac->userdata);
 
-		o = pa_context_set_sink_input_mute(
+		po = pa_context_set_sink_input_mute(
 			c, info->id, info->mute,
 			set_sink_input_mute_cb, pac
 		);
 
-		if (NULL == o) {
+		if (NULL == po) {
 			dief("pa_context_set_sink_input_mute failed: %s",
 					pa_strerror(pa_context_errno(pac->context)));
 		}
 
-		pa_operation_unref(o);
+		pa_operation_unref(po);
 	}
 }
 
