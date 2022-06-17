@@ -64,7 +64,7 @@ extern void
 sink_selector_select_up(sink_selector_t *selector)
 {
 	selector->index = selector->index == 0 ?
-		linkedlist_length(selector->sinks) - 1 :
+		selector->length - 1 :
 		selector->index - 1;
 }
 
