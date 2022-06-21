@@ -48,6 +48,31 @@ x11_get_atom(xcb_connection_t *conn, const char *name)
 }
 
 static void
+window_get_size(xcb_connection_t *conn,
+                xcb_window_t wid,
+                uint16_t *width,
+                uint16_t *height)
+{
+	xcb_get_geometry_cookie_t cookie;
+	xcb_get_geometry_reply_t *reply;
+	xcb_generic_error_t *error;
+
+	error = NULL;
+	cookie = xcb_get_geometry(conn, wid);
+	reply = xcb_get_geometry_reply(conn, cookie, &error);
+
+	if (NULL != error) {
+		dief("xcb_get_geometry failed with error code: %d",
+				(int)(error->error_code));
+	}
+
+	*width = reply->width;
+	*height = reply->height;
+
+	free(reply);
+}
+
+static void
 window_set_fullscreen(xcb_connection_t *conn, xcb_window_t wid)
 {
 	xcb_atom_t net_wm_state, net_wm_state_fullscreen;
@@ -181,6 +206,7 @@ window_loop_start(window_t *window)
 	xcb_key_press_event_t *kpev;
 	xcb_client_message_event_t *cmev;
 	xcb_atom_t atom;
+	uint16_t width, height;
 
 	window->running = 1;
 
@@ -199,9 +225,15 @@ window_loop_start(window_t *window)
 
 					break;
 				case XCB_EXPOSE:
+					window_get_size(
+						window->connection, window->id,
+						&width, &height
+					);
+
 					xcb_image_put(
 						window->connection, window->id, window->gc,
-						window->image, 0, 0, 0
+						window->image, (width - window->bmp->width) / 2,
+						(height - window->bmp->height) / 2, 0
 					);
 
 					break;
