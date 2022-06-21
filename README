@@ -4,7 +4,7 @@ pulseaudio volume manager, preview: https://i.imgur.com/zNCEJAA.mp4
 
 build
 =====
-in order to build xpavm you will need xcb, pulseaudio, fontconfig and freetype headers
+in order to build xpavm you will need xcb, xcb-image, pulseaudio, fontconfig and freetype headers
 $ make
 
 install
