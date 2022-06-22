@@ -79,8 +79,7 @@ font_load(const char *family, uint32_t size)
 	CHKFTERR("FT_Init_FreeType", FT_Init_FreeType(&lib));
 	CHKFTERR("FT_New_Face", FT_New_Face(lib, path, 0, &face));
 	CHKFTERR("FT_Set_Char_Size", FT_Set_Char_Size(face, 0, size * 64, 72, 72));
-	CHKFTERR("FT_Load_Glyph", FT_Load_Glyph(face, FT_Get_Char_Index(face, '0'), 0));
-	CHKFTERR("FT_Render_Glyph", FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL));
+	CHKFTERR("FT_Load_Char", FT_Load_Char(face, '0', FT_LOAD_RENDER));
 
 	if (NULL == (font = malloc(sizeof(font_t)))) {
 		die("error while calling malloc, no memory available");
@@ -100,8 +99,7 @@ font_load(const char *family, uint32_t size)
 extern FT_GlyphSlot
 font_get_glyph(font_t *font, char c)
 {
-	CHKFTERR("FT_Load_Glyph", FT_Load_Glyph(font->face, FT_Get_Char_Index(font->face, c), 0));
-	CHKFTERR("FT_Render_Glyph", FT_Render_Glyph(font->face->glyph, FT_RENDER_MODE_NORMAL));
+	CHKFTERR("FT_Load_Char", FT_Load_Char(font->face, c, FT_LOAD_RENDER));
 
 	return font->face->glyph;
 }
