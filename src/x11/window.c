@@ -215,36 +215,36 @@ window_loop_start(struct window *window)
 	while (window->running) {
 		if ((ev = xcb_wait_for_event(window->connection))) {
 			switch (ev->response_type & ~0x80) {
-			case XCB_CLIENT_MESSAGE:
-				cmev = (xcb_client_message_event_t *)(ev);
-				atom = cmev->data.data32[0];
+				case XCB_CLIENT_MESSAGE:
+					cmev = (xcb_client_message_event_t *)(ev);
+					atom = cmev->data.data32[0];
 
-				/* check if the wm sent a delete window message */
-				/* https://www.x.org/docs/ICCCM/icccm.pdf */
-				if (atom == x11_get_atom(window->connection, "WM_DELETE_WINDOW")) {
-					window_loop_end(window);
-				}
+					/* check if the wm sent a delete window message */
+					/* https://www.x.org/docs/ICCCM/icccm.pdf */
+					if (atom == x11_get_atom(window->connection, "WM_DELETE_WINDOW")) {
+						window_loop_end(window);
+					}
 
-				break;
-			case XCB_EXPOSE:
-				window_get_size(
-					window->connection, window->id,
-					&width, &height
-				);
+					break;
+				case XCB_EXPOSE:
+					window_get_size(
+						window->connection, window->id,
+						&width, &height
+					);
 
-				xcb_image_put(
-					window->connection, window->id, window->gc,
-					window->image, (width - window->bmp->width) / 2,
-					(height - window->bmp->height) / 2, 0
-				);
+					xcb_image_put(
+						window->connection, window->id, window->gc,
+						window->image, (width - window->bmp->width) / 2,
+						(height - window->bmp->height) / 2, 0
+					);
 
-				break;
-			case XCB_KEY_PRESS:
-				kpev = (xcb_key_press_event_t *)(ev);
-				window->key_pressed(kpev->detail);
-				break;
-			default:
-				break;
+					break;
+				case XCB_KEY_PRESS:
+					kpev = (xcb_key_press_event_t *)(ev);
+					window->key_pressed(kpev->detail);
+					break;
+				default:
+					break;
 			}
 
 			free(ev);

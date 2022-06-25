@@ -73,29 +73,29 @@ key_press_callback(uint32_t key)
 	sink = sink_selector_get_selected(selector);
 
 	switch (key) {
-	case KEY_ESCAPE:
-	case KEY_Q:
-		window_loop_end(window);
-		return;
-	case KEY_M:
-		sink_set_mute(pac, sink, !sink->mute);
-		break;
-	case KEY_H:
-		sink_set_volume_relative(pac, sink, -1);
-		break;
-	case KEY_L:
-		sink_set_volume_relative(pac, sink, 1);
-		break;
-	case KEY_J:
-		sink_selector_select_down(selector);
-		break;
-	case KEY_K:
-		sink_selector_select_up(selector);
-		break;
-	case KEY_1: case KEY_2: case KEY_3: case KEY_4: case KEY_5:
-	case KEY_6: case KEY_7: case KEY_8: case KEY_9: case KEY_0:
-		sink_set_volume(pac, sink, (key - KEY_1 + 1) * 10);
-		break;
+		case KEY_ESCAPE:
+		case KEY_Q:
+			window_loop_end(window);
+			return;
+		case KEY_M:
+			sink_set_mute(pac, sink, !sink->mute);
+			break;
+		case KEY_H:
+			sink_set_volume_relative(pac, sink, -1);
+			break;
+		case KEY_L:
+			sink_set_volume_relative(pac, sink, 1);
+			break;
+		case KEY_J:
+			sink_selector_select_down(selector);
+			break;
+		case KEY_K:
+			sink_selector_select_up(selector);
+			break;
+		case KEY_1: case KEY_2: case KEY_3: case KEY_4: case KEY_5:
+		case KEY_6: case KEY_7: case KEY_8: case KEY_9: case KEY_0:
+			sink_set_volume(pac, sink, (key - KEY_1 + 1) * 10);
+			break;
 	}
 
 	bitmap_clear(window->bmp, 0x000000);
