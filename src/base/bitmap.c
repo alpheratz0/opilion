@@ -28,9 +28,9 @@ bitmap_create(uint32_t width, uint32_t height, uint32_t color)
 
 	bmp = xmalloc(sizeof(struct bitmap));
 
-	bmp->px = xmalloc(sizeof(uint32_t)*width*height);
 	bmp->width = width;
 	bmp->height = height;
+	bmp->px = xmalloc(sizeof(uint32_t)*width*height);
 
 	bitmap_clear(bmp, color);
 
