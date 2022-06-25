@@ -18,26 +18,23 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "../util/debug.h"
+#include "../util/xmalloc.h"
 #include "linkedlist.h"
 
 extern void
-linkedlist_append(linkedlist_t **ref, void *data)
+linkedlist_append(struct linkedlist **ref, void *data)
 {
 	while (NULL != ref[0]) {
 		ref = &ref[0]->next;
 	}
 
-	if (NULL == (ref[0] = malloc(sizeof(node_t)))) {
-		die("error while calling malloc, no memory available");
-	}
-
+	ref[0] = xmalloc(sizeof(struct linkedlist));
 	ref[0]->data = data;
 	ref[0]->next = NULL;
 }
 
 extern void *
-linkedlist_get(linkedlist_t *list, uint32_t pos)
+linkedlist_get(struct linkedlist *list, uint32_t pos)
 {
 	while (pos-- > 0 && NULL != list) {
 		list = list->next;
@@ -47,7 +44,7 @@ linkedlist_get(linkedlist_t *list, uint32_t pos)
 }
 
 extern uint32_t
-linkedlist_length(linkedlist_t *list)
+linkedlist_length(struct linkedlist *list)
 {
 	uint32_t length;
 
@@ -59,9 +56,9 @@ linkedlist_length(linkedlist_t *list)
 }
 
 extern void
-linkedlist_free(linkedlist_t *list)
+linkedlist_free(struct linkedlist *list)
 {
-	linkedlist_t *head, *temp;
+	struct linkedlist *head, *temp;
 
 	head = list;
 

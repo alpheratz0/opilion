@@ -22,8 +22,6 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-typedef struct font font_t;
-
 struct font {
 	FT_Library library;
 	FT_Face face;
@@ -32,13 +30,13 @@ struct font {
 	uint32_t width;
 };
 
-extern font_t *
+extern struct font *
 font_load(const char *family, uint32_t size);
 
 extern FT_GlyphSlot
-font_get_glyph(font_t *font, char c);
+font_get_glyph(struct font *font, char c);
 
 extern void
-font_unload(font_t *font);
+font_unload(struct font *font);
 
 #endif

@@ -17,6 +17,7 @@ SRC = src/xpavm.c \
 	  src/pulseaudio/volume.c \
 	  src/util/debug.c \
 	  src/util/color.c \
+	  src/util/xmalloc.c \
 	  src/ui/label.c \
 	  src/ui/sink_selector.c \
 	  src/x11/window.c
@@ -34,6 +35,7 @@ ${OBJ}:	src/base/linkedlist.h \
 		src/pulseaudio/volume.h \
 		src/util/debug.h \
 		src/util/color.h \
+		src/util/xmalloc.h \
 		src/ui/label.h \
 		src/ui/sink_selector.h \
 		src/x11/keys.h \

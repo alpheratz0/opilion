@@ -23,6 +23,7 @@
 #include <fontconfig/fontconfig.h>
 
 #include "../util/debug.h"
+#include "../util/xmalloc.h"
 #include "font.h"
 
 #define CHKFTERR(name,err) do {                                 \
@@ -64,13 +65,13 @@ font_search(const char *family)
 	return path;
 }
 
-extern font_t *
+extern struct font *
 font_load(const char *family, uint32_t size)
 {
 	char *path;
 	FT_Library lib;
 	FT_Face face;
-	font_t *font;
+	struct font *font;
 
 	if (NULL == (path = font_search(family))) {
 		dief("font family not found: %s", family);
@@ -81,9 +82,7 @@ font_load(const char *family, uint32_t size)
 	CHKFTERR("FT_Set_Char_Size", FT_Set_Char_Size(face, 0, size * 64, 72, 72));
 	CHKFTERR("FT_Load_Char", FT_Load_Char(face, '0', FT_LOAD_RENDER));
 
-	if (NULL == (font = malloc(sizeof(font_t)))) {
-		die("error while calling malloc, no memory available");
-	}
+	font = xmalloc(sizeof(struct font));
 
 	font->library = lib;
 	font->face = face;
@@ -97,7 +96,7 @@ font_load(const char *family, uint32_t size)
 }
 
 extern FT_GlyphSlot
-font_get_glyph(font_t *font, char c)
+font_get_glyph(struct font *font, char c)
 {
 	CHKFTERR("FT_Load_Char", FT_Load_Char(font->face, c, FT_LOAD_RENDER));
 
@@ -105,7 +104,7 @@ font_get_glyph(font_t *font, char c)
 }
 
 extern void
-font_unload(font_t *font)
+font_unload(struct font *font)
 {
 	FT_Done_FreeType(font->library);
 	free(font);

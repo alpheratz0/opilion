@@ -26,7 +26,7 @@
 static void
 set_sink_input_volume_cb(pa_context *c, int eol, void *userdata)
 {
-	pulseaudio_connection_t *pac;
+	struct pulseaudio_connection *pac;
 
 	pac = userdata;
 
@@ -44,8 +44,8 @@ get_sink_input_info_for_set_volume_cb(pa_context *c,
                                       int eol,
                                       void *userdata)
 {
-	sink_t *info;
-	pulseaudio_connection_t *pac;
+	struct sink *info;
+	struct pulseaudio_connection *pac;
 	pa_operation *po;
 	pa_cvolume cv;
 
@@ -90,7 +90,9 @@ get_sink_input_info_for_set_volume_cb(pa_context *c,
 }
 
 extern void
-sink_set_volume(pulseaudio_connection_t *pac, sink_t *info, uint32_t volume)
+sink_set_volume(struct pulseaudio_connection *pac,
+                struct sink *info,
+                uint32_t volume)
 {
 	pa_operation *po;
 
@@ -112,8 +114,8 @@ sink_set_volume(pulseaudio_connection_t *pac, sink_t *info, uint32_t volume)
 }
 
 extern void
-sink_set_volume_relative(pulseaudio_connection_t *pac,
-                         sink_t *info,
+sink_set_volume_relative(struct pulseaudio_connection *pac,
+                         struct sink *info,
                          int32_t delta)
 {
 #define clamp(v,min,max) (v>max?max:v<min?min:v)
@@ -131,7 +133,7 @@ sink_set_volume_relative(pulseaudio_connection_t *pac,
 static void
 set_sink_input_mute_cb(pa_context *c, int eol, void *userdata)
 {
-	pulseaudio_connection_t *pac;
+	struct pulseaudio_connection *pac;
 
 	pac = userdata;
 
@@ -149,8 +151,8 @@ get_sink_input_info_for_set_mute_cb(pa_context *c,
                                     int eol,
                                     void *userdata)
 {
-	sink_t *info;
-	pulseaudio_connection_t *pac;
+	struct sink *info;
+	struct pulseaudio_connection *pac;
 	pa_operation *po;
 
 	pac = userdata;
@@ -187,7 +189,9 @@ get_sink_input_info_for_set_mute_cb(pa_context *c,
 }
 
 extern void
-sink_set_mute(pulseaudio_connection_t *pac, sink_t *info, uint32_t mute)
+sink_set_mute(struct pulseaudio_connection *pac,
+              struct sink *info,
+              uint32_t mute)
 {
 	pa_operation *po;
 

@@ -21,27 +21,29 @@
 
 #include "../base/bitmap.h"
 #include "../base/font.h"
-#include "../util/debug.h"
 #include "../util/color.h"
 #include "label.h"
 
 static void
 label_render_char_onto(char c,
-                       font_t *font,
+                       struct font *font,
                        uint32_t color,
                        uint32_t x,
                        uint32_t y,
-                       bitmap_t *bmp)
+                       struct bitmap *bmp)
 {
 	FT_GlyphSlot glyph;
-	uint32_t width, height, xmap, ymap, gray;
+	uint32_t width, height;
+	uint32_t xmap, ymap;
+	uint32_t gray;
+	uint32_t i, j;
 
 	glyph = font_get_glyph(font, c);
 	height = glyph->bitmap.rows;
 	width = glyph->bitmap.width;
 
-	for (uint32_t i = 0; i < height; ++i) {
-		for (uint32_t j = 0; j < width; ++j) {
+	for (i = 0; i < height; ++i) {
+		for (j = 0; j < width; ++j) {
 			xmap = x + j + glyph->bitmap_left;
 			ymap = y + i - glyph->bitmap_top + font->size;
 			gray = glyph->bitmap.buffer[i*width+j];
@@ -59,17 +61,21 @@ label_render_char_onto(char c,
 
 extern void
 label_render_onto(const char *text,
-                  font_t *font,
+                  struct font *font,
                   uint32_t color,
                   uint32_t x,
                   uint32_t y,
-                  bitmap_t *bmp)
+                  struct bitmap *bmp)
 {
+	size_t i;
 	size_t len;
 
 	len = strlen(text);
 
-	for (size_t i = 0; i < len && text[i] != '\n'; ++i) {
-		label_render_char_onto(text[i], font, color, x + i * font->width, y, bmp);
+	for (i = 0; i < len && text[i] != '\n'; ++i) {
+		label_render_char_onto(
+			text[i], font, color,
+			x + i * font->width, y, bmp
+		);
 	}
 }

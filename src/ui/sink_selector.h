@@ -25,11 +25,8 @@
 #include "../base/linkedlist.h"
 #include "../pulseaudio/sink.h"
 
-typedef struct sink_style sink_style_t;
-typedef struct sink_selector sink_selector_t;
-
 struct sink_style {
-	font_t *font;
+	struct font *font;
 	uint32_t width;
 	uint32_t height;
 	uint32_t foreground;
@@ -38,38 +35,38 @@ struct sink_style {
 };
 
 struct sink_selector {
-	linkedlist_t *sinks;
-	sink_style_t *snormal, *sselected;
+	struct linkedlist *sinks;
+	struct sink_style *snormal, *sselected;
 	uint32_t index;
 	uint32_t length;
 };
 
-extern sink_style_t
-sink_style_from(font_t *font,
+extern struct sink_style
+sink_style_from(struct font *font,
                 uint32_t width,
                 uint32_t height,
                 uint32_t foreground,
                 uint32_t bar_filled,
                 uint32_t bar_unfilled);
 
-extern sink_selector_t *
-sink_selector_create(linkedlist_t *sinks,
-                     sink_style_t *snormal,
-                     sink_style_t *sselected);
+extern struct sink_selector *
+sink_selector_create(struct linkedlist *sinks,
+                     struct sink_style *snormal,
+                     struct sink_style *sselected);
 
-extern sink_t *
-sink_selector_get_selected(sink_selector_t *selector);
-
-extern void
-sink_selector_select_up(sink_selector_t *selector);
+extern struct sink *
+sink_selector_get_selected(struct sink_selector *selector);
 
 extern void
-sink_selector_select_down(sink_selector_t *selector);
+sink_selector_select_up(struct sink_selector *selector);
 
 extern void
-sink_selector_render_onto(sink_selector_t *selector, bitmap_t *bmp);
+sink_selector_select_down(struct sink_selector *selector);
 
 extern void
-sink_selector_free(sink_selector_t *selector);
+sink_selector_render_onto(struct sink_selector *selector, struct bitmap *bmp);
+
+extern void
+sink_selector_free(struct sink_selector *selector);
 
 #endif

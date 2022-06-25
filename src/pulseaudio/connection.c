@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <pulse/pulseaudio.h>
 
-#include "../util/debug.h"
+#include "../util/xmalloc.h"
 #include "connection.h"
 
 static void
@@ -31,14 +31,12 @@ context_state_cb(__attribute__((unused)) pa_context *c, void *userdata)
 	pa_threaded_mainloop_signal(mainloop, 0);
 }
 
-extern pulseaudio_connection_t *
+extern struct pulseaudio_connection *
 pulseaudio_connect(void)
 {
-	pulseaudio_connection_t *pac;
+	struct pulseaudio_connection *pac;
 
-	if (NULL == (pac = malloc(sizeof(pulseaudio_connection_t)))) {
-		die("error while calling malloc, no memory available");
-	}
+	pac = xmalloc(sizeof(struct pulseaudio_connection));
 
 	pac->mainloop = pa_threaded_mainloop_new();
 	pac->api = pa_threaded_mainloop_get_api(pac->mainloop);
@@ -57,7 +55,7 @@ pulseaudio_connect(void)
 }
 
 extern void
-pulseaudio_disconnect(pulseaudio_connection_t *pac)
+pulseaudio_disconnect(struct pulseaudio_connection *pac)
 {
 	pa_context_unref(pac->context);
 	pa_threaded_mainloop_unlock(pac->mainloop);

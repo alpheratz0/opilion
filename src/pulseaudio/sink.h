@@ -23,8 +23,6 @@
 #include "../base/linkedlist.h"
 #include "connection.h"
 
-typedef struct sink sink_t;
-
 struct sink {
 	char *appname;
 	uint32_t id;
@@ -32,10 +30,10 @@ struct sink {
 	uint32_t mute;
 };
 
-extern linkedlist_t *
-sink_get_all_input_sinks(pulseaudio_connection_t *pac);
+extern struct linkedlist *
+sink_get_all_input_sinks(struct pulseaudio_connection *pac);
 
 extern void
-sink_list_free(linkedlist_t *sinks);
+sink_list_free(struct linkedlist *sinks);
 
 #endif

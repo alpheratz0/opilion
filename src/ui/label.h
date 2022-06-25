@@ -25,10 +25,10 @@
 
 extern void
 label_render_onto(const char *text,
-                  font_t *font,
+                  struct font *font,
                   uint32_t color,
                   uint32_t x,
                   uint32_t y,
-                  bitmap_t *bmp);
+                  struct bitmap *bmp);
 
 #endif

@@ -20,8 +20,6 @@
 
 #include <pulse/pulseaudio.h>
 
-typedef struct pulseaudio_connection pulseaudio_connection_t;
-
 struct pulseaudio_connection {
 	pa_threaded_mainloop *mainloop;
 	pa_mainloop_api *api;
@@ -29,10 +27,10 @@ struct pulseaudio_connection {
 	void *userdata;
 };
 
-extern pulseaudio_connection_t *
+extern struct pulseaudio_connection *
 pulseaudio_connect(void);
 
 extern void
-pulseaudio_disconnect(pulseaudio_connection_t *pac);
+pulseaudio_disconnect(struct pulseaudio_connection *pac);
 
 #endif

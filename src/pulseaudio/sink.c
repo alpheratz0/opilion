@@ -22,18 +22,17 @@
 #include <pulse/volume.h>
 
 #include "../util/debug.h"
+#include "../util/xmalloc.h"
 #include "../base/linkedlist.h"
 #include "connection.h"
 #include "sink.h"
 
-static sink_t *
+static struct sink *
 sink_create(const char *appname, uint32_t id, uint32_t volume, uint32_t mute)
 {
-	sink_t *sink;
+	struct sink *sink;
 
-	if (NULL == (sink = malloc(sizeof(sink_t)))) {
-		die("error while calling malloc, no memory available");
-	}
+	sink = xmalloc(sizeof(struct sink));
 
 	sink->appname = strdup(appname);
 	sink->id = id;
@@ -49,8 +48,8 @@ get_sink_input_info_cb(pa_context *c,
                        int eol,
                        void *userdata)
 {
-	sink_t *sink;
-	pulseaudio_connection_t *pac;
+	struct sink *sink;
+	struct pulseaudio_connection *pac;
 
 	pac = userdata;
 
@@ -73,15 +72,15 @@ get_sink_input_info_cb(pa_context *c,
 			i->mute != 0 ? 1 : 0
 		);
 
-		linkedlist_append((linkedlist_t **)(&pac->userdata), sink);
+		linkedlist_append((struct linkedlist **)(&pac->userdata), sink);
 	}
 }
 
-extern linkedlist_t *
-sink_get_all_input_sinks(pulseaudio_connection_t *pac)
+extern struct linkedlist *
+sink_get_all_input_sinks(struct pulseaudio_connection *pac)
 {
 	pa_operation *po;
-	linkedlist_t *sinks;
+	struct linkedlist *sinks;
 
 	pac->userdata = NULL;
 
@@ -103,10 +102,10 @@ sink_get_all_input_sinks(pulseaudio_connection_t *pac)
 }
 
 extern void
-sink_list_free(linkedlist_t *sinks)
+sink_list_free(struct linkedlist *sinks)
 {
-	linkedlist_t *temp;
-	sink_t *sink;
+	struct linkedlist *temp;
+	struct sink *sink;
 
 	temp = sinks;
 

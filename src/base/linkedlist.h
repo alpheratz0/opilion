@@ -20,27 +20,24 @@
 
 #include <stdint.h>
 
-typedef struct node linkedlist_t;
-typedef struct node node_t;
-
-struct node {
-	node_t *next;
+struct linkedlist {
+	struct linkedlist *next;
 	void *data;
 };
 
 extern void
-linkedlist_append(linkedlist_t **ref, void *data);
+linkedlist_append(struct linkedlist **ref, void *data);
 
 extern void *
-linkedlist_get(linkedlist_t *list, uint32_t pos);
+linkedlist_get(struct linkedlist *list, uint32_t pos);
 
 #define linkedlist_get_as(list, pos, ptype) \
 	((ptype *)(linkedlist_get(list, pos)))
 
 extern uint32_t
-linkedlist_length(linkedlist_t *list);
+linkedlist_length(struct linkedlist *list);
 
 extern void
-linkedlist_free(linkedlist_t *list);
+linkedlist_free(struct linkedlist *list);
 
 #endif
