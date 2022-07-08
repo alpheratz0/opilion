@@ -5,7 +5,7 @@ APPPREFIX = ${PREFIX}/share/applications
 LDLIBS = -lxcb -lxcb-image -lpulse -lfontconfig -lfreetype
 LDFLAGS = -s ${LDLIBS}
 INCS = -I/usr/include -I/usr/include/freetype2
-CFLAGS = -std=c99 -pedantic -Wall -Wextra -Os ${INCS} -D_XOPEN_SOURCE=500 -DVERSION="\"${VERSION}\""
+CFLAGS = -std=c99 -pedantic -Wall -Wextra -Os ${INCS} -DVERSION="\"${VERSION}\""
 CC = cc
 
 SRC = src/xpavm.c \
