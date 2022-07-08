@@ -1,4 +1,4 @@
-VERSION = 0.1.4-rev+${shell git rev-parse --short=16 HEAD}
+VERSION = 0.1.4
 PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 APPPREFIX = ${PREFIX}/share/applications
