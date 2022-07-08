@@ -1,12 +1,16 @@
-xpavm
-=====
-pulseaudio volume manager, preview: https://i.imgur.com/zNCEJAA.mp4
+]|~ xpavm ~|[
 
-build
-=====
-in order to build xpavm you will need xcb, xcb-image, pulseaudio, fontconfig and freetype headers
+Pulseaudio volume manager.
+
+]|~ build ~|[
+
+In order to build xpavm you will need xcb, xcb-image, pulseaudio,
+fontconfig and freetype headers.
 $ make
 
-install
-=======
-# make install
+]|~ license ~|[
+
+This program is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
+See LICENSE for more details.
