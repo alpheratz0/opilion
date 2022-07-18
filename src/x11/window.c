@@ -235,8 +235,6 @@ window_loop_start(struct window *window)
 					kpev = (xcb_key_press_event_t *)(ev);
 					window->key_pressed(kpev->detail);
 					break;
-				default:
-					break;
 			}
 
 			free(ev);
