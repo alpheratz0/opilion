@@ -118,14 +118,10 @@ sink_set_volume_relative(struct pulseaudio_connection *pac,
                          struct sink *info,
                          int32_t delta)
 {
-#define clamp(v,min,max) (v>max?max:v<min?min:v)
-
 	int32_t volume;
 
 	volume = delta + (int32_t)(info->volume);
-	volume = clamp(volume, 0, 100);
-
-#undef clamp
+	volume = volume > 100 ? 100 : volume < 0 ? 0 : volume;
 
 	sink_set_volume(pac, info, (uint32_t)(volume));
 }
