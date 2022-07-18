@@ -70,7 +70,7 @@ sink_selector_get_selected(struct sink_selector *selector)
 {
 	struct sink *selected;
 
-	selected = linkedlist_get_as(selector->sinks, selector->index, struct sink);
+	selected = linkedlist_get(selector->sinks, selector->index);
 
 	return selected;
 }

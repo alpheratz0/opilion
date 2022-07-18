@@ -31,9 +31,6 @@ linkedlist_append(struct linkedlist **ref, void *data);
 extern void *
 linkedlist_get(struct linkedlist *list, uint32_t pos);
 
-#define linkedlist_get_as(list, pos, ptype) \
-	((ptype *)(linkedlist_get(list, pos)))
-
 extern uint32_t
 linkedlist_length(struct linkedlist *list);
 
