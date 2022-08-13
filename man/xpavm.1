@@ -1,47 +1,34 @@
-.TH XPAVM 1 "June 13, 2022"
-.SH NAME
-xpavm \- simple X11 program to control pulseaudio sink inputs volume.
-.SH SYNOPSIS
-\fBxpavm\fP [ -hkv ]
-.SH OPTIONS
-.TP
-\fB\-k\fR, \fB\-\-keybidings\fR
-display the keybindings
-.TP
-\fB\-h\fR, \fB\-\-help\fR
-show the help message and exit
-.TP
-\fB\-v\fR, \fB\-\-version\fR
+.Dd August 13, 2022
+.Dt XPAVM 1
+.Sh NAME
+.Nm xpavm
+.Nd simple pulseaudio volume manager for X
+.Sh SYNOPSIS
+.Nm
+.Op Fl hv
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl h
+show usage
+.It Fl v
 display the program version
-.SH CONTROLS
-.TP
-\fBj, k\fR
-sink selection
-.TP
-\fBh, l\fR
-decrease/increase volume
-.TP
-\fBm\fR
-toggle mute
-.TP
-\fBq, escape\fR
-exit the program
-.SH EXIT STATUS
-.TP
-\fB0\fR
-the program terminated successfully
-.TP
-\fB1\fR
-an error occurred
-.SH AUTHOR
-Written by alpheratz0.
-.SH COPYRIGHT
-Copyright \(co 2022 <alpheratz99@protonmail.com>
-.br
-License GPLv2.0: GNU GPL version 2.0 <https://gnu.org/licenses/old-licenses/gpl-2.0.en.html>.
-.br
-This is free software: you are free to change and redistribute it.
-.br
-There is NO WARRANTY, to the extent permitted by law.
-.SH BUGS
+.El
+.Sh CONTROLS
+.Bl -bullet -compact -width indent
+.It
+select a different sink with j/k keys
+.It
+decrease/increase volume of sink with h/l keys
+.It
+toggle mute of sink with m key
+.It
+exit the program with q/escape keys
+.El
+.Sh SEE ALSO
+.Xr X 7
+.Xr pulseaudio 1
+.Xr pactl 1
+.Sh AUTHORS
+.An alpheratz0 Aq Mt alpheratz99@protonmail.com
+.Sh BUGS
 https://github.com/alpheratz0/xpavm/issues
