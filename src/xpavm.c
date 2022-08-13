@@ -106,7 +106,7 @@ key_press_callback(xcb_keysym_t key)
 static void
 usage(void)
 {
-	puts("usage: xpavm [-hkv]");
+	puts("usage: xpavm [-hv]");
 	exit(0);
 }
 
