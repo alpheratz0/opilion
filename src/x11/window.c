@@ -21,6 +21,7 @@
 #include <string.h>
 #include <xcb/xcb.h>
 #include <xcb/xcb_image.h>
+#include <xcb/xcb_keysyms.h>
 #include <xcb/xproto.h>
 
 #include "../base/bitmap.h"
@@ -135,6 +136,7 @@ window_create(const char *title, const char *class)
 	xcb_connection_t *conn;
 	xcb_screen_t *screen;
 	xcb_window_t wid;
+	xcb_key_symbols_t *ksyms;
 	xcb_gcontext_t gc;
 	xcb_image_t *image;
 	struct bitmap *bmp;
@@ -150,6 +152,7 @@ window_create(const char *title, const char *class)
 		die("can't get default screen");
 	}
 
+	ksyms = xcb_key_symbols_alloc(conn);
 	wid = xcb_generate_id(conn);
 	gc = xcb_generate_id(conn);
 	bmp = bitmap_create(screen->width_in_pixels, screen->height_in_pixels, 0);
@@ -162,7 +165,8 @@ window_create(const char *title, const char *class)
 
 	evmask = XCB_EVENT_MASK_EXPOSURE |
 	         XCB_EVENT_MASK_KEY_PRESS |
-	         XCB_EVENT_MASK_KEY_RELEASE;
+	         XCB_EVENT_MASK_KEY_RELEASE |
+	         XCB_EVENT_MASK_KEYMAP_STATE;
 
 	xcb_create_window(
 		conn, XCB_COPY_FROM_PARENT, wid, screen->root, 0, 0, bmp->width,
@@ -185,6 +189,7 @@ window_create(const char *title, const char *class)
 	window->running = 0;
 	window->connection = conn;
 	window->screen = screen;
+	window->ksyms = ksyms;
 	window->id = wid;
 	window->image = image;
 	window->bmp = bmp;
@@ -233,7 +238,12 @@ window_loop_start(struct window *window)
 					break;
 				case XCB_KEY_PRESS:
 					kpev = (xcb_key_press_event_t *)(ev);
-					window->key_pressed(kpev->detail);
+					window->key_pressed(
+						xcb_key_symbols_get_keysym(window->ksyms, kpev->detail, 0)
+					);
+					break;
+				case XCB_MAPPING_NOTIFY:
+					xcb_refresh_keyboard_mapping(window->ksyms, (xcb_mapping_notify_event_t *)(ev));
 					break;
 			}
 
@@ -251,7 +261,7 @@ window_loop_end(struct window *window)
 extern void
 window_force_redraw(struct window *window)
 {
-	xcb_clear_area(window->connection, 1, window->id, 0, 0, 1, 1);
+	xcb_clear_area(window->connection, 1, window->id, 0, 0, 0, 0);
 	xcb_flush(window->connection);
 }
 
@@ -264,6 +274,7 @@ window_set_key_press_callback(struct window *window, window_key_press_callback_t
 extern void
 window_free(struct window *window)
 {
+	xcb_key_symbols_free(window->ksyms);
 	xcb_free_gc(window->connection, window->gc);
 	xcb_disconnect(window->connection);
 	bitmap_free(window->bmp);

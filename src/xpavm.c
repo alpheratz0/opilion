@@ -44,6 +44,8 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/file.h>
+#include <xcb/xproto.h>
+#include <xkbcommon/xkbcommon-keysyms.h>
 
 #include "base/bitmap.h"
 #include "base/font.h"
@@ -53,48 +55,46 @@
 #include "pulseaudio/volume.h"
 #include "ui/sink_selector.h"
 #include "util/debug.h"
-#include "x11/keys.h"
 #include "x11/window.h"
 
 static struct window *window;
 static struct pulseaudio_connection *pac;
 static struct sink_selector *selector;
 
-static int
-match_opt(const char *in, const char *sh, const char *lo)
-{
-	return (strcmp(in, sh) == 0) || (strcmp(in, lo) == 0);
-}
-
 static void
-key_press_callback(uint32_t key)
+key_press_callback(xcb_keysym_t key)
 {
 	struct sink *sink;
 	sink = sink_selector_get_selected(selector);
 
 	switch (key) {
-		case KEY_ESCAPE:
-		case KEY_Q:
+		case XKB_KEY_Escape:
+		case XKB_KEY_q:
 			window_loop_end(window);
 			return;
-		case KEY_M:
+		case XKB_KEY_m:
+			window_loop_end(window);
 			sink_set_mute(pac, sink, !sink->mute);
 			break;
-		case KEY_H:
+		case XKB_KEY_h:
 			sink_set_volume_relative(pac, sink, -1);
 			break;
-		case KEY_L:
+		case XKB_KEY_l:
 			sink_set_volume_relative(pac, sink, 1);
 			break;
-		case KEY_J:
+		case XKB_KEY_j:
 			sink_selector_select_down(selector);
 			break;
-		case KEY_K:
+		case XKB_KEY_k:
 			sink_selector_select_up(selector);
 			break;
-		case KEY_1: case KEY_2: case KEY_3: case KEY_4: case KEY_5:
-		case KEY_6: case KEY_7: case KEY_8: case KEY_9: case KEY_0:
-			sink_set_volume(pac, sink, (key - KEY_1 + 1) * 10);
+		case XKB_KEY_1: case XKB_KEY_2: case XKB_KEY_3:
+		case XKB_KEY_4: case XKB_KEY_5: case XKB_KEY_6:
+		case XKB_KEY_7: case XKB_KEY_8: case XKB_KEY_9:
+			sink_set_volume(pac, sink, ((key - XKB_KEY_1 + 1) * 10));
+			break;
+		case XKB_KEY_0:
+			sink_set_volume(pac, sink, 100);
 			break;
 	}
 
@@ -103,31 +103,10 @@ key_press_callback(uint32_t key)
 	window_force_redraw(window);
 }
 
-static inline void
-print_opt(const char *sh, const char *lo, const char *desc)
-{
-	printf("%7s | %-25s %s\n", sh, lo, desc);
-}
-
 static void
 usage(void)
 {
-	puts("Usage: xpavm [ -hkv ]");
-	puts("Options are:");
-	print_opt("-h", "--help", "display this message and exit");
-	print_opt("-k", "--keybindings", "display the keybindings");
-	print_opt("-v", "--version", "display the program version");
-	exit(0);
-}
-
-static void
-keybindings(void)
-{
-	puts("Keybindings are:");
-	puts("j/k: sink selection");
-	puts("h/l: decrease/increase volume");
-	puts("m: toggle mute");
-	puts("q/esc: exit");
+	puts("usage: xpavm [-hkv]");
 	exit(0);
 }
 
@@ -157,9 +136,8 @@ main(int argc, char **argv)
 	struct sink_style snormal, sselected;
 
 	if (++argv, --argc > 0) {
-		if (match_opt(*argv, "-k", "--keybindings")) keybindings();
-		else if (match_opt(*argv, "-h", "--help")) usage();
-		else if (match_opt(*argv, "-v", "--version")) version();
+		if (!strcmp(*argv, "-h")) usage();
+		else if (!strcmp(*argv, "-v")) version();
 		else if (**argv == '-') dief("invalid option %s", *argv);
 		else dief("unexpected argument: %s", *argv);
 	}

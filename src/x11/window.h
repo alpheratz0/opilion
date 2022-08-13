@@ -21,15 +21,18 @@
 #include <stdint.h>
 #include <xcb/xcb.h>
 #include <xcb/xcb_image.h>
+#include <xcb/xcb_keysyms.h>
+#include <xcb/xproto.h>
 
 #include "../base/bitmap.h"
 
-typedef void (*window_key_press_callback_t)(uint32_t key);
+typedef void (*window_key_press_callback_t)(xcb_keysym_t key);
 
 struct window {
 	xcb_window_t id;
 	xcb_connection_t *connection;
 	xcb_screen_t *screen;
+	xcb_key_symbols_t *ksyms;
 	xcb_gcontext_t gc;
 	xcb_image_t *image;
 	struct bitmap *bmp;
