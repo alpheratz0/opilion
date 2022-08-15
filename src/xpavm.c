@@ -73,7 +73,6 @@ key_press_callback(xcb_keysym_t key)
 			window_loop_end(window);
 			return;
 		case XKB_KEY_m:
-			window_loop_end(window);
 			sink_set_mute(pac, sink, !sink->mute);
 			break;
 		case XKB_KEY_h:
