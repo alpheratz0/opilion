@@ -119,10 +119,10 @@ version(void)
 static int
 is_instance_running(void)
 {
-	int pidfd, rc;
+	int fd, rc;
 
-	pidfd = open("/tmp/xpavm.pid", O_CREAT | O_RDWR, 0666);
-	rc = flock(pidfd, LOCK_EX | LOCK_NB);
+	fd = open("/tmp/xpavm.pid", O_CREAT | O_RDWR, 0666);
+	rc = flock(fd, LOCK_EX | LOCK_NB);
 
 	return rc && errno == EWOULDBLOCK;
 }
