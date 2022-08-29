@@ -41,7 +41,7 @@ install: all
 
 dist: clean
 	mkdir -p xpavm-$(VERSION)
-	cp -R LICENSE Makefile README misc src man xpavm-$(VERSION)
+	cp -R COPYING Makefile README misc src man xpavm-$(VERSION)
 	tar -cf xpavm-$(VERSION).tar xpavm-$(VERSION)
 	gzip xpavm-$(VERSION).tar
 	rm -rf xpavm-$(VERSION)
