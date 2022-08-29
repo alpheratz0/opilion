@@ -1,18 +1,7 @@
 .POSIX:
 .PHONY: all clean install uninstall dist
 
-VERSION = 0.1.4
-
-CC      = cc
-INCS    = -I/usr/include/freetype2
-CFLAGS  = -std=c99 -pedantic -Wall -Wextra -Os $(INCS) -DVERSION=\"$(VERSION)\"
-LDLIBS  = -lxcb -lxcb-image -lxcb-keysyms -lfontconfig -lfreetype -lpulse
-LDFLAGS = -s
-
-
-PREFIX    = /usr/local
-MANPREFIX = $(PREFIX)/share/man
-APPPREFIX = $(PREFIX)/share/applications
+include config.mk
 
 SRC = src/xpavm.c src/base/linkedlist.c src/base/font.c src/base/bitmap.c src/pulseaudio/connection.c src/pulseaudio/sink.c src/pulseaudio/volume.c \
 	  src/util/debug.c src/util/color.c src/util/xmalloc.c src/ui/label.c src/ui/sink_selector.c src/x11/window.c
@@ -41,7 +30,7 @@ install: all
 
 dist: clean
 	mkdir -p xpavm-$(VERSION)
-	cp -R COPYING Makefile README misc src man xpavm-$(VERSION)
+	cp -R COPYING config.mk Makefile README misc src man xpavm-$(VERSION)
 	tar -cf xpavm-$(VERSION).tar xpavm-$(VERSION)
 	gzip xpavm-$(VERSION).tar
 	rm -rf xpavm-$(VERSION)
