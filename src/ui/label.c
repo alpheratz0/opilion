@@ -25,18 +25,11 @@
 #include "label.h"
 
 static void
-label_render_char_onto(char c,
-                       struct font *font,
-                       uint32_t color,
-                       uint32_t x,
-                       uint32_t y,
-                       struct bitmap *bmp)
+label_render_char_onto(char c, struct font *font, uint32_t color,
+                       uint32_t x, uint32_t y, struct bitmap *bmp)
 {
 	FT_GlyphSlot glyph;
-	uint32_t width, height;
-	uint32_t xmap, ymap;
-	uint32_t gray;
-	uint32_t i, j;
+	uint32_t width, height, xmap, ymap, gray, i, j;
 
 	glyph = font_get_glyph(font, c);
 	height = glyph->bitmap.rows;
@@ -60,22 +53,16 @@ label_render_char_onto(char c,
 }
 
 extern void
-label_render_onto(const char *text,
-                  struct font *font,
-                  uint32_t color,
-                  uint32_t x,
-                  uint32_t y,
-                  struct bitmap *bmp)
+label_render_onto(const char *text, struct font *font, uint32_t color,
+                  uint32_t x, uint32_t y, struct bitmap *bmp)
 {
-	size_t i;
-	size_t len;
+	size_t i, len;
 
 	len = strlen(text);
 
-	for (i = 0; i < len && text[i] != '\n'; ++i) {
+	for (i = 0; i < len && text[i] != '\n'; ++i)
 		label_render_char_onto(
 			text[i], font, color,
 			x + i * font->width, y, bmp
 		);
-	}
 }

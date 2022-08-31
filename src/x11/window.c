@@ -37,14 +37,12 @@ xatom(xcb_connection_t *conn, const char *name)
 	xcb_intern_atom_cookie_t cookie;
 	xcb_intern_atom_reply_t *reply;
 
-	error = NULL;
 	cookie = xcb_intern_atom(conn, 0, strlen(name), name);
 	reply = xcb_intern_atom_reply(conn, cookie, &error);
 
-	if (NULL != error) {
+	if (NULL != error)
 		dief("xcb_intern_atom failed with error code: %d",
 				(int)(error->error_code));
-	}
 
 	atom = reply->atom;
 	free(reply);
@@ -53,23 +51,19 @@ xatom(xcb_connection_t *conn, const char *name)
 }
 
 static void
-window_get_size(xcb_connection_t *conn,
-                xcb_window_t wid,
-                uint16_t *width,
-                uint16_t *height)
+window_get_size(xcb_connection_t *conn, xcb_window_t wid,
+                uint16_t *width, uint16_t *height)
 {
 	xcb_get_geometry_cookie_t cookie;
 	xcb_get_geometry_reply_t *reply;
 	xcb_generic_error_t *error;
 
-	error = NULL;
 	cookie = xcb_get_geometry(conn, wid);
 	reply = xcb_get_geometry_reply(conn, cookie, &error);
 
-	if (NULL != error) {
+	if (NULL != error)
 		dief("xcb_get_geometry failed with error code: %d",
 				(int)(error->error_code));
-	}
 
 	*width = reply->width;
 	*height = reply->height;
@@ -111,10 +105,8 @@ window_set_wm_name(xcb_connection_t *conn, xcb_window_t wid, const char *title)
 }
 
 static void
-window_set_wm_class(xcb_connection_t *conn,
-                    xcb_window_t wid,
-                    const char *iname,
-                    const char *cname)
+window_set_wm_class(xcb_connection_t *conn, xcb_window_t wid,
+                    const char *iname, const char *cname)
 {
 	/* set instance and class name */
 	/* https://x.org/releases/X11R7.6/doc/xorg-docs/specs/ICCCM/icccm.html */
@@ -141,16 +133,12 @@ window_create(const char *title, const char *class)
 	xcb_image_t *image;
 	struct bitmap *bmp;
 	struct window *window;
-	uint32_t evmask;
 
-	if (xcb_connection_has_error((conn = xcb_connect(NULL, NULL)))) {
+	if (xcb_connection_has_error((conn = xcb_connect(NULL, NULL))))
 		die("can't open display");
-	}
 
-	if (NULL == (screen = xcb_setup_roots_iterator(xcb_get_setup(conn)).data)) {
-		xcb_disconnect(conn);
+	if (NULL == (screen = xcb_setup_roots_iterator(xcb_get_setup(conn)).data))
 		die("can't get default screen");
-	}
 
 	ksyms = xcb_key_symbols_alloc(conn);
 	wid = xcb_generate_id(conn);
@@ -163,18 +151,18 @@ window_create(const char *title, const char *class)
 		(uint8_t *)(bmp->px)
 	);
 
-	evmask = XCB_EVENT_MASK_EXPOSURE |
-	         XCB_EVENT_MASK_KEY_PRESS |
-	         XCB_EVENT_MASK_KEY_RELEASE |
-	         XCB_EVENT_MASK_KEYMAP_STATE;
-
-	xcb_create_window(
-		conn, XCB_COPY_FROM_PARENT, wid, screen->root, 0, 0, bmp->width,
-		bmp->height, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual,
-		XCB_CW_EVENT_MASK, &evmask
+	xcb_create_window_aux(
+		conn, XCB_COPY_FROM_PARENT, wid, screen->root, 0, 0, bmp->width, bmp->height,
+		0, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, XCB_CW_EVENT_MASK,
+		(const xcb_create_window_value_list_t []) {{
+			.event_mask = XCB_EVENT_MASK_EXPOSURE |
+	       	              XCB_EVENT_MASK_KEY_PRESS |
+	       	              XCB_EVENT_MASK_KEY_RELEASE |
+	       	              XCB_EVENT_MASK_KEYMAP_STATE
+		}}
 	);
 
-	xcb_create_gc(conn, gc, wid, 0, 0);
+	xcb_create_gc(conn, gc, wid, 0, NULL);
 
 	window_set_wm_name(conn, wid, title);
 	window_set_wm_class(conn, wid, class, class);
@@ -218,10 +206,8 @@ window_loop_start(struct window *window)
 
 					/* check if the wm sent a delete window message */
 					/* https://www.x.org/docs/ICCCM/icccm.pdf */
-					if (atom == xatom(window->connection, "WM_DELETE_WINDOW")) {
+					if (atom == xatom(window->connection, "WM_DELETE_WINDOW"))
 						window_loop_end(window);
-					}
-
 					break;
 				case XCB_EXPOSE:
 					window_get_size(
@@ -234,7 +220,6 @@ window_loop_start(struct window *window)
 						window->image, (width - window->bmp->width) / 2,
 						(height - window->bmp->height) / 2, 0
 					);
-
 					break;
 				case XCB_KEY_PRESS:
 					kpev = (xcb_key_press_event_t *)(ev);

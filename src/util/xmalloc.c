@@ -25,9 +25,8 @@ xmalloc(size_t size)
 {
 	void *p;
 
-	if (NULL == (p = malloc(size))) {
+	if (NULL == (p = malloc(size)))
 		die("error while calling malloc, no memory available");
-	}
 
 	return p;
 }

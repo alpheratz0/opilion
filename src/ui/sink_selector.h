@@ -42,16 +42,11 @@ struct sink_selector {
 };
 
 extern struct sink_style
-sink_style_from(struct font *font,
-                uint32_t width,
-                uint32_t height,
-                uint32_t foreground,
-                uint32_t bar_filled,
-                uint32_t bar_unfilled);
+sink_style_from(struct font *font, uint32_t width, uint32_t height,
+                uint32_t foreground, uint32_t bar_filled, uint32_t bar_unfilled);
 
 extern struct sink_selector *
-sink_selector_create(struct linkedlist *sinks,
-                     struct sink_style *snormal,
+sink_selector_create(struct linkedlist *sinks, struct sink_style *snormal,
                      struct sink_style *sselected);
 
 extern struct sink *

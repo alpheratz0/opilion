@@ -39,10 +39,8 @@ set_sink_input_volume_cb(pa_context *c, int eol, void *userdata)
 }
 
 static void
-get_sink_input_info_for_set_volume_cb(pa_context *c,
-                                      const pa_sink_input_info *i,
-                                      int eol,
-                                      void *userdata)
+get_sink_input_info_for_set_volume_cb(pa_context *c, const pa_sink_input_info *i,
+                                      int eol, void *userdata)
 {
 	struct sink *info;
 	struct pulseaudio_connection *pac;
@@ -80,10 +78,9 @@ get_sink_input_info_for_set_volume_cb(pa_context *c,
 			set_sink_input_volume_cb, pac
 		);
 
-		if (NULL == po) {
+		if (NULL == po)
 			dief("pa_context_set_sink_input_volume failed: %s",
 					pa_strerror(pa_context_errno(pac->context)));
-		}
 
 		pa_operation_unref(po);
 	}
@@ -91,8 +88,7 @@ get_sink_input_info_for_set_volume_cb(pa_context *c,
 
 extern void
 sink_set_volume(struct pulseaudio_connection *pac,
-                struct sink *info,
-                uint32_t volume)
+                struct sink *info, uint32_t volume)
 {
 	pa_operation *po;
 
@@ -104,10 +100,9 @@ sink_set_volume(struct pulseaudio_connection *pac,
 		get_sink_input_info_for_set_volume_cb, pac
 	);
 
-	if (NULL == po) {
+	if (NULL == po)
 		dief("pa_context_get_sink_input_info failed: %s",
 				pa_strerror(pa_context_errno(pac->context)));
-	}
 
 	pa_operation_unref(po);
 	pa_threaded_mainloop_wait(pac->mainloop);
@@ -115,8 +110,7 @@ sink_set_volume(struct pulseaudio_connection *pac,
 
 extern void
 sink_set_volume_relative(struct pulseaudio_connection *pac,
-                         struct sink *info,
-                         int32_t delta)
+                         struct sink *info, int32_t delta)
 {
 	int32_t volume;
 
@@ -142,10 +136,8 @@ set_sink_input_mute_cb(pa_context *c, int eol, void *userdata)
 }
 
 static void
-get_sink_input_info_for_set_mute_cb(pa_context *c,
-                                    const pa_sink_input_info *i,
-                                    int eol,
-                                    void *userdata)
+get_sink_input_info_for_set_mute_cb(pa_context *c, const pa_sink_input_info *i,
+                                    int eol, void *userdata)
 {
 	struct sink *info;
 	struct pulseaudio_connection *pac;
@@ -175,10 +167,9 @@ get_sink_input_info_for_set_mute_cb(pa_context *c,
 			set_sink_input_mute_cb, pac
 		);
 
-		if (NULL == po) {
+		if (NULL == po)
 			dief("pa_context_set_sink_input_mute failed: %s",
 					pa_strerror(pa_context_errno(pac->context)));
-		}
 
 		pa_operation_unref(po);
 	}
@@ -186,8 +177,7 @@ get_sink_input_info_for_set_mute_cb(pa_context *c,
 
 extern void
 sink_set_mute(struct pulseaudio_connection *pac,
-              struct sink *info,
-              uint32_t mute)
+              struct sink *info, uint32_t mute)
 {
 	pa_operation *po;
 
@@ -199,10 +189,9 @@ sink_set_mute(struct pulseaudio_connection *pac,
 		get_sink_input_info_for_set_mute_cb, pac
 	);
 
-	if (NULL == po) {
+	if (NULL == po)
 		dief("pa_context_get_sink_input_info failed: %s",
 				pa_strerror(pa_context_errno(pac->context)));
-	}
 
 	pa_operation_unref(po);
 	pa_threaded_mainloop_wait(pac->mainloop);

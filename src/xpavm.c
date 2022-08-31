@@ -141,16 +141,14 @@ main(int argc, char **argv)
 		else dief("unexpected argument: %s", *argv);
 	}
 
-	if (is_instance_running()) {
+	if (is_instance_running())
 		die("another instance is already running");
-	}
 
 	pac = pulseaudio_connect();
 	sinks = sink_get_all_input_sinks(pac);
 
-	if (linkedlist_length(sinks) == 0) {
+	if (linkedlist_length(sinks) == 0)
 		die("no sinks were found");
-	}
 
 	window = window_create("xpavm", "xpavm");
 	font = font_load("Iosevka", 12);

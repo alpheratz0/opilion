@@ -45,20 +45,17 @@ sink_create(const char *appname, uint32_t id, uint32_t volume, uint32_t mute)
 }
 
 static void
-get_sink_input_info_cb(pa_context *c,
-                       const pa_sink_input_info *i,
-                       int eol,
-                       void *userdata)
+get_sink_input_info_cb(pa_context *c, const pa_sink_input_info *i,
+                       int eol, void *userdata)
 {
 	struct sink *sink;
 	struct pulseaudio_connection *pac;
 
 	pac = userdata;
 
-	if (eol < 0) {
+	if (eol < 0)
 		dief("failed to get sink input information: %s",
 				pa_strerror(pa_context_errno(c)));
-	}
 
 	if (eol > 0) {
 		pa_threaded_mainloop_signal(pac->mainloop, 0);
@@ -90,10 +87,9 @@ sink_get_all_input_sinks(struct pulseaudio_connection *pac)
 		pac->context, get_sink_input_info_cb, pac
 	);
 
-	if (NULL == po) {
+	if (NULL == po)
 		dief("pa_context_get_sink_input_info_list failed: %s",
 				pa_strerror(pa_context_errno(pac->context)));
-	}
 
 	pa_operation_unref(po);
 	pa_threaded_mainloop_wait(pac->mainloop);

@@ -28,12 +28,8 @@
 #include "sink_selector.h"
 
 extern struct sink_style
-sink_style_from(struct font *font,
-                uint32_t width,
-                uint32_t height,
-                uint32_t foreground,
-                uint32_t bar_filled,
-                uint32_t bar_unfilled)
+sink_style_from(struct font *font, uint32_t width, uint32_t height,
+                uint32_t foreground, uint32_t bar_filled, uint32_t bar_unfilled)
 {
 	struct sink_style style;
 
@@ -48,8 +44,7 @@ sink_style_from(struct font *font,
 }
 
 extern struct sink_selector *
-sink_selector_create(struct linkedlist *sinks,
-                     struct sink_style *snormal,
+sink_selector_create(struct linkedlist *sinks, struct sink_style *snormal,
                      struct sink_style *sselected)
 {
 	struct sink_selector *selector;
@@ -102,10 +97,8 @@ sink_selector_sink_volume_format(struct sink *sink, char *volstr)
 }
 
 static void
-sink_selector_sink_render_onto(struct sink *sink,
-                               struct sink_style *style,
-                               uint32_t y,
-                               struct bitmap *bmp)
+sink_selector_sink_render_onto(struct sink *sink, struct sink_style *style,
+                               uint32_t y, struct bitmap *bmp)
 {
 	uint32_t x;
 	char volstr[128];
@@ -171,9 +164,8 @@ sink_selector_render_onto(struct sink_selector *selector, struct bitmap *bmp)
 		temp = temp->next;
 		style = selector->snormal;
 
-		if (index == selector->index) {
+		if (index == selector->index)
 			style = selector->sselected;
-		}
 
 		sink_selector_sink_render_onto(sink, style, y, bmp);
 

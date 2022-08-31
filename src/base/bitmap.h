@@ -36,12 +36,8 @@ extern uint32_t
 bitmap_get(struct bitmap *bmp, uint32_t x, uint32_t y);
 
 extern void
-bitmap_rect(struct bitmap *bmp,
-            uint32_t x,
-            uint32_t y,
-            uint32_t width,
-            uint32_t height,
-            uint32_t color);
+bitmap_rect(struct bitmap *bmp, uint32_t x, uint32_t y,
+            uint32_t width, uint32_t height, uint32_t color);
 
 extern void
 bitmap_clear(struct bitmap *bmp, uint32_t color);

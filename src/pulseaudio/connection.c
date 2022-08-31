@@ -47,9 +47,8 @@ pulseaudio_connect(void)
 	pa_threaded_mainloop_start(pac->mainloop);
 	pa_context_connect(pac->context, NULL, PA_CONTEXT_NOFAIL, NULL);
 
-	while (pa_context_get_state(pac->context) != PA_CONTEXT_READY) {
+	while (pa_context_get_state(pac->context) != PA_CONTEXT_READY)
 		pa_threaded_mainloop_wait(pac->mainloop);
-	}
 
 	return pac;
 }

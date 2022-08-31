@@ -24,10 +24,8 @@
 extern void
 linkedlist_append(struct linkedlist **ref, void *data)
 {
-	while (NULL != ref[0]) {
+	while (NULL != ref[0])
 		ref = &ref[0]->next;
-	}
-
 	ref[0] = xmalloc(sizeof(struct linkedlist));
 	ref[0]->data = data;
 	ref[0]->next = NULL;
@@ -36,10 +34,8 @@ linkedlist_append(struct linkedlist **ref, void *data)
 extern void *
 linkedlist_get(struct linkedlist *list, uint32_t pos)
 {
-	while (pos-- > 0 && NULL != list) {
+	while (pos-- > 0 && NULL != list)
 		list = list->next;
-	}
-
 	return list->data;
 }
 
@@ -48,9 +44,8 @@ linkedlist_length(struct linkedlist *list)
 {
 	uint32_t length;
 
-	for (length = 0; NULL != list; ++length) {
+	for (length = 0; NULL != list; ++length)
 		list = list->next;
-	}
 
 	return length;
 }

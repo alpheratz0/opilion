@@ -31,9 +31,8 @@
 #define CHKFTERR(name,err) do {                                 \
 	FT_Error error;                                             \
 	error = (err);                                              \
-	if (error != 0) {                                           \
+	if (error != 0)                                             \
 		dief(name " failed with error code: %d", (int)(error)); \
-	}                                                           \
 } while (0)
 
 static char *
@@ -75,9 +74,8 @@ font_load(const char *family, uint32_t size)
 	FT_Face face;
 	struct font *font;
 
-	if (NULL == (path = font_search(family))) {
+	if (NULL == (path = font_search(family)))
 		dief("font family not found: %s", family);
-	}
 
 	CHKFTERR("FT_Init_FreeType", FT_Init_FreeType(&lib));
 	CHKFTERR("FT_New_Face", FT_New_Face(lib, path, 0, &face));

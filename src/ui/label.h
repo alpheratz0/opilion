@@ -24,11 +24,7 @@
 #include "../base/font.h"
 
 extern void
-label_render_onto(const char *text,
-                  struct font *font,
-                  uint32_t color,
-                  uint32_t x,
-                  uint32_t y,
-                  struct bitmap *bmp);
+label_render_onto(const char *text, struct font *font, uint32_t color,
+                  uint32_t x, uint32_t y, struct bitmap *bmp);
 
 #endif
