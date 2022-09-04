@@ -156,9 +156,8 @@ window_create(const char *title, const char *class)
 		0, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, XCB_CW_EVENT_MASK,
 		(const xcb_create_window_value_list_t []) {{
 			.event_mask = XCB_EVENT_MASK_EXPOSURE |
-	       	              XCB_EVENT_MASK_KEY_PRESS |
-	       	              XCB_EVENT_MASK_KEY_RELEASE |
-	       	              XCB_EVENT_MASK_KEYMAP_STATE
+			              XCB_EVENT_MASK_KEY_PRESS |
+			              XCB_EVENT_MASK_KEY_RELEASE
 		}}
 	);
 
@@ -192,6 +191,7 @@ window_loop_start(struct window *window)
 	xcb_generic_event_t *ev;
 	xcb_key_press_event_t *kpev;
 	xcb_client_message_event_t *cmev;
+	xcb_mapping_notify_event_t *mnev;
 	xcb_atom_t atom;
 	uint16_t width, height;
 
@@ -228,7 +228,9 @@ window_loop_start(struct window *window)
 					);
 					break;
 				case XCB_MAPPING_NOTIFY:
-					xcb_refresh_keyboard_mapping(window->ksyms, (xcb_mapping_notify_event_t *)(ev));
+					mnev = (xcb_mapping_notify_event_t *)(ev);
+					if (mnev->count > 0)
+						xcb_refresh_keyboard_mapping(window->ksyms, mnev);
 					break;
 			}
 
