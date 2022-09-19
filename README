@@ -1,14 +1,9 @@
-]|~ xpavm ~|[
+xpavm is a pulseaudio volume manager for X.
+For more information about it's usage check `man xpavm`.
 
-Pulseaudio volume manager.
-
-]|~ build ~|[
-
-In order to build xpavm you will need xcb, xcb-image, xcb-keysyms,
-pulseaudio, fontconfig and freetype headers.
-$ make
-
-]|~ license ~|[
+This program requires libxcb and libxcb-image, libxcb-keysyms,
+libpulse, libfreetype2 and libfontconfig to be installed.
+In order to build this program you need to run `make`.
 
 This program is free software; you can redistribute it
 and/or modify it under the terms of the GNU General Public License
