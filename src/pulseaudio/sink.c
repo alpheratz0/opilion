@@ -54,7 +54,7 @@ get_sink_input_info_cb(pa_context *c, const pa_sink_input_info *i,
 	pac = userdata;
 
 	if (eol < 0)
-		dief("failed to get sink input information: %s",
+		die("failed to get sink input information: %s",
 				pa_strerror(pa_context_errno(c)));
 
 	if (eol > 0) {
@@ -88,7 +88,7 @@ sink_get_all_input_sinks(struct pulseaudio_connection *pac)
 	);
 
 	if (NULL == po)
-		dief("pa_context_get_sink_input_info_list failed: %s",
+		die("pa_context_get_sink_input_info_list failed: %s",
 				pa_strerror(pa_context_errno(pac->context)));
 
 	pa_operation_unref(po);

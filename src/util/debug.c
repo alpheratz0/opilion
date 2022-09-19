@@ -23,13 +23,7 @@
 #include "debug.h"
 
 extern void
-warn(const char *wrn)
-{
-	fprintf(stderr, "xpavm: %s\n", wrn);
-}
-
-extern void
-warnf(const char *fmt, ...)
+warn(const char *fmt, ...)
 {
 	va_list args;
 
@@ -41,29 +35,24 @@ warnf(const char *fmt, ...)
 }
 
 extern void
-die(const char *err)
+die(const char *fmt, ...)
 {
-	char command[256];
+	va_list args;
+	char expanded[256], cmd[512];
+
+	va_start(args, fmt);
 
 	if (isatty(STDOUT_FILENO)) {
-		fprintf(stderr, "xpavm: %s\n", err);
+		fputs("xpavm: ", stderr);
+		vfprintf(stderr, fmt, args);
+		fputc('\n', stderr);
+	} else {
+		vsnprintf(expanded, sizeof(expanded), fmt, args);
+		snprintf(cmd, sizeof(cmd), "notify-send \"xpavm\" \"%s\"", expanded);
+		system(cmd);
 	}
-	else {
-		snprintf(command, sizeof(command), "notify-send \"xpavm\" \"%s\"", err);
-		system(command);
-	}
-	exit(1);
-}
 
-extern void
-dief(const char *fmt, ...)
-{
-	va_list args;
-
-	fputs("xpavm: ", stderr);
-	va_start(args, fmt);
-	vfprintf(stderr, fmt, args);
 	va_end(args);
-	fputc('\n', stderr);
+
 	exit(1);
 }

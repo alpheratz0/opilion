@@ -41,7 +41,7 @@ xatom(xcb_connection_t *conn, const char *name)
 	reply = xcb_intern_atom_reply(conn, cookie, &error);
 
 	if (NULL != error)
-		dief("xcb_intern_atom failed with error code: %d",
+		die("xcb_intern_atom failed with error code: %d",
 				(int)(error->error_code));
 
 	atom = reply->atom;
@@ -62,7 +62,7 @@ window_get_size(xcb_connection_t *conn, xcb_window_t wid,
 	reply = xcb_get_geometry_reply(conn, cookie, &error);
 
 	if (NULL != error)
-		dief("xcb_get_geometry failed with error code: %d",
+		die("xcb_get_geometry failed with error code: %d",
 				(int)(error->error_code));
 
 	*width = reply->width;

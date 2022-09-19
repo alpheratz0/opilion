@@ -19,15 +19,9 @@
 #define __XPAVM_UTIL_DEBUG_H__
 
 extern void
-warn(const char *wrn);
+warn(const char *fmt, ...);
 
 extern void
-warnf(const char *fmt, ...);
-
-extern void
-die(const char *err);
-
-extern void
-dief(const char *fmt, ...);
+die(const char *fmt, ...);
 
 #endif
