@@ -4,10 +4,10 @@
 VERSION   = 0.1.4
 
 CC        = cc
-INCS      = -I/usr/include/freetype2
+INCS      = -I/usr/include/freetype2 -I/usr/X11R6/include
 CFLAGS    = -std=c99 -pedantic -Wall -Wextra -Os $(INCS) -DVERSION=\"$(VERSION)\"
 LDLIBS    = -lxcb -lxcb-image -lxcb-keysyms -lfontconfig -lfreetype -lpulse
-LDFLAGS   = -s
+LDFLAGS   = -L/usr/X11R6/lib -s
 
 PREFIX    = /usr/local
 MANPREFIX = $(PREFIX)/share/man
