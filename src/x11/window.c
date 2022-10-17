@@ -77,7 +77,7 @@ window_set_fullscreen(xcb_connection_t *conn, xcb_window_t wid)
 	xcb_change_property(
 		conn, XCB_PROP_MODE_REPLACE, wid,
 		xatom(conn, "_NET_WM_STATE"), XCB_ATOM_ATOM, 32, 1,
-		(const xcb_atom_t[]) { xatom(conn, "_NET_WM_STATE_FULLSCREEN") }
+		(const xcb_atom_t []) { xatom(conn, "_NET_WM_STATE_FULLSCREEN") }
 	);
 }
 
@@ -87,7 +87,7 @@ window_enable_wm_delete_window(xcb_connection_t *conn, xcb_window_t wid)
 	xcb_change_property(
 		conn, XCB_PROP_MODE_REPLACE, wid,
 		xatom(conn, "WM_PROTOCOLS"), XCB_ATOM_ATOM, 32, 1,
-		(const xcb_atom_t[]) { xatom(conn, "WM_DELETE_WINDOW") }
+		(const xcb_atom_t []) { xatom(conn, "WM_DELETE_WINDOW") }
 	);
 }
 
@@ -185,53 +185,62 @@ window_create(const char *title, const char *class)
 	return window;
 }
 
+static void
+h_client_message(struct window *window, xcb_client_message_event_t *ev)
+{
+	/* check if the wm sent a delete window message */
+	/* https://www.x.org/docs/ICCCM/icccm.pdf */
+	if (ev->data.data32[0] == xatom(window->connection, "WM_DELETE_WINDOW"))
+		window_loop_end(window);
+
+}
+
+static void
+h_expose(struct window *window, xcb_expose_event_t *ev)
+{
+	uint16_t width, height;
+
+	(void) ev;
+
+	window_get_size(window->connection, window->id, &width, &height);
+
+	xcb_image_put(
+		window->connection, window->id, window->gc, window->image,
+		(width - window->bmp->width) / 2, (height - window->bmp->height) / 2, 0
+	);
+}
+
+static void
+h_key_press(struct window *window, xcb_key_press_event_t *ev)
+{
+	xcb_keysym_t keysym;
+
+	keysym = xcb_key_symbols_get_keysym(window->ksyms, ev->detail, 0);
+
+	window->key_pressed(keysym);
+}
+
+static void
+h_mapping_notify(struct window *window, xcb_mapping_notify_event_t *ev)
+{
+	if (ev->count > 0)
+		xcb_refresh_keyboard_mapping(window->ksyms, ev);
+}
+
 extern void
 window_loop_start(struct window *window)
 {
 	xcb_generic_event_t *ev;
-	xcb_key_press_event_t *kpev;
-	xcb_client_message_event_t *cmev;
-	xcb_mapping_notify_event_t *mnev;
-	xcb_atom_t atom;
-	uint16_t width, height;
 
 	window->running = 1;
 
 	while (window->running) {
 		if ((ev = xcb_wait_for_event(window->connection))) {
 			switch (ev->response_type & ~0x80) {
-				case XCB_CLIENT_MESSAGE:
-					cmev = (xcb_client_message_event_t *)(ev);
-					atom = cmev->data.data32[0];
-
-					/* check if the wm sent a delete window message */
-					/* https://www.x.org/docs/ICCCM/icccm.pdf */
-					if (atom == xatom(window->connection, "WM_DELETE_WINDOW"))
-						window_loop_end(window);
-					break;
-				case XCB_EXPOSE:
-					window_get_size(
-						window->connection, window->id,
-						&width, &height
-					);
-
-					xcb_image_put(
-						window->connection, window->id, window->gc,
-						window->image, (width - window->bmp->width) / 2,
-						(height - window->bmp->height) / 2, 0
-					);
-					break;
-				case XCB_KEY_PRESS:
-					kpev = (xcb_key_press_event_t *)(ev);
-					window->key_pressed(
-						xcb_key_symbols_get_keysym(window->ksyms, kpev->detail, 0)
-					);
-					break;
-				case XCB_MAPPING_NOTIFY:
-					mnev = (xcb_mapping_notify_event_t *)(ev);
-					if (mnev->count > 0)
-						xcb_refresh_keyboard_mapping(window->ksyms, mnev);
-					break;
+				case XCB_CLIENT_MESSAGE:   h_client_message(window, (void *)(ev)); break;
+				case XCB_EXPOSE:           h_expose(window, (void *)(ev)); break;
+				case XCB_KEY_PRESS:        h_key_press(window, (void *)(ev)); break;
+				case XCB_MAPPING_NOTIFY:   h_mapping_notify(window, (void *)(ev)); break;
 			}
 
 			free(ev);
@@ -265,6 +274,5 @@ window_free(struct window *window)
 	xcb_free_gc(window->connection, window->gc);
 	xcb_disconnect(window->connection);
 	bitmap_free(window->bmp);
-	free(window->image);
 	free(window);
 }
