@@ -87,13 +87,12 @@ key_press_callback(xcb_keysym_t key)
 		case XKB_KEY_k:
 			sink_selector_select_up(selector);
 			break;
-		case XKB_KEY_1: case XKB_KEY_2: case XKB_KEY_3:
-		case XKB_KEY_4: case XKB_KEY_5: case XKB_KEY_6:
-		case XKB_KEY_7: case XKB_KEY_8: case XKB_KEY_9:
-			sink_set_volume(pac, sink, ((key - XKB_KEY_1 + 1) * 10));
-			break;
-		case XKB_KEY_0:
-			sink_set_volume(pac, sink, 100);
+		case XKB_KEY_0: case XKB_KEY_1:
+		case XKB_KEY_2: case XKB_KEY_3:
+		case XKB_KEY_4: case XKB_KEY_5:
+		case XKB_KEY_6: case XKB_KEY_7:
+		case XKB_KEY_8: case XKB_KEY_9:
+			sink_set_volume(pac, sink, (((key - XKB_KEY_0 + 9) % 10 + 1) * 10));
 			break;
 	}
 
