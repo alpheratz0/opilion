@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2023 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it under
 	the terms of the GNU General Public License version 2 as published by the
@@ -147,7 +147,7 @@ window_create(const char *title, const char *class)
 
 	image = xcb_image_create_native(
 		conn, bmp->width, bmp->height, XCB_IMAGE_FORMAT_Z_PIXMAP,
-		screen->root_depth, bmp->px, 4 * bmp->width * bmp->height,
+		screen->root_depth, NULL, 4 * bmp->width * bmp->height,
 		(uint8_t *)(bmp->px)
 	);
 
@@ -181,6 +181,7 @@ window_create(const char *title, const char *class)
 	window->image = image;
 	window->bmp = bmp;
 	window->gc = gc;
+	window->key_pressed = NULL;
 
 	return window;
 }
@@ -215,9 +216,11 @@ h_key_press(struct window *window, xcb_key_press_event_t *ev)
 {
 	xcb_keysym_t keysym;
 
-	keysym = xcb_key_symbols_get_keysym(window->ksyms, ev->detail, 0);
+	keysym = xcb_key_symbols_get_keysym(window->ksyms, ev->detail,
+			ev->state & XCB_MOD_MASK_SHIFT);
 
-	window->key_pressed(keysym);
+	if (NULL != window->key_pressed)
+		window->key_pressed(keysym);
 }
 
 static void
@@ -273,6 +276,7 @@ window_free(struct window *window)
 	xcb_key_symbols_free(window->ksyms);
 	xcb_free_gc(window->connection, window->gc);
 	xcb_disconnect(window->connection);
+	xcb_image_destroy(window->image);
 	bitmap_free(window->bmp);
 	free(window);
 }
