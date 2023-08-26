@@ -3,11 +3,20 @@
 
 include config.mk
 
-SRC = src/xpavm.c src/base/linkedlist.c src/base/font.c src/base/bitmap.c src/pulseaudio/connection.c src/pulseaudio/sink.c src/pulseaudio/volume.c \
-	  src/util/debug.c src/util/color.c src/util/xmalloc.c src/ui/label.c src/ui/sink_selector.c src/x11/window.c
-
-OBJ = src/xpavm.o src/base/linkedlist.o src/base/font.o src/base/bitmap.o src/pulseaudio/connection.o src/pulseaudio/sink.o src/pulseaudio/volume.o \
-	  src/util/debug.o src/util/color.o src/util/xmalloc.o src/ui/label.o src/ui/sink_selector.o src/x11/window.o
+OBJ=\
+	src/xpavm.o \
+	src/base/linkedlist.o \
+	src/base/font.o \
+	src/base/bitmap.o \
+	src/pulseaudio/connection.o \
+	src/pulseaudio/sink.o \
+	src/pulseaudio/volume.o \
+	src/util/debug.o \
+	src/util/color.o \
+	src/util/xmalloc.o \
+	src/ui/label.o \
+	src/ui/sink_selector.o \
+	src/x11/window.o
 
 all: xpavm
 
@@ -15,7 +24,7 @@ xpavm: $(OBJ)
 	$(CC) $(LDFLAGS) -o xpavm $(OBJ) $(LDLIBS)
 
 clean:
-	rm -f xpavm xpavm.o xpavm-$(VERSION).tar.gz $(OBJ)
+	rm -f xpavm $(OBJ) xpavm-$(VERSION).tar.gz
 
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
