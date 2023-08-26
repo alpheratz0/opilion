@@ -241,10 +241,10 @@ window_loop_start(struct window *window)
 	while (window->running) {
 		if ((ev = xcb_wait_for_event(window->connection))) {
 			switch (ev->response_type & ~0x80) {
-				case XCB_CLIENT_MESSAGE:   h_client_message(window, (void *)(ev)); break;
-				case XCB_EXPOSE:           h_expose(window, (void *)(ev)); break;
-				case XCB_KEY_PRESS:        h_key_press(window, (void *)(ev)); break;
-				case XCB_MAPPING_NOTIFY:   h_mapping_notify(window, (void *)(ev)); break;
+			case XCB_CLIENT_MESSAGE:   h_client_message(window, (void *)(ev)); break;
+			case XCB_EXPOSE:           h_expose(window, (void *)(ev)); break;
+			case XCB_KEY_PRESS:        h_key_press(window, (void *)(ev)); break;
+			case XCB_MAPPING_NOTIFY:   h_mapping_notify(window, (void *)(ev)); break;
 			}
 
 			free(ev);

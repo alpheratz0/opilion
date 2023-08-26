@@ -69,32 +69,32 @@ key_press_callback(xcb_keysym_t key)
 	sink = sink_selector_get_selected(selector);
 
 	switch (key) {
-		case XKB_KEY_Escape:
-		case XKB_KEY_q:
-			window_loop_end(window);
-			return;
-		case XKB_KEY_m:
-			sink_set_mute(pac, sink, !sink->mute);
-			break;
-		case XKB_KEY_h:
-			sink_set_volume_relative(pac, sink, -1);
-			break;
-		case XKB_KEY_l:
-			sink_set_volume_relative(pac, sink, 1);
-			break;
-		case XKB_KEY_j:
-			sink_selector_select_down(selector);
-			break;
-		case XKB_KEY_k:
-			sink_selector_select_up(selector);
-			break;
-		case XKB_KEY_0: case XKB_KEY_1:
-		case XKB_KEY_2: case XKB_KEY_3:
-		case XKB_KEY_4: case XKB_KEY_5:
-		case XKB_KEY_6: case XKB_KEY_7:
-		case XKB_KEY_8: case XKB_KEY_9:
-			sink_set_volume(pac, sink, (((key - XKB_KEY_0 + 9) % 10 + 1) * 10));
-			break;
+	case XKB_KEY_Escape:
+	case XKB_KEY_q:
+		window_loop_end(window);
+		return;
+	case XKB_KEY_m:
+		sink_set_mute(pac, sink, !sink->mute);
+		break;
+	case XKB_KEY_h:
+		sink_set_volume_relative(pac, sink, -1);
+		break;
+	case XKB_KEY_l:
+		sink_set_volume_relative(pac, sink, 1);
+		break;
+	case XKB_KEY_j:
+		sink_selector_select_down(selector);
+		break;
+	case XKB_KEY_k:
+		sink_selector_select_up(selector);
+		break;
+	case XKB_KEY_0: case XKB_KEY_1:
+	case XKB_KEY_2: case XKB_KEY_3:
+	case XKB_KEY_4: case XKB_KEY_5:
+	case XKB_KEY_6: case XKB_KEY_7:
+	case XKB_KEY_8: case XKB_KEY_9:
+		sink_set_volume(pac, sink, (((key - XKB_KEY_0 + 9) % 10 + 1) * 10));
+		break;
 	}
 
 	bitmap_clear(window->bmp, 0x000000);
@@ -137,9 +137,9 @@ main(int argc, char **argv)
 	while (++argv, --argc > 0) {
 		if ((*argv)[0] == '-' && (*argv)[1] != '\0' && (*argv)[2] == '\0') {
 			switch ((*argv)[1]) {
-				case 'h': usage(); break;
-				case 'v': version(); break;
-				default: die("invalid option %s", *argv); break;
+			case 'h': usage(); break;
+			case 'v': version(); break;
+			default: die("invalid option %s", *argv); break;
 			}
 		} else {
 			die("unexpected argument: %s", *argv);
