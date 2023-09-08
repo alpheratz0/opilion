@@ -107,6 +107,7 @@ sink_selector_select_down(SinkSelector_t *s)
 static void
 __render_sink(PulseAudioSink_t *sink, SinkStyle_t *sro, uint32_t y, Pixbuf_t *pb)
 {
+	// TODO: clean up this s***
 	char volume_str[128];
 	int app_name_x, app_name_y;
 	int volume_str_x, volume_str_y;
@@ -141,6 +142,7 @@ __render_sink(PulseAudioSink_t *sink, SinkStyle_t *sro, uint32_t y, Pixbuf_t *pb
 extern void
 sink_selector_render(SinkSelector_t *s, Pixbuf_t *pb)
 {
+	// TODO: clean up this s***
 	int i, len;
 	PulseAudioSinkList_t *sl;
 	SinkStyle_t *sro;
