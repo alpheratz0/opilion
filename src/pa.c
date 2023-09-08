@@ -58,7 +58,11 @@ static void
 __context_state_change_cb(pa_context *ctx, void *userdata)
 {
 	pa_threaded_mainloop *mainloop;
+
+	(void) ctx;
+
 	mainloop = userdata;
+
 	pa_threaded_mainloop_signal(mainloop, 0);
 }
 
