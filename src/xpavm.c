@@ -66,7 +66,7 @@ static xcb_connection_t *conn;
 static xcb_screen_t *scr;
 static xcb_window_t win;
 static xcb_key_symbols_t *ksyms;
-static bool start_in_fullscreen;
+static bool start_windowed;
 static bool should_close;
 
 static xcb_atom_t
@@ -151,7 +151,7 @@ xwininit(void)
 	_NET_WM_STATE = get_x11_atom("_NET_WM_STATE");
 	_NET_WM_STATE_FULLSCREEN = get_x11_atom("_NET_WM_STATE_FULLSCREEN");
 
-	if (start_in_fullscreen) {
+	if (!start_windowed) {
 		xcb_change_property(conn, XCB_PROP_MODE_REPLACE, win,
 			_NET_WM_STATE, XCB_ATOM_ATOM, 32, 1, &_NET_WM_STATE_FULLSCREEN);
 	}
@@ -257,7 +257,7 @@ h_mapping_notify(xcb_mapping_notify_event_t *ev)
 static void
 usage(void)
 {
-	puts("usage: xpavm [-fhv]");
+	puts("usage: xpavm [-hvw]");
 	exit(0);
 }
 
@@ -293,7 +293,7 @@ main(int argc, char **argv)
 			switch ((*argv)[1]) {
 			case 'h': usage(); break;
 			case 'v': version(); break;
-			case 'f': start_in_fullscreen = true; break;
+			case 'w': start_windowed = true; break;
 			default: die("invalid option %s", *argv); break;
 			}
 		} else {
