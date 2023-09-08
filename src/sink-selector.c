@@ -29,7 +29,7 @@
 
 struct SinkSelector {
 	PulseAudioSinkList_t *sinks;
-	SinkSelectorRenderOptions_t ssro;
+	SinkSelectorStyle_t ssro;
 	int selected;
 };
 
@@ -44,7 +44,7 @@ __fmt_volume(PulseAudioSink_t *sink, char *str)
 }
 
 extern void
-sink_render_options_init(SinkRenderOptions_t *sro, TextRenderer_t *tr,
+sink_style_init(SinkStyle_t *sro, TextRenderer_t *tr,
 		int w, int h, uint32_t fg_color, uint32_t vbar_color1,
 		uint32_t vbar_color2)
 {
@@ -57,15 +57,15 @@ sink_render_options_init(SinkRenderOptions_t *sro, TextRenderer_t *tr,
 }
 
 extern void
-sink_selector_render_options_init(SinkSelectorRenderOptions_t *ssro,
-		SinkRenderOptions_t *sro_normal, SinkRenderOptions_t *sro_selected)
+sink_selector_style_init(SinkSelectorStyle_t *ssro,
+		SinkStyle_t *sro_normal, SinkStyle_t *sro_selected)
 {
 	ssro->sro_normal = *sro_normal;
 	ssro->sro_selected = *sro_selected;
 }
 
 extern SinkSelector_t *
-sink_selector_new(PulseAudioSinkList_t *sl, SinkSelectorRenderOptions_t *ssro)
+sink_selector_new(PulseAudioSinkList_t *sl, SinkSelectorStyle_t *ssro)
 {
 	SinkSelector_t *sink_selector;
 
@@ -105,7 +105,7 @@ sink_selector_select_down(SinkSelector_t *s)
 }
 
 static void
-__render_sink(PulseAudioSink_t *sink, SinkRenderOptions_t *sro, uint32_t y, Pixbuf_t *pb)
+__render_sink(PulseAudioSink_t *sink, SinkStyle_t *sro, uint32_t y, Pixbuf_t *pb)
 {
 	char volume_str[128];
 	int app_name_x, app_name_y;
@@ -143,7 +143,7 @@ sink_selector_render(SinkSelector_t *s, Pixbuf_t *pb)
 {
 	int i, len;
 	PulseAudioSinkList_t *sl;
-	SinkRenderOptions_t *sro;
+	SinkStyle_t *sro;
 	int margin, y;
 
 	sl = s->sinks;

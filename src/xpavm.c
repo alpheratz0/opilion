@@ -163,6 +163,8 @@ xwininit(void)
 		XCB_XKB_PER_CLIENT_FLAG_DETECTABLE_AUTO_REPEAT, 1, 0, 0, 0
 	);
 
+	pb = pixbuf_new(conn, win, 500, 1000);
+
 	xcb_map_window(conn, win);
 	xcb_flush(conn);
 }
@@ -170,6 +172,7 @@ xwininit(void)
 static void
 xwindestroy(void)
 {
+	pixbuf_free(pb);
 	xcb_key_symbols_free(ksyms);
 	xcb_destroy_window(conn, win);
 	xcb_disconnect(conn);
@@ -284,8 +287,8 @@ main(int argc, char **argv)
 {
 	PulseAudioSinkList_t *sinks;
 	TextRenderer_t *text_renderer;
-	SinkRenderOptions_t sro[2];
-	SinkSelectorRenderOptions_t ssro;
+	SinkStyle_t snormal, sselected;
+	SinkSelectorStyle_t ssro;
 	xcb_generic_event_t *ev;
 
 	while (++argv, --argc > 0) {
@@ -306,7 +309,6 @@ main(int argc, char **argv)
 
 	xwininit();
 
-	pb = pixbuf_new(conn, win, 500, 1000);
 	pac = pulseaudio_connect();
 	sinks = pulseaudio_get_all_input_sinks(pac);
 
@@ -315,9 +317,9 @@ main(int argc, char **argv)
 
 	text_renderer = text_renderer_new("Iosevka", 12);
 
-	sink_render_options_init(&sro[0], text_renderer, 450, 23, 0xffffff, 0x555555, 0x333333);
-	sink_render_options_init(&sro[1], text_renderer, 450, 23, 0xa0e547, 0x5e5eed, 0x333333);
-	sink_selector_render_options_init(&ssro, &sro[0], &sro[1]);
+	sink_style_init(&snormal, text_renderer, 450, 23, 0xffffff, 0x555555, 0x333333);
+	sink_style_init(&sselected, text_renderer, 450, 23, 0xa0e547, 0x5e5eed, 0x333333);
+	sink_selector_style_init(&ssro, &snormal, &sselected);
 	sink_selector = sink_selector_new(sinks, &ssro);
 
 	sink_selector_render(sink_selector, pb);
@@ -338,7 +340,6 @@ main(int argc, char **argv)
 	pulseaudio_disconnect(pac);
 	text_renderer_free(text_renderer);
 	sink_selector_free(sink_selector);
-	pixbuf_free(pb);
 	xwindestroy();
 
 	return 0;

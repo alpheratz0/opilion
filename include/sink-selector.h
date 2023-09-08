@@ -24,33 +24,33 @@
 #include "text-renderer.h"
 #include "pixbuf.h"
 
-typedef struct SinkRenderOptions SinkRenderOptions_t;
-typedef struct SinkSelectorRenderOptions SinkSelectorRenderOptions_t;
+typedef struct SinkStyle SinkStyle_t;
+typedef struct SinkSelectorStyle SinkSelectorStyle_t;
 typedef struct SinkSelector SinkSelector_t;
 
-struct SinkRenderOptions {
+struct SinkStyle {
 	TextRenderer_t *tr;
 	int width, height;
 	uint32_t fg_color;
 	uint32_t vbar_colors[2];
 };
 
-struct SinkSelectorRenderOptions {
-	SinkRenderOptions_t sro_normal;
-	SinkRenderOptions_t sro_selected;
+struct SinkSelectorStyle {
+	SinkStyle_t sro_normal;
+	SinkStyle_t sro_selected;
 };
 
 extern void
-sink_render_options_init(SinkRenderOptions_t *sro, TextRenderer_t *tr,
+sink_style_init(SinkStyle_t *sro, TextRenderer_t *tr,
 		int w, int h, uint32_t fg_color, uint32_t vbar_color1,
 		uint32_t vbar_color2);
 
 extern void
-sink_selector_render_options_init(SinkSelectorRenderOptions_t *ssro,
-		SinkRenderOptions_t *sro_normal, SinkRenderOptions_t *sro_selected);
+sink_selector_style_init(SinkSelectorStyle_t *ssro,
+		SinkStyle_t *sro_normal, SinkStyle_t *sro_selected);
 
 extern SinkSelector_t *
-sink_selector_new(PulseAudioSinkList_t *sl, SinkSelectorRenderOptions_t *ssro);
+sink_selector_new(PulseAudioSinkList_t *sl, SinkSelectorStyle_t *ssro);
 
 extern PulseAudioSink_t *
 sink_selector_get_selected(SinkSelector_t *s);
