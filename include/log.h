@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022 <alpheratz99@protonmail.com>
+	Copyright (C) 2023 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -16,26 +16,10 @@
 
 */
 
-#ifndef __XPAVM_BASE_LINKEDLIST_H__
-#define __XPAVM_BASE_LINKEDLIST_H__
-
-#include <stdint.h>
-
-struct linkedlist {
-	struct linkedlist *next;
-	void *data;
-};
+#pragma once
 
 extern void
-linkedlist_append(struct linkedlist **ref, void *data);
-
-extern void *
-linkedlist_get(struct linkedlist *list, uint32_t pos);
-
-extern uint32_t
-linkedlist_length(struct linkedlist *list);
+info(const char *fmt, ...);
 
 extern void
-linkedlist_free(struct linkedlist *list);
-
-#endif
+die(const char *fmt, ...);

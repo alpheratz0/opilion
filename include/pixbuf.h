@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2023 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -16,34 +16,38 @@
 
 */
 
-#ifndef __XPAVM_BASE_BITMAP_H__
-#define __XPAVM_BASE_BITMAP_H__
+#pragma once
 
-#include <stdint.h>
+#include <xcb/xcb.h>
 
-struct bitmap {
-	uint32_t *px;
-	uint32_t width;
-	uint32_t height;
-};
+typedef struct Pixbuf Pixbuf_t;
 
-extern struct bitmap *
-bitmap_create(uint32_t width, uint32_t height, uint32_t color);
+extern Pixbuf_t *
+pixbuf_new(xcb_connection_t *conn, xcb_window_t win, int w, int h);
 
-extern void
-bitmap_set(struct bitmap *bmp, uint32_t x, uint32_t y, uint32_t color);
+extern int
+pixbuf_get_width(Pixbuf_t *pb);
 
-extern uint32_t
-bitmap_get(struct bitmap *bmp, uint32_t x, uint32_t y);
+extern int
+pixbuf_get_height(Pixbuf_t *pb);
+
+extern int
+pixbuf_get(Pixbuf_t *pb, int x, int y, uint32_t *color);
 
 extern void
-bitmap_rect(struct bitmap *bmp, uint32_t x, uint32_t y,
-            uint32_t width, uint32_t height, uint32_t color);
+pixbuf_set(Pixbuf_t *pb, int x, int y, uint32_t color);
 
 extern void
-bitmap_clear(struct bitmap *bmp, uint32_t color);
+pixbuf_set_viewport(Pixbuf_t *pb, int vw, int vh);
 
 extern void
-bitmap_free(struct bitmap *bmp);
+pixbuf_rect(Pixbuf_t *pb, int x, int y, int w, int h, uint32_t color);
 
-#endif
+extern void
+pixbuf_clear(Pixbuf_t *pb, uint32_t color);
+
+extern void
+pixbuf_render(Pixbuf_t *pb);
+
+extern void
+pixbuf_free(Pixbuf_t *pb);

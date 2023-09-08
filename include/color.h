@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022 <alpheratz99@protonmail.com>
+	Copyright (C) 2023 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -16,13 +16,12 @@
 
 */
 
-#ifndef __XPAVM_UTIL_DEBUG_H__
-#define __XPAVM_UTIL_DEBUG_H__
+#pragma once
+
+#include <stdint.h>
 
 extern void
-warn(const char *fmt, ...);
+color_parse(const char *str, uint32_t *c);
 
-extern void
-die(const char *fmt, ...);
-
-#endif
+extern uint32_t
+color_mix(uint32_t c1, uint32_t c2, uint8_t alpha);

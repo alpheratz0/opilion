@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2023 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -16,28 +16,42 @@
 
 */
 
-#ifndef __XPAVM_BASE_FONT_H__
-#define __XPAVM_BASE_FONT_H__
+#include <stdlib.h>
+#include <string.h>
+#include "utils.h"
+#include "log.h"
 
-#include <stdint.h>
-#include <ft2build.h>
-#include FT_FREETYPE_H
+extern void *
+xmalloc(size_t size)
+{
+	void *ptr;
+	if (NULL == (ptr = malloc(size)))
+		die("OOM");
+	return ptr;
+}
 
-struct font {
-	FT_Library library;
-	FT_Face face;
-	uint32_t size;
-	uint32_t height;
-	uint32_t width;
-};
+extern void *
+xcalloc(size_t nmemb, size_t size)
+{
+	void *ptr;
+	if (NULL == (ptr = calloc(nmemb, size)))
+		die("OOM");
+	return ptr;
+}
 
-extern struct font *
-font_load(const char *family, uint32_t size);
+extern char *
+xstrdup(const char *str)
+{
+	size_t len;
+	char *res;
 
-extern FT_GlyphSlot
-font_get_glyph(struct font *font, char c);
+	if (NULL == str)
+		return NULL;
 
-extern void
-font_unload(struct font *font);
+	len = strlen(str);
+	res = xmalloc(len + 1);
+	memcpy(res, str, len);
+	res[len] = '\0';
 
-#endif
+	return res;
+}

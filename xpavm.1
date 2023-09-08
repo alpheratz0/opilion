@@ -1,4 +1,4 @@
-.Dd August 13, 2022
+.Dd September 08, 2022
 .Dt XPAVM 1
 .Sh NAME
 .Nm xpavm
@@ -13,16 +13,20 @@ show usage
 .It Fl v
 display the program version
 .El
-.Sh CONTROLS
-.Bl -bullet -compact -width indent
-.It
-select a different sink with j/k keys
-.It
-decrease/increase volume of sink with h/l keys
-.It
-toggle mute of sink with m key
-.It
-exit the program with q/escape keys
+.Sh KEYBOARD BINDINGS
+.Bl -tag -width indent
+.It m
+Toggle sink mute.
+.It h
+Decrease sink volume.
+.It l
+Increase sink volume.
+.It j
+Select sink below.
+.It k
+Select sink above.
+.It Escape/q
+Exit the application.
 .El
 .Sh SEE ALSO
 .Xr X 7

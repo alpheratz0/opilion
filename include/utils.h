@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2023 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -16,18 +16,18 @@
 
 */
 
-#include <stdlib.h>
+#pragma once
 
-#include "debug.h"
-#include "xmalloc.h"
+#include <stddef.h>
+
+#define CLAMP(v,min,max) \
+	((v)>(max)?(max):(v)<(min)?(min):(v))
 
 extern void *
-xmalloc(size_t size)
-{
-	void *p;
+xmalloc(size_t size);
 
-	if (NULL == (p = malloc(size)))
-		die("error while calling malloc, no memory available");
+extern void *
+xcalloc(size_t nmemb, size_t size);
 
-	return p;
-}
+extern char *
+xstrdup(const char *str);
