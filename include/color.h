@@ -20,8 +20,5 @@
 
 #include <stdint.h>
 
-extern void
-color_parse(const char *str, uint32_t *c);
-
 extern uint32_t
 color_mix(uint32_t c1, uint32_t c2, uint8_t alpha);

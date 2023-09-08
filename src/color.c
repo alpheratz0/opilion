@@ -51,29 +51,6 @@ __color_unpack_to_arr(uint32_t c, uint8_t *p)
 	p[3] = ALPHA(c);
 }
 
-extern void
-color_parse(const char *str, uint32_t *c)
-{
-	uint32_t tmp_col;
-	char *end = NULL;
-
-	if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X')) {
-		str += 2;
-	} else if (str[0] == '#') {
-		str += 1;
-	}
-
-	tmp_col = strtol(str, &end, 16);
-
-	if (*end != '\0')
-		return;
-
-	*c = tmp_col;
-
-	if (end - str <= 6)
-		*c |= 0xff << 24;
-}
-
 extern uint32_t
 color_mix(uint32_t c1, uint32_t c2, uint8_t alpha)
 {
