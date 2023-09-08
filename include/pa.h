@@ -28,19 +28,19 @@ extern PulseAudioConnection_t *
 pulseaudio_connect(void);
 
 extern PulseAudioSinkList_t *
-pulseaudio_get_all_input_sinks(PulseAudioConnection_t *conn);
+pulseaudio_get_all_input_sinks(PulseAudioConnection_t *pac);
 
 extern void
-pulseaudio_sink_set_volume(PulseAudioConnection_t *conn, PulseAudioSink_t *s, int v);
+pulseaudio_sink_set_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s, int v);
 
 extern void
-pulseaudio_sink_increase_volume(PulseAudioConnection_t *conn, PulseAudioSink_t *s, int v);
+pulseaudio_sink_increase_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s, int v);
 
 extern void
-pulseaudio_sink_set_mute(PulseAudioConnection_t *conn, PulseAudioSink_t *s, bool mute);
+pulseaudio_sink_set_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s, bool mute);
 
 extern void
-pulseaudio_sink_toggle_mute(PulseAudioConnection_t *conn, PulseAudioSink_t *s);
+pulseaudio_sink_toggle_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s);
 
 extern const char *
 pulseaudio_sink_get_app_name(const PulseAudioSink_t *s);
@@ -61,4 +61,4 @@ extern void
 pulseaudio_sink_list_free(PulseAudioSinkList_t *sl);
 
 extern void
-pulseaudio_disconnect(PulseAudioConnection_t *conn);
+pulseaudio_disconnect(PulseAudioConnection_t *pac);
