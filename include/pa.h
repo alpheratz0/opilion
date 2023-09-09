@@ -82,7 +82,7 @@ extern int
 pulseaudio_sink_list_get_length(const PulseAudioSinkList_t *sl);
 
 extern PulseAudioSink_t *
-pulseaudio_sink_list_get(PulseAudioSinkList_t *sl, int index);
+pulseaudio_sink_list_get(const PulseAudioSinkList_t *sl, int index);
 
 extern void
 pulseaudio_sink_list_free(PulseAudioSinkList_t *sl);

@@ -296,7 +296,7 @@ pulseaudio_sink_list_get_length(const PulseAudioSinkList_t *sl)
 }
 
 extern PulseAudioSink_t *
-pulseaudio_sink_list_get(PulseAudioSinkList_t *sl, int index)
+pulseaudio_sink_list_get(const PulseAudioSinkList_t *sl, int index)
 {
 	if (index < 0 || index >= (int)(sl->len))
 		return NULL;
