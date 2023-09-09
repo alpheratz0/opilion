@@ -19,24 +19,31 @@
 #include <stdint.h>
 #include <pulse/pulseaudio.h>
 #include <pulse/volume.h>
+#include <stddef.h>
 
 #include "log.h"
 #include "utils.h"
 #include "pa.h"
 
+#define PULSEAUDIO_SINK_LIST_DEFAULT_CAPACITY 16
+
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+
 struct PulseAudioConnection {
 	pa_threaded_mainloop *mainloop;
 	pa_mainloop_api *api;
-	pa_context *context;
+	pa_context *ctx;
 	void *userdata;
 };
 
 struct PulseAudioSink {
-	char *appname;
-	uint32_t id;
+	unsigned int id;
+	char *application_name;
 	pa_cvolume volume;
 	uint8_t channels;
-	bool mute;
+	bool is_muted;
 };
 
 struct PulseAudioSinkList {
@@ -44,22 +51,14 @@ struct PulseAudioSinkList {
 	PulseAudioSink_t **sinks;
 };
 
-static PulseAudioSinkList_t *
-__pulseaudio_sink_list_new(void);
-
-static PulseAudioSink_t *
-__pulseaudio_sink_new(const char *appname, uint32_t id,
-		const pa_cvolume *volume, uint8_t channels, uint32_t mute);
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
 static void
-__pulseaudio_sink_list_push(PulseAudioSinkList_t *sl, PulseAudioSink_t *s);
-
-static void
-__context_state_change_cb(pa_context *ctx, void *userdata)
+__context_state_change_cb(UNUSED pa_context *ctx, void *userdata)
 {
 	pa_threaded_mainloop *mainloop;
-
-	(void) ctx;
 
 	mainloop = userdata;
 
@@ -67,8 +66,7 @@ __context_state_change_cb(pa_context *ctx, void *userdata)
 }
 
 static void
-__get_sink_input_cb(pa_context *ctx, const pa_sink_input_info *sink_input,
-		int eol, void *userdata)
+__get_sink_input_cb(pa_context *ctx, const pa_sink_input_info *sink_input, int eol, void *userdata)
 {
 	PulseAudioConnection_t *pac;
 	PulseAudioSinkList_t *sink_list;
@@ -87,15 +85,8 @@ __get_sink_input_cb(pa_context *ctx, const pa_sink_input_info *sink_input,
 	}
 
 	if (NULL != sink_input) {
-		__pulseaudio_sink_list_push(sink_list,
-			__pulseaudio_sink_new(
-				pa_proplist_gets(sink_input->proplist, "application.name"),
-				sink_input->index,
-				&sink_input->volume,
-				sink_input->channel_map.channels,
-				sink_input->mute
-			)
-		);
+		pulseaudio_sink_list_push_back(sink_list,
+				pulseaudio_sink_new(sink_input));
 	}
 }
 
@@ -115,58 +106,6 @@ __update_sink_input_cb(pa_context *ctx, int eol, void *userdata)
 	pa_threaded_mainloop_signal(pac->mainloop, 0);
 }
 
-static PulseAudioSink_t *
-__pulseaudio_sink_new(const char *appname, uint32_t id, const pa_cvolume *volume, uint8_t channels, uint32_t mute)
-{
-	PulseAudioSink_t *s;
-
-	s = xmalloc(sizeof(PulseAudioSink_t));
-
-	// Init
-	s->appname = xstrdup(NULL == appname ? "unknown" : appname);
-	s->id = id;
-	s->volume = *volume;
-	s->channels = channels;
-	s->mute = mute > 0 ? true : false;
-
-	return s;
-}
-
-static void
-__pulseaudio_sink_free(PulseAudioSink_t *s)
-{
-	free(s->appname);
-	free(s);
-}
-
-static PulseAudioSinkList_t *
-__pulseaudio_sink_list_new(void)
-{
-	PulseAudioSinkList_t *sl;
-
-	sl = malloc(sizeof(PulseAudioSinkList_t));
-
-	sl->len = 0;
-	sl->cap = 16;
-	sl->sinks = xmalloc(
-		sl->cap*sizeof(PulseAudioSink_t*));
-
-	return sl;
-}
-
-static void
-__pulseaudio_sink_list_push(PulseAudioSinkList_t *sl, PulseAudioSink_t *s)
-{
-	if (sl->len == sl->cap) {
-		sl->cap += 16;
-		sl->sinks = realloc(sl->sinks,
-				sl->cap*sizeof(PulseAudioSink_t*));
-	}
-
-	sl->sinks[sl->len] = s;
-	sl->len += 1;
-}
-
 extern PulseAudioConnection_t *
 pulseaudio_connect(void)
 {
@@ -177,17 +116,17 @@ pulseaudio_connect(void)
 	// Init
 	pac->mainloop = pa_threaded_mainloop_new();
 	pac->api = pa_threaded_mainloop_get_api(pac->mainloop);
-	pac->context = pa_context_new(pac->api, NULL);
+	pac->ctx = pa_context_new(pac->api, NULL);
 	pac->userdata = NULL;
 
-	pa_context_set_state_callback(pac->context,
+	pa_context_set_state_callback(pac->ctx,
 			__context_state_change_cb, pac->mainloop);
 
 	pa_threaded_mainloop_lock(pac->mainloop);
 	pa_threaded_mainloop_start(pac->mainloop);
-	pa_context_connect(pac->context, NULL, PA_CONTEXT_NOFAIL, NULL);
+	pa_context_connect(pac->ctx, NULL, PA_CONTEXT_NOFAIL, NULL);
 
-	while (pa_context_get_state(pac->context) != PA_CONTEXT_READY)
+	while (pa_context_get_state(pac->ctx) != PA_CONTEXT_READY)
 		pa_threaded_mainloop_wait(pac->mainloop);
 
 	return pac;
@@ -199,14 +138,14 @@ pulseaudio_get_all_input_sinks(PulseAudioConnection_t *pac)
 	pa_operation *po;
 	PulseAudioSinkList_t *sl;
 
-	pac->userdata = sl = __pulseaudio_sink_list_new();
+	pac->userdata = sl = pulseaudio_sink_list_new();
 
-	po = pa_context_get_sink_input_info_list(pac->context,
+	po = pa_context_get_sink_input_info_list(pac->ctx,
 			__get_sink_input_cb, pac);
 
 	if (NULL == po) {
 		die("pa_context_get_sink_input_info_list failed: %s",
-				pa_strerror(pa_context_errno(pac->context)));
+				pa_strerror(pa_context_errno(pac->ctx)));
 	}
 
 	pa_operation_unref(po);
@@ -216,59 +155,41 @@ pulseaudio_get_all_input_sinks(PulseAudioConnection_t *pac)
 }
 
 extern void
-pulseaudio_sink_set_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s, int v)
+pulseaudio_disconnect(PulseAudioConnection_t *pac)
 {
-	pa_operation *po;
-
-	pa_cvolume_set(&s->volume, s->channels,
-			CLAMP(v,0,100)*(PA_VOLUME_NORM/100));
-
-	po = pa_context_set_sink_input_volume(pac->context, s->id, &s->volume,
-			__update_sink_input_cb, pac);
-
-	if (NULL == po) {
-		die("pa_context_set_sink_input_volume failed: %s",
-				pa_strerror(pa_context_errno(pac->context)));
-	}
-
-	pa_operation_unref(po);
-	pa_threaded_mainloop_wait(pac->mainloop);
+	pa_context_unref(pac->ctx);
+	pa_threaded_mainloop_unlock(pac->mainloop);
+	pa_threaded_mainloop_free(pac->mainloop);
+	free(pac);
 }
 
-extern void
-pulseaudio_sink_increase_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s, int v)
+extern PulseAudioSink_t *
+pulseaudio_sink_new(const pa_sink_input_info *sink_input)
 {
-	pulseaudio_sink_set_volume(pac, s, pulseaudio_sink_get_volume(s)+v);
-}
+	PulseAudioSink_t *s;
+	const char *orig_app_name;
 
-extern void
-pulseaudio_sink_set_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s, bool mute)
-{
-	pa_operation *po;
+	s = xmalloc(sizeof(PulseAudioSink_t));
 
-	s->mute = mute;
-	po = pa_context_set_sink_input_mute(pac->context, s->id, mute,
-			__update_sink_input_cb, pac);
+	orig_app_name = pa_proplist_gets(sink_input->proplist,
+			"application.name");
 
-	if (NULL == po) {
-		die("pa_context_set_sink_input_mute failed: %s",
-				pa_strerror(pa_context_errno(pac->context)));
-	}
+	if (NULL == orig_app_name)
+		orig_app_name = "Unknown";
 
-	pa_operation_unref(po);
-	pa_threaded_mainloop_wait(pac->mainloop);
-}
+	s->id = sink_input->index;
+	s->application_name = xstrdup(orig_app_name);
+	s->volume = sink_input->volume;
+	s->channels = sink_input->channel_map.channels;
+	s->is_muted = sink_input->mute > 0;
 
-extern void
-pulseaudio_sink_toggle_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s)
-{
-	pulseaudio_sink_set_mute(pac, s, !s->mute);
+	return s;
 }
 
 extern const char *
 pulseaudio_sink_get_app_name(const PulseAudioSink_t *s)
 {
-	return s->appname;
+	return s->application_name;
 }
 
 extern int
@@ -280,36 +201,114 @@ pulseaudio_sink_get_volume(const PulseAudioSink_t *s)
 extern bool
 pulseaudio_sink_is_muted(const PulseAudioSink_t *s)
 {
-	return s->mute;
+	return s->is_muted;
+}
+
+extern void
+pulseaudio_sink_set_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s, int v)
+{
+	pa_operation *po;
+
+	pa_cvolume_set(&s->volume, s->channels,
+			CLAMP(v,0,100)*(PA_VOLUME_NORM/100));
+
+	po = pa_context_set_sink_input_volume(pac->ctx, s->id, &s->volume,
+			__update_sink_input_cb, pac);
+
+	if (NULL == po) {
+		die("pa_context_set_sink_input_volume failed: %s",
+				pa_strerror(pa_context_errno(pac->ctx)));
+	}
+
+	pa_operation_unref(po);
+	pa_threaded_mainloop_wait(pac->mainloop);
+}
+
+extern void
+pulseaudio_sink_increase_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s, int v)
+{
+	pulseaudio_sink_set_volume(pac, s,
+			pulseaudio_sink_get_volume(s)+v);
+}
+
+extern void
+pulseaudio_sink_set_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s, bool mute)
+{
+	pa_operation *po;
+
+	s->is_muted = mute;
+	po = pa_context_set_sink_input_mute(pac->ctx, s->id, mute,
+			__update_sink_input_cb, pac);
+
+	if (NULL == po) {
+		die("pa_context_set_sink_input_mute failed: %s",
+				pa_strerror(pa_context_errno(pac->ctx)));
+	}
+
+	pa_operation_unref(po);
+	pa_threaded_mainloop_wait(pac->mainloop);
+}
+
+extern void
+pulseaudio_sink_toggle_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s)
+{
+	pulseaudio_sink_set_mute(pac, s, !s->is_muted);
+}
+
+extern void
+pulseaudio_sink_free(PulseAudioSink_t *s)
+{
+	free(s->application_name);
+	free(s);
+}
+
+extern PulseAudioSinkList_t *
+pulseaudio_sink_list_new(void)
+{
+	PulseAudioSinkList_t *sl;
+	sl = xcalloc(1, sizeof(PulseAudioSinkList_t));
+	sl->cap = PULSEAUDIO_SINK_LIST_DEFAULT_CAPACITY;
+	sl->sinks = xmalloc(sl->cap * sizeof(void *));
+	return sl;
+}
+
+extern void
+pulseaudio_sink_list_resize(PulseAudioSinkList_t *sl, size_t new_size)
+{
+	if (new_size > sl->cap) {
+		sl->sinks = realloc(sl->sinks,
+			(sl->cap=new_size) * sizeof(void *));
+	}
+}
+
+extern void
+pulseaudio_sink_list_push_back(PulseAudioSinkList_t *sl, PulseAudioSink_t *s)
+{
+	if (sl->len == sl->cap)
+		pulseaudio_sink_list_resize(sl, sl->len + 16);
+	sl->sinks[sl->len++] = s;
 }
 
 extern int
-pulseaudio_sink_list_get_length(PulseAudioSinkList_t *sl)
+pulseaudio_sink_list_get_length(const PulseAudioSinkList_t *sl)
 {
 	return sl->len;
 }
 
 extern PulseAudioSink_t *
-pulseaudio_sink_list_get(PulseAudioSinkList_t *sl, int i)
+pulseaudio_sink_list_get(PulseAudioSinkList_t *sl, int index)
 {
-	return sl->sinks[i];
+	if (index < 0 || index >= (int)(sl->len))
+		return NULL;
+	return sl->sinks[index];
 }
 
 extern void
 pulseaudio_sink_list_free(PulseAudioSinkList_t *sl)
 {
-	size_t i;
-	for (i = 0; i < sl->len; ++i)
-		__pulseaudio_sink_free(sl->sinks[i]);
+	while (sl->len > 0)
+		pulseaudio_sink_free(
+			sl->sinks[--sl->len]);
 	free(sl->sinks);
 	free(sl);
-}
-
-extern void
-pulseaudio_disconnect(PulseAudioConnection_t *pac)
-{
-	pa_context_unref(pac->context);
-	pa_threaded_mainloop_unlock(pac->mainloop);
-	pa_threaded_mainloop_free(pac->mainloop);
-	free(pac);
 }

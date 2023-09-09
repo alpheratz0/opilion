@@ -19,16 +19,40 @@
 #pragma once
 
 #include <stdbool.h>
+#include <pulse/pulseaudio.h>
 
-typedef struct PulseAudioConnection PulseAudioConnection_t;
-typedef struct PulseAudioSink PulseAudioSink_t;
-typedef struct PulseAudioSinkList PulseAudioSinkList_t;
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+
+typedef struct PulseAudioConnection   PulseAudioConnection_t;
+typedef struct PulseAudioSink               PulseAudioSink_t;
+typedef struct PulseAudioSinkList       PulseAudioSinkList_t;
+
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
 extern PulseAudioConnection_t *
 pulseaudio_connect(void);
 
 extern PulseAudioSinkList_t *
 pulseaudio_get_all_input_sinks(PulseAudioConnection_t *pac);
+
+extern void
+pulseaudio_disconnect(PulseAudioConnection_t *pac);
+
+extern PulseAudioSink_t *
+pulseaudio_sink_new(const pa_sink_input_info *sink_input);
+
+extern const char *
+pulseaudio_sink_get_app_name(const PulseAudioSink_t *s);
+
+extern int
+pulseaudio_sink_get_volume(const PulseAudioSink_t *s);
+
+extern bool
+pulseaudio_sink_is_muted(const PulseAudioSink_t *s);
 
 extern void
 pulseaudio_sink_set_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s, int v);
@@ -42,23 +66,23 @@ pulseaudio_sink_set_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s, bool 
 extern void
 pulseaudio_sink_toggle_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s);
 
-extern const char *
-pulseaudio_sink_get_app_name(const PulseAudioSink_t *s);
+extern void
+pulseaudio_sink_free(PulseAudioSink_t *s);
+
+extern PulseAudioSinkList_t *
+pulseaudio_sink_list_new(void);
+
+extern void
+pulseaudio_sink_list_resize(PulseAudioSinkList_t *sl, size_t new_size);
+
+extern void
+pulseaudio_sink_list_push_back(PulseAudioSinkList_t *sl, PulseAudioSink_t *s);
 
 extern int
-pulseaudio_sink_get_volume(const PulseAudioSink_t *s);
-
-extern bool
-pulseaudio_sink_is_muted(const PulseAudioSink_t *s);
-
-extern int
-pulseaudio_sink_list_get_length(PulseAudioSinkList_t *sl);
+pulseaudio_sink_list_get_length(const PulseAudioSinkList_t *sl);
 
 extern PulseAudioSink_t *
-pulseaudio_sink_list_get(PulseAudioSinkList_t *sl, int i);
+pulseaudio_sink_list_get(PulseAudioSinkList_t *sl, int index);
 
 extern void
 pulseaudio_sink_list_free(PulseAudioSinkList_t *sl);
-
-extern void
-pulseaudio_disconnect(PulseAudioConnection_t *pac);
