@@ -29,7 +29,7 @@
 #include "utils.h"
 
 #define SINK_WIDTH 450
-#define SINK_HEIGHT 18
+#define SINK_VOL_SLIDER_HEIGHT 5
 #define SINK_MARGIN 15
 
 #define LOOPVAL(v,n) \
@@ -63,8 +63,8 @@ __sink_render_to(const PulseAudioSink_t *s, TextRenderer_t *tr,
 			volume_str, ct->c_volume);
 
 	render_util_render_slider(pb, x, y+text_renderer_text_height(tr),
-			SINK_WIDTH, SINK_HEIGHT-text_renderer_text_height(tr),
-			pulseaudio_sink_get_volume(s), ct->c_volume_bar);
+			SINK_WIDTH, SINK_VOL_SLIDER_HEIGHT, pulseaudio_sink_get_volume(s),
+			ct->c_volume_bar);
 }
 
 extern SinkColorTheme_t
@@ -118,19 +118,21 @@ extern void
 sink_selector_render_to(const SinkSelector_t *ss, Pixbuf_t *pb)
 {
 	int i, x, y;
+	int sink_height;
 
+	sink_height = text_renderer_text_height(ss->tr) + SINK_VOL_SLIDER_HEIGHT;
 	x = (pixbuf_get_width(pb) - SINK_WIDTH) / 2;
 
 	if (ss->len > 5) {
-		y = (pixbuf_get_height(pb) - SINK_HEIGHT) / 2 - ss->selected * (SINK_HEIGHT + SINK_MARGIN);
+		y = (pixbuf_get_height(pb) - sink_height) / 2 - ss->selected * (sink_height + SINK_MARGIN);
 	} else {
-		y = (pixbuf_get_height(pb) - ss->len * SINK_HEIGHT - (ss->len - 1) * SINK_MARGIN) / 2;
+		y = (pixbuf_get_height(pb) - ss->len * sink_height - (ss->len - 1) * SINK_MARGIN) / 2;
 	}
 
 	for (i = 0; i < ss->len; ++i) {
 		__sink_render_to(pulseaudio_sink_list_get(ss->sinks, i), ss->tr,
 				i == ss->selected ? &ss->ct_sel : &ss->ct_nor, x, y, pb);
-		y += SINK_HEIGHT + SINK_MARGIN;
+		y += sink_height + SINK_MARGIN;
 	}
 }
 
