@@ -2,7 +2,7 @@ xpavm is a pulseaudio volume manager for X.
 For more information about it's usage check `man xpavm`.
 
 This program requires libxcb and libxcb-image, libxcb-keysyms, libxcb-xkb,
-libxcb-shm, libpulse, libfreetype2 and libfontconfig to be installed.
+libxcb-shm, libpulse, libfcft and libpixman-1 to be installed.
 In order to build this program you need to run `make`.
 
 This program is free software; you can redistribute it
