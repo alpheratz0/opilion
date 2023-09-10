@@ -1,3 +1,3 @@
 [ ] press F5 to refresh input sinks
 [x] fix apps with volume > 100
-[ ] create xrealloc
+[x] create xrealloc
