@@ -192,9 +192,8 @@ h_client_message(xcb_client_message_event_t *ev)
 }
 
 static void
-h_expose(xcb_expose_event_t *ev)
+h_expose(UNUSED xcb_expose_event_t *ev)
 {
-	(void) ev;
 	pixbuf_render(pb);
 }
 
@@ -240,14 +239,14 @@ h_key_press(xcb_key_press_event_t *ev)
 	}
 
 	pixbuf_clear(pb, 0x000000);
-	sink_selector_render(sink_selector, pb);
+	sink_selector_render_to(sink_selector, pb);
 	pixbuf_render(pb);
 }
 
 static void
 h_configure_notify(xcb_configure_notify_event_t *ev)
 {
-	pixbuf_set_viewport(pb, ev->width, ev->height);
+	pixbuf_set_container_size(pb, ev->width, ev->height);
 }
 
 static void
@@ -287,8 +286,7 @@ main(int argc, char **argv)
 {
 	PulseAudioSinkList_t *sinks;
 	TextRenderer_t *text_renderer;
-	SinkStyle_t snormal, sselected;
-	SinkSelectorStyle_t ssro;
+	SinkColorTheme_t ct_nor, ct_sel;
 	xcb_generic_event_t *ev;
 
 	while (++argv, --argc > 0) {
@@ -315,14 +313,13 @@ main(int argc, char **argv)
 	if (pulseaudio_sink_list_get_length(sinks) == 0)
 		die("no sinks were found");
 
-	text_renderer = text_renderer_new("Iosevka", 12);
+	text_renderer = text_renderer_new("Terminus", 12);
 
-	sink_style_init(&snormal, text_renderer, 450, 23, 0xffffff, 0x555555, 0x333333);
-	sink_style_init(&sselected, text_renderer, 450, 23, 0xa0e547, 0x5e5eed, 0x333333);
-	sink_selector_style_init(&ssro, &snormal, &sselected);
-	sink_selector = sink_selector_new(sinks, &ssro);
+	ct_nor = sink_color_theme_from(0xffffff, 0xffffff, (const uint32_t []){ 0x333333, 0x555555 });
+	ct_sel = sink_color_theme_from(0xa0e547, 0xa0e547, (const uint32_t []){ 0x333333, 0x5e5eed });
+	sink_selector = sink_selector_new(sinks, text_renderer, &ct_nor, &ct_sel);
 
-	sink_selector_render(sink_selector, pb);
+	sink_selector_render_to(sink_selector, pb);
 
 	while (!should_close && (ev = xcb_wait_for_event(conn))) {
 		switch (ev->response_type & ~0x80) {

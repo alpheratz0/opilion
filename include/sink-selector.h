@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2023 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -24,45 +24,40 @@
 #include "text-renderer.h"
 #include "pixbuf.h"
 
-typedef struct SinkStyle SinkStyle_t;
-typedef struct SinkSelectorStyle SinkSelectorStyle_t;
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+
+typedef struct SinkColorTheme SinkColorTheme_t;
 typedef struct SinkSelector SinkSelector_t;
 
-struct SinkStyle {
-	TextRenderer_t *tr;
-	int width, height;
-	uint32_t fg_color;
-	uint32_t vbar_colors[2];
+struct SinkColorTheme {
+	uint32_t c_app_name;
+	uint32_t c_volume;
+	uint32_t c_volume_bar[2];
 };
 
-struct SinkSelectorStyle {
-	SinkStyle_t sro_normal;
-	SinkStyle_t sro_selected;
-};
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
-extern void
-sink_style_init(SinkStyle_t *sro, TextRenderer_t *tr,
-		int w, int h, uint32_t fg_color, uint32_t vbar_color1,
-		uint32_t vbar_color2);
-
-extern void
-sink_selector_style_init(SinkSelectorStyle_t *ssro,
-		SinkStyle_t *sro_normal, SinkStyle_t *sro_selected);
+extern SinkColorTheme_t
+sink_color_theme_from(uint32_t c_app_name, uint32_t c_volume, const uint32_t c_volume_bar[2]);
 
 extern SinkSelector_t *
-sink_selector_new(PulseAudioSinkList_t *sl, SinkSelectorStyle_t *ssro);
+sink_selector_new(PulseAudioSinkList_t *sl, TextRenderer_t *tr, SinkColorTheme_t *ct_nor, SinkColorTheme_t *ct_sel);
 
 extern PulseAudioSink_t *
-sink_selector_get_selected(SinkSelector_t *s);
+sink_selector_get_selected(const SinkSelector_t *ss);
 
 extern void
-sink_selector_select_up(SinkSelector_t *s);
+sink_selector_select_up(SinkSelector_t *ss);
 
 extern void
-sink_selector_select_down(SinkSelector_t *s);
+sink_selector_select_down(SinkSelector_t *ss);
 
 extern void
-sink_selector_render(SinkSelector_t *s, Pixbuf_t *pb);
+sink_selector_render_to(const SinkSelector_t *ss, Pixbuf_t *pb);
 
 extern void
-sink_selector_free(SinkSelector_t *s);
+sink_selector_free(SinkSelector_t *ss);

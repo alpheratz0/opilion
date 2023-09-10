@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022-2023 <alpheratz99@protonmail.com>
+	Copyright (C) 2023 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -18,19 +18,14 @@
 
 #pragma once
 
-#include <stddef.h>
+#include <stdint.h>
 
-#define CLAMP(v,min,max) \
-	((v)>(max)?(max):(v)<(min)?(min):(v))
+#include "pixbuf.h"
+#include "text-renderer.h"
 
-#define UNUSED \
-	__attribute__((unused))
+extern void
+render_util_render_slider(Pixbuf_t *pb, int x, int y, int w, int h, int pct, const uint32_t c[2]);
 
-extern void *
-xmalloc(size_t size);
-
-extern void *
-xcalloc(size_t nmemb, size_t size);
-
-extern char *
-xstrdup(const char *str);
+extern void
+render_util_render_key_value_pair(Pixbuf_t *pb, int x, int y, int w, TextRenderer_t *tr, const char *key, uint32_t key_color,
+		const char *value, uint32_t value_color);

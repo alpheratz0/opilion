@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2023 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -24,178 +24,118 @@
 #include "pixbuf.h"
 #include "sink-selector.h"
 #include "text-renderer.h"
+#include "render-util.h"
 #include "pa.h"
 #include "utils.h"
 
+#define SINK_WIDTH 450
+#define SINK_HEIGHT 18
+#define SINK_MARGIN 15
+
+#define LOOPVAL(v,n) \
+	(((v)%(n)+(n))%(n))
+
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+
 struct SinkSelector {
+	TextRenderer_t *tr;
 	PulseAudioSinkList_t *sinks;
-	SinkSelectorStyle_t ssro;
-	int selected;
+	SinkColorTheme_t ct_nor, ct_sel;
+	int len, selected;
 };
 
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+
 static void
-__fmt_volume(PulseAudioSink_t *sink, char *str)
+__sink_render_to(const PulseAudioSink_t *s, TextRenderer_t *tr,
+		const SinkColorTheme_t *ct, int x, int y, Pixbuf_t *pb)
 {
-	if (pulseaudio_sink_is_muted(sink)) {
-		strcpy(str, "muted");
-	} else {
-		sprintf(str, "%u%%", pulseaudio_sink_get_volume(sink));
-	}
+	char volume_str[128];
+
+	pulseaudio_sink_format_volume(s, sizeof(volume_str), volume_str);
+
+	render_util_render_key_value_pair(pb, x, y, SINK_WIDTH,
+			tr, pulseaudio_sink_get_app_name(s), ct->c_app_name,
+			volume_str, ct->c_volume);
+
+	render_util_render_slider(pb, x, y+text_renderer_text_height(tr),
+			SINK_WIDTH, SINK_HEIGHT-text_renderer_text_height(tr),
+			pulseaudio_sink_get_volume(s), ct->c_volume_bar);
 }
 
-extern void
-sink_style_init(SinkStyle_t *sro, TextRenderer_t *tr,
-		int w, int h, uint32_t fg_color, uint32_t vbar_color1,
-		uint32_t vbar_color2)
+extern SinkColorTheme_t
+sink_color_theme_from(uint32_t c_app_name, uint32_t c_volume, const uint32_t c_volume_bar[2])
 {
-	sro->tr = tr;
-	sro->width = w;
-	sro->height = h;
-	sro->fg_color = fg_color;
-	sro->vbar_colors[0] = vbar_color1;
-	sro->vbar_colors[1] = vbar_color2;
-}
-
-extern void
-sink_selector_style_init(SinkSelectorStyle_t *ssro,
-		SinkStyle_t *sro_normal, SinkStyle_t *sro_selected)
-{
-	ssro->sro_normal = *sro_normal;
-	ssro->sro_selected = *sro_selected;
+	SinkColorTheme_t ct;
+	ct.c_app_name = c_app_name;
+	ct.c_volume = c_volume;
+	ct.c_volume_bar[0] = c_volume_bar[0];
+	ct.c_volume_bar[1] = c_volume_bar[1];
+	return ct;
 }
 
 extern SinkSelector_t *
-sink_selector_new(PulseAudioSinkList_t *sl, SinkSelectorStyle_t *ssro)
+sink_selector_new(PulseAudioSinkList_t *sl, TextRenderer_t *tr, SinkColorTheme_t *ct_nor, SinkColorTheme_t *ct_sel)
 {
-	SinkSelector_t *sink_selector;
+	SinkSelector_t *ss;
 
-	sink_selector = xmalloc(sizeof(SinkSelector_t));
-	sink_selector->sinks = sl;
-	sink_selector->selected = 0;
-	sink_selector->ssro = *ssro;
+	ss = xmalloc(sizeof(SinkSelector_t));
 
-	return sink_selector;
+	ss->sinks = sl;
+	ss->tr = tr;
+	ss->selected = 0;
+	ss->len = pulseaudio_sink_list_get_length(sl);
+	ss->ct_nor = *ct_nor;
+	ss->ct_sel = *ct_sel;
+
+	return ss;
 }
 
 extern PulseAudioSink_t *
-sink_selector_get_selected(SinkSelector_t *s)
+sink_selector_get_selected(const SinkSelector_t *ss)
 {
-	return pulseaudio_sink_list_get(s->sinks,
-			s->selected);
+	return pulseaudio_sink_list_get(ss->sinks,
+			ss->selected);
 }
 
 extern void
-sink_selector_select_up(SinkSelector_t *s)
+sink_selector_select_up(SinkSelector_t *ss)
 {
-	if (s->selected == 0) {
-		s->selected = pulseaudio_sink_list_get_length(s->sinks) - 1;
+	ss->selected = LOOPVAL(ss->selected-1, ss->len);
+}
+
+extern void
+sink_selector_select_down(SinkSelector_t *ss)
+{
+	ss->selected = LOOPVAL(ss->selected+1, ss->len);
+}
+
+extern void
+sink_selector_render_to(const SinkSelector_t *ss, Pixbuf_t *pb)
+{
+	int i, x, y;
+
+	x = (pixbuf_get_width(pb) - SINK_WIDTH) / 2;
+
+	if (ss->len > 5) {
+		y = (pixbuf_get_height(pb) - SINK_HEIGHT) / 2 - ss->selected * (SINK_HEIGHT + SINK_MARGIN);
 	} else {
-		s->selected -= 1;
+		y = (pixbuf_get_height(pb) - ss->len * SINK_HEIGHT - (ss->len - 1) * SINK_MARGIN) / 2;
+	}
+
+	for (i = 0; i < ss->len; ++i) {
+		__sink_render_to(pulseaudio_sink_list_get(ss->sinks, i), ss->tr,
+				i == ss->selected ? &ss->ct_sel : &ss->ct_nor, x, y, pb);
+		y += SINK_HEIGHT + SINK_MARGIN;
 	}
 }
 
 extern void
-sink_selector_select_down(SinkSelector_t *s)
+sink_selector_free(SinkSelector_t *ss)
 {
-	if (s->selected == pulseaudio_sink_list_get_length(s->sinks) - 1) {
-		s->selected = 0;
-	} else {
-		s->selected += 1;
-	}
-}
-
-static void
-__render_sink(PulseAudioSink_t *sink, SinkStyle_t *sro, uint32_t y, Pixbuf_t *pb)
-{
-	// TODO: clean up this s***
-	char volume_str[128];
-	int app_name_x, app_name_y;
-	int volume_str_x, volume_str_y;
-	int volume_box_x, volume_box_y;
-
-	// render app name
-	app_name_x = (pixbuf_get_width(pb) - sro->width) / 2;
-	app_name_y = y;
-
-	text_renderer_draw_string(sro->tr, pb, pulseaudio_sink_get_app_name(sink),
-			app_name_x, app_name_y, sro->fg_color);
-
-	// render volume str
-	__fmt_volume(sink, volume_str);
-	volume_str_x = app_name_x + sro->width - text_renderer_text_width(sro->tr, volume_str);
-	volume_str_y = y;
-
-	text_renderer_draw_string(sro->tr, pb, volume_str, volume_str_x,
-			volume_str_y, sro->fg_color);
-
-	// render volume box
-	volume_box_x = app_name_x;
-	volume_box_y = app_name_y + text_renderer_text_height(sro->tr);
-
-	pixbuf_rect(pb, volume_box_x, volume_box_y, sro->width,
-			sro->height - text_renderer_text_height(sro->tr), sro->vbar_colors[1]);
-
-	pixbuf_rect(pb, volume_box_x, volume_box_y, (sro->width * pulseaudio_sink_get_volume(sink)) / 100,
-			sro->height - text_renderer_text_height(sro->tr), sro->vbar_colors[0]);
-}
-
-extern void
-sink_selector_render(SinkSelector_t *s, Pixbuf_t *pb)
-{
-	// TODO: clean up this s***
-	int i, len;
-	PulseAudioSinkList_t *sl;
-	SinkStyle_t *sro;
-	int margin, y;
-
-	sl = s->sinks;
-	len = pulseaudio_sink_list_get_length(sl);
-	margin = 30;
-
-	/* total available space */
-	y = pixbuf_get_height(pb);
-
-	if (len > 5) {
-		/* space used by selected sink */
-		y -= (s->ssro.sro_selected.height);
-
-		/* center it */
-		y /= 2;
-
-		/* space used by non selected sinks (before selected one)*/
-		y -= (s->selected) * (s->ssro.sro_normal.height);
-
-		/* space used by margin */
-		y -= (s->selected) * (margin);
-	} else {
-		/* space used by non selected sinks */
-		y -= (len - 1) * (s->ssro.sro_normal.height);
-
-		/* space used by selected sinks */
-		y -= (s->ssro.sro_selected.height);
-
-		/* space used by margin */
-		y -= (len - 1) * (margin);
-
-		/* center it */
-		y /= 2;
-	}
-
-	for (i = 0; i < len; ++i) {
-		sro = &s->ssro.sro_normal;
-
-		if (s->selected == i)
-			sro = &s->ssro.sro_selected;
-
-		__render_sink(pulseaudio_sink_list_get(sl, i),
-				sro, y, pb);
-
-		y += sro->height + margin;
-	}
-}
-
-extern void
-sink_selector_free(SinkSelector_t *s)
-{
-	free(s);
+	free(ss);
 }

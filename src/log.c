@@ -26,14 +26,14 @@
 #include "log.h"
 
 static int
-log_stderr(const char *s)
+__log_stderr(const char *s)
 {
 	fprintf(stderr, "xpavm: %s\n", s);
 	return 0;
 }
 
 static int
-log_notify_send(const char *s)
+__log_notify_send(const char *s)
 {
 	pid_t pid;
 	int status;
@@ -56,12 +56,12 @@ log_notify_send(const char *s)
 }
 
 static void
-log_context_based(const char *s)
+__log_context_based(const char *s)
 {
 	if (isatty(STDOUT_FILENO)) {
-		log_stderr(s);
+		__log_stderr(s);
 	} else {
-		log_notify_send(s);
+		__log_notify_send(s);
 	}
 }
 
@@ -73,7 +73,7 @@ info(const char *fmt, ...)
 
 	va_start(args, fmt);
 	vsnprintf(msg, sizeof(msg), fmt, args);
-	log_context_based(msg);
+	__log_context_based(msg);
 	va_end(args);
 }
 
@@ -90,9 +90,9 @@ die(const char *fmt, ...)
 		snprintf(msg_w_strerr, sizeof(msg_w_strerr),
 				"%s %s", msg, strerror(errno));
 
-		log_context_based(msg_w_strerr);
+		__log_context_based(msg_w_strerr);
 	} else {
-		log_context_based(msg);
+		__log_context_based(msg);
 	}
 
 	va_end(args);

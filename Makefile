@@ -8,7 +8,7 @@ OBJ=\
 	src/pixbuf.o \
 	src/pa.o \
 	src/log.o \
-	src/color.o \
+	src/render-util.o \
 	src/sink-selector.o \
 	src/text-renderer.o \
 	src/utils.o
@@ -16,7 +16,7 @@ OBJ=\
 all: xpavm
 
 xpavm: $(OBJ)
-	$(CC) $(LDFLAGS) -o xpavm $(OBJ) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o xpavm $(OBJ)
 
 clean:
 	rm -f xpavm $(OBJ) xpavm-$(VERSION).tar.gz

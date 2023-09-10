@@ -16,38 +16,43 @@
 
 */
 
-#include <string.h>
-#include <stdint.h>
-#include <stdlib.h>
+#include <pixman.h>
+#include <sys/shm.h>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 #include <xcb/xcb_image.h>
 #include <xcb/shm.h>
-#include <sys/shm.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include "pixbuf.h"
 #include "utils.h"
 #include "log.h"
 
+#define SHM_INVALID_MEM ((void *)(-1))
+
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+
+typedef struct {
+	xcb_drawable_t drawable;
+	int width, height;
+} PixbufContainer_t;
+
 struct Pixbuf {
-	struct {
-		float x;
-		float y;
-	} pos;
-
-	int viewport_width;
-	int viewport_height;
-
+	xcb_connection_t *conn;
+	xcb_screen_t *scr;
+	xcb_gcontext_t gc;
+	PixbufContainer_t cont;
+	float x;
+	float y;
 	int width;
 	int height;
 	uint32_t *px;
-
-	/* X11 */
-	xcb_connection_t *conn;
-	xcb_screen_t *scr;
-	xcb_window_t win;
-	int shm;
-	xcb_gcontext_t gc;
+	pixman_image_t *pixman_image;
+	bool is_shm;
 	union {
 		struct {
 			int id;
@@ -55,16 +60,20 @@ struct Pixbuf {
 			xcb_pixmap_t pixmap;
 		} shm;
 		xcb_image_t *image;
-	} x;
+	};
 };
 
-static int
-__x_check_mit_shm_extension(xcb_connection_t *conn)
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+
+static bool
+__is_shm_extension_available(xcb_connection_t *conn)
 {
 	xcb_generic_error_t *error;
 	xcb_shm_query_version_cookie_t cookie;
 	xcb_shm_query_version_reply_t *reply;
-	int supported;
+	bool supported;
 
 	cookie = xcb_shm_query_version(conn);
 	reply = xcb_shm_query_version_reply(conn, cookie, &error);
@@ -75,120 +84,108 @@ __x_check_mit_shm_extension(xcb_connection_t *conn)
 	return supported;
 }
 
-static void
-__pixbuf_set_size(Pixbuf_t *pb, int w, int h)
+static xcb_screen_t *
+__get_default_screen(xcb_connection_t *conn)
 {
-	if (pb->shm) {
-		if (pb->px) {
-			shmctl(pb->x.shm.id, IPC_RMID, NULL);
-			xcb_shm_detach(pb->conn, pb->x.shm.seg);
-			shmdt(pb->px);
-			xcb_free_pixmap(pb->conn, pb->x.shm.pixmap);
-		}
+	const xcb_setup_t *setup;
+	xcb_screen_iterator_t scr_iter;
+	xcb_screen_t *scr;
 
-		pb->x.shm.seg = xcb_generate_id(pb->conn);
-		pb->x.shm.pixmap = xcb_generate_id(pb->conn);
-		pb->x.shm.id = shmget(IPC_PRIVATE, w*h*4, IPC_CREAT | 0600);
+	setup = xcb_get_setup(conn);
+	scr_iter = xcb_setup_roots_iterator(setup);
+	scr = scr_iter.data;
 
-		if (pb->x.shm.id < 0)
-			die("shmget:");
-
-		pb->px = shmat(pb->x.shm.id, NULL, 0);
-
-		if (pb->px == (void *) -1) {
-			shmctl(pb->x.shm.id, IPC_RMID, NULL);
-			die("shmat:");
-		}
-
-		xcb_shm_attach(pb->conn, pb->x.shm.seg, pb->x.shm.id, 0);
-		shmctl(pb->x.shm.id, IPC_RMID, NULL);
-
-		xcb_shm_create_pixmap(pb->conn, pb->x.shm.pixmap, pb->win, w, h,
-				pb->scr->root_depth, pb->x.shm.seg, 0);
-	} else {
-		if (pb->px)
-			xcb_image_destroy(pb->x.image);
-
-		if (w > 2000) w = 2000;
-		if (h > 2000) h = 2000;
-
-		pb->px = xmalloc(w*h*4);
-
-		pb->x.image = xcb_image_create_native(pb->conn, w, h,
-				XCB_IMAGE_FORMAT_Z_PIXMAP, pb->scr->root_depth, pb->px,
-				w*h*4, (uint8_t*)pb->px);
+	if (NULL == scr) {
+		die("can't get default screen");
 	}
 
-	pb->width = w;
-	pb->height = h;
+	return scr;
 }
 
 extern Pixbuf_t *
-pixbuf_new(xcb_connection_t *conn, xcb_window_t win, int w, int h)
+pixbuf_new(xcb_connection_t *conn, xcb_drawable_t container, int w, int h)
 {
-	xcb_screen_t *scr;
 	Pixbuf_t *pb;
-
-	scr = xcb_setup_roots_iterator(xcb_get_setup(conn)).data;
-
-	if (NULL == scr)
-		die("can't get default screen");
 
 	pb = xcalloc(1, sizeof(Pixbuf_t));
 
 	pb->conn = conn;
-	pb->win = win;
-	pb->scr = scr;
-	pb->viewport_width = w;
-	pb->viewport_height = h;
-
+	pb->scr = __get_default_screen(conn);
 	pb->gc = xcb_generate_id(conn);
-	pb->shm = __x_check_mit_shm_extension(conn) ? 1 : 0;
+	pb->cont.drawable = container;
 
-	xcb_create_gc(conn, pb->gc, win, 0, NULL);
+	xcb_create_gc(conn, pb->gc, container, 0, NULL);
 
-	__pixbuf_set_size(pb, w, h);
+	if (__is_shm_extension_available(conn)) {
+
+		pb->is_shm = true;
+
+		pb->shm.seg = xcb_generate_id(conn);
+		pb->shm.pixmap = xcb_generate_id(conn);
+		pb->shm.id = shmget(IPC_PRIVATE, w*h*4, IPC_CREAT | 0600);
+
+		if (pb->shm.id < 0) die("shmget:");
+
+		pb->px = shmat(pb->shm.id, NULL, 0);
+
+		if (SHM_INVALID_MEM == pb->px) {
+			shmctl(pb->shm.id, IPC_RMID, NULL);
+			die("shmat:");
+		}
+
+		xcb_shm_attach(conn, pb->shm.seg, pb->shm.id, 0);
+		xcb_shm_create_pixmap(conn, pb->shm.pixmap, container,
+				w, h, pb->scr->root_depth, pb->shm.seg, 0);
+
+	} else {
+
+		pb->is_shm = false;
+
+		w = CLAMP(w, 0, 2000);
+		h = CLAMP(h, 0, 2000);
+
+		pb->px = xmalloc(w*h*4);
+
+		pb->image = xcb_image_create_native(conn, w, h,
+				XCB_IMAGE_FORMAT_Z_PIXMAP, pb->scr->root_depth,
+				pb->px, w*h*4, (uint8_t *)pb->px);
+
+	}
+
+	pb->pixman_image = pixman_image_create_bits_no_clear(
+			PIXMAN_a8r8g8b8, w, h, pb->px, w*4);
+
+	pb->width  = pb->cont.width  = w;
+	pb->height = pb->cont.height = h;
 
 	return pb;
 }
 
 extern int
-pixbuf_get_width(Pixbuf_t *pb)
+pixbuf_get_width(const Pixbuf_t *pb)
 {
 	return pb->width;
 }
 
 extern int
-pixbuf_get_height(Pixbuf_t *pb)
+pixbuf_get_height(const Pixbuf_t *pb)
 {
 	return pb->height;
 }
 
-extern int
-pixbuf_get(Pixbuf_t *pb, int x, int y, uint32_t *color)
+extern pixman_image_t *
+pixbuf_get_pixman_image(const Pixbuf_t *pb)
 {
-	if (x >= 0 && y >= 0 && x < pb->width && y < pb->height) {
-		*color = pb->px[y*pb->width+x];
-		return 1;
-	}
-	return 0;
+	return pb->pixman_image;
 }
 
 extern void
-pixbuf_set(Pixbuf_t *pb, int x, int y, uint32_t color)
+pixbuf_set_container_size(Pixbuf_t *pb, int cw, int ch)
 {
-	if (x >= 0 && y >= 0 && x < pb->width && y < pb->height)
-		pb->px[y*pb->width+x] = color;
-}
-
-extern void
-pixbuf_set_viewport(Pixbuf_t *pb, int vw, int vh)
-{
-	pb->pos.x += ((float)vw - pb->viewport_width) / 2;
-	pb->pos.y += ((float)vh - pb->viewport_height) / 2;
-
-	pb->viewport_width = vw;
-	pb->viewport_height = vh;
+	pb->x += ((float)cw - pb->cont.width) / 2;
+	pb->y += ((float)ch - pb->cont.height) / 2;
+	pb->cont.width  = cw;
+	pb->cont.height = ch;
 }
 
 extern void
@@ -215,28 +212,71 @@ pixbuf_clear(Pixbuf_t *pb, uint32_t color)
 }
 
 extern void
-pixbuf_render(Pixbuf_t *pb)
+pixbuf_render(const Pixbuf_t *pb)
 {
-	if (pb->pos.y > 0)
-		xcb_clear_area(pb->conn, 0, pb->win, 0, 0, pb->viewport_width, pb->pos.y);
+	//                  cont.width
+	//  ◄───────────────────────────────────────►
+	//  a───────────┬───────────────b────────────┐ ▲
+	//  │           │               │            │ │
+	//  │           │               │            │ │
+	//  │           │               │            │ │
+	//  │           │               │            │ │ c
+	//  │           │               │            │ │ o
+	//  ├───────────┼───────────────┼────────────┤ │ n
+	//  │           │pixbuf         │            │ │ t
+	//  │           │               │            │ │ .
+	//  │           │               │            │ │ h
+	//  │           │               │            │ │ e
+	//  │           │               │            │ │ i
+	//  c───────────┼───────────────┼────────────┤ │ g
+	//  │           │               │            │ │ h
+	//  │           │               │            │ │ t
+	//  │           │               │            │ │
+	//  │           │               │            │ │
+	//  │           │               │            │ │
+	//  └───────────┴───────────────┴────────────┘ ▼
 
-	if (pb->pos.y + pb->height < pb->viewport_height)
-		xcb_clear_area(pb->conn, 0, pb->win, 0, pb->pos.y + pb->height,
-				pb->viewport_width, pb->viewport_height - (pb->pos.y + pb->height));
+	int a_x, a_y, b_x, b_y, c_x, c_y;
 
-	if (pb->pos.x > 0)
-		xcb_clear_area(pb->conn, 0, pb->win, 0, 0, pb->pos.x, pb->viewport_height);
+	a_x = 0;
+	a_y = 0;
 
-	if (pb->pos.x + pb->width < pb->viewport_width)
-		xcb_clear_area(pb->conn, 0, pb->win, pb->pos.x + pb->width, 0,
-				pb->viewport_width - (pb->pos.x + pb->width), pb->viewport_height);
+	b_x = pb->x + pb->width;
+	b_y = 0;
 
-	if (pb->shm) {
-		xcb_copy_area(pb->conn, pb->x.shm.pixmap, pb->win,
-				pb->gc, 0, 0, pb->pos.x, pb->pos.y, pb->width, pb->height);
+	c_x = 0;
+	c_y = pb->y + pb->height;
+
+	if (pb->y > 0) {
+		// Clear top area
+		xcb_clear_area(pb->conn, 0, pb->cont.drawable, a_x, a_y,
+				pb->cont.width, pb->y);
+	}
+
+	if (pb->x > 0) {
+		// Clear left area
+		xcb_clear_area(pb->conn, 0, pb->cont.drawable, a_x, a_y,
+				pb->x, pb->cont.height);
+	}
+
+	if (pb->y + pb->height < pb->cont.height) {
+		// Clear bottom area
+		xcb_clear_area(pb->conn, 0, pb->cont.drawable, c_x, c_y,
+				pb->cont.width, pb->cont.height - c_y);
+	}
+
+	if (pb->x + pb->width < pb->cont.width) {
+		// Clear right area
+		xcb_clear_area(pb->conn, 0, pb->cont.drawable, b_x, b_y,
+				pb->cont.width - b_x, pb->cont.height);
+	}
+
+	if (pb->is_shm) {
+		xcb_copy_area(pb->conn, pb->shm.pixmap, pb->cont.drawable,
+				pb->gc, 0, 0, pb->x, pb->y, pb->width, pb->height);
 	} else {
-		xcb_image_put(pb->conn, pb->win, pb->gc,
-				pb->x.image, pb->pos.x, pb->pos.y, 0);
+		xcb_image_put(pb->conn, pb->cont.drawable, pb->gc,
+				pb->image, pb->x, pb->y, 0);
 	}
 
 	xcb_flush(pb->conn);
@@ -247,14 +287,16 @@ pixbuf_free(Pixbuf_t *pb)
 {
 	xcb_free_gc(pb->conn, pb->gc);
 
-	if (pb->shm) {
-		shmctl(pb->x.shm.id, IPC_RMID, NULL);
-		xcb_shm_detach(pb->conn, pb->x.shm.seg);
+	if (pb->is_shm) {
+		shmctl(pb->shm.id, IPC_RMID, NULL);
+		xcb_shm_detach(pb->conn, pb->shm.seg);
 		shmdt(pb->px);
-		xcb_free_pixmap(pb->conn, pb->x.shm.pixmap);
+		xcb_free_pixmap(pb->conn, pb->shm.pixmap);
 	} else {
-		xcb_image_destroy(pb->x.image);
+		xcb_image_destroy(pb->image);
 	}
+
+	pixman_image_unref(pb->pixman_image);
 
 	free(pb);
 }

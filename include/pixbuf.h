@@ -18,27 +18,33 @@
 
 #pragma once
 
+#include <pixman.h>
 #include <xcb/xcb.h>
+
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
 typedef struct Pixbuf Pixbuf_t;
 
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+
 extern Pixbuf_t *
-pixbuf_new(xcb_connection_t *conn, xcb_window_t win, int w, int h);
+pixbuf_new(xcb_connection_t *conn, xcb_drawable_t container, int w, int h);
 
 extern int
-pixbuf_get_width(Pixbuf_t *pb);
+pixbuf_get_width(const Pixbuf_t *pb);
 
 extern int
-pixbuf_get_height(Pixbuf_t *pb);
+pixbuf_get_height(const Pixbuf_t *pb);
 
-extern int
-pixbuf_get(Pixbuf_t *pb, int x, int y, uint32_t *color);
+extern pixman_image_t *
+pixbuf_get_pixman_image(const Pixbuf_t *pb);
 
 extern void
-pixbuf_set(Pixbuf_t *pb, int x, int y, uint32_t color);
-
-extern void
-pixbuf_set_viewport(Pixbuf_t *pb, int vw, int vh);
+pixbuf_set_container_size(Pixbuf_t *pb, int cw, int ch);
 
 extern void
 pixbuf_rect(Pixbuf_t *pb, int x, int y, int w, int h, uint32_t color);
@@ -47,7 +53,7 @@ extern void
 pixbuf_clear(Pixbuf_t *pb, uint32_t color);
 
 extern void
-pixbuf_render(Pixbuf_t *pb);
+pixbuf_render(const Pixbuf_t *pb);
 
 extern void
 pixbuf_free(Pixbuf_t *pb);

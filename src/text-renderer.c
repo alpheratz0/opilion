@@ -16,156 +16,157 @@
 
 */
 
-#include <stdlib.h>
+#include <pixman.h>
+#include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <fcft/fcft.h>
 #include <string.h>
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include <fontconfig/fontconfig.h>
+#include <ctype.h>
 
 #include "log.h"
 #include "text-renderer.h"
 #include "pixbuf.h"
 #include "utils.h"
-#include "color.h"
 
-#define CHKFTERR(name,err) do {                                \
-	FT_Error error;                                            \
-	error = (err);                                             \
-	if (error != 0)                                            \
-		die(name " failed with error code: %d", (int)(error)); \
-} while (0)
+#define LEN(arr) (sizeof(arr)/sizeof(arr[0]))
 
 struct TextRenderer {
-	FT_Library library;
-	FT_Face face;
-	int size;
-	int height;
-	int width;
+	struct fcft_font *font;
+	struct {
+		uint32_t color;
+		pixman_color_t pcolor;
+		pixman_image_t *image;
+	} colors[16];
 };
 
-static FT_GlyphSlot
-__get_glyph(TextRenderer_t *tr, char c)
+static pixman_color_t
+__pixman_color_from_uint32(uint32_t c)
 {
-	CHKFTERR("FT_Load_Char", FT_Load_Char(tr->face, c, FT_LOAD_RENDER));
-	return tr->face->glyph;
+	pixman_color_t pc;
+	pc.red = ((c>>16) & 0xff) * 257;
+	pc.green = ((c>>8) & 0xff) * 257;
+	pc.blue = ((c>>0) & 0xff) * 257;
+	return pc;
 }
 
-static char *
-__query_font(const char *family)
+static pixman_image_t *
+__text_renderer_get_image_for_color(TextRenderer_t *tr, uint32_t c)
 {
-	FcPattern *pattern;
-	FcPattern *match;
-	FcResult result;
-	FcValue v;
-	char *path = NULL;
+	size_t i;
 
-	if ((pattern = FcNameParse((const FcChar8 *)(family)))) {
-		FcConfigSubstitute(0, pattern, FcMatchPattern);
-		FcDefaultSubstitute(pattern);
-
-		if ((match = FcFontMatch(0, pattern, &result))) {
-			FcPatternGet(match, FC_FAMILY, 0, &v);
-
-			if (strcmp(family, (char *)(v.u.s)) == 0) {
-				FcPatternGet(match, FC_FILE, 0, &v);
-				path = xstrdup((char *)(v.u.s));
-			}
-
-			FcPatternDestroy(match);
-		}
-
-		FcPatternDestroy(pattern);
-		FcFini();
+	for (i = 0; i < LEN(tr->colors); ++i) {
+		if (NULL == tr->colors[i].image) break;
+		if (c != tr->colors[i].color) continue;
+		return tr->colors[i].image;
 	}
 
-	return path;
+	if (i == LEN(tr->colors))
+		return NULL;
+
+	tr->colors[i].color = c;
+	tr->colors[i].pcolor = __pixman_color_from_uint32(c);
+	tr->colors[i].image = pixman_image_create_solid_fill(&tr->colors[i].pcolor);
+
+	return tr->colors[i].image;
 }
 
 extern TextRenderer_t *
 text_renderer_new(const char *font_family, int size)
 {
-	char *path;
-	FT_Library lib;
-	FT_Face face;
 	TextRenderer_t *tr;
+	char font_query[128];
 
-	if (NULL == (path = __query_font(font_family)))
-		die("font family not found: %s", font_family);
+	snprintf(font_query, sizeof(font_query), "%s:size=%d", font_family, size);
 
-	CHKFTERR("FT_Init_FreeType", FT_Init_FreeType(&lib));
-	CHKFTERR("FT_New_Face", FT_New_Face(lib, path, 0, &face));
-	CHKFTERR("FT_Set_Char_Size", FT_Set_Char_Size(face, 0, size * 64, 72, 72));
-	CHKFTERR("FT_Load_Char", FT_Load_Char(face, '0', FT_LOAD_RENDER));
+	fcft_init(FCFT_LOG_COLORIZE_ALWAYS, false, FCFT_LOG_CLASS_NONE);
 
-	tr = xmalloc(sizeof(TextRenderer_t));
+	if (!fcft_set_scaling_filter(FCFT_SCALING_FILTER_LANCZOS3))
+		die("fcft_set_scaling_filter failed");
 
-	tr->library = lib;
-	tr->face = face;
-	tr->size = size;
-	tr->width = face->glyph->advance.x >> 6;
-	tr->height = (face->size->metrics.ascender - face->size->metrics.descender) >> 6;
+	tr = xcalloc(1, sizeof(TextRenderer_t));
 
-	free(path);
+	tr->font = fcft_from_name(1, (const char *[]){font_query}, NULL);
+
+	if (NULL == tr->font)
+		die("fcft_from_name couldn't load font: %s:size=%d", font_family, size);
+
+	fcft_set_emoji_presentation(tr->font, FCFT_EMOJI_PRESENTATION_DEFAULT);
 
 	return tr;
 }
 
-extern void
+extern int
 text_renderer_draw_char(TextRenderer_t *tr, Pixbuf_t *pb, char c,
 		int x, int y, uint32_t color)
 {
-	FT_GlyphSlot glyph;
-	uint32_t width, height, xmap, ymap, gray, cx, cy;
-	uint32_t prev_color;
+	pixman_image_t *color_img;
+	const struct fcft_glyph *g;
 
-	glyph = __get_glyph(tr, c);
-	height = glyph->bitmap.rows;
-	width = glyph->bitmap.width;
+	g = fcft_rasterize_char_utf32(tr->font, c, FCFT_SUBPIXEL_DEFAULT);
 
-	for (cx = 0; cx < height; ++cx) {
-		for (cy = 0; cy < width; ++cy) {
-			xmap = x + cy + glyph->bitmap_left;
-			ymap = y + cx - glyph->bitmap_top + tr->size;
-			gray = glyph->bitmap.buffer[cx*width+cy];
+	if (NULL == g ||
+			pixman_image_get_format(g->pix) == PIXMAN_a8r8g8b8)
+		return 0;
 
-			if (pixbuf_get(pb, xmap, ymap, &prev_color)) {
-				pixbuf_set(pb, xmap, ymap,
-						color_mix(prev_color, color, gray));
-			}
-		}
-	}
+	color_img = __text_renderer_get_image_for_color(tr, color);
+
+	pixman_image_composite32(
+			PIXMAN_OP_OVER, color_img, g->pix, pixbuf_get_pixman_image(pb), 0, 0, 0, 0,
+			x + g->x, y + tr->font->ascent - g->y, g->width, g->height);
+
+	return g->advance.x;
 }
 
-extern void
+extern int
 text_renderer_draw_string(TextRenderer_t *tr, Pixbuf_t *pb, const char *str,
 		int x, int y, uint32_t color)
 {
 	size_t i, len;
+	int w;
 
+	w = 0;
 	len = strlen(str);
 
 	for (i = 0; i < len && str[i] != '\n'; ++i) {
-		text_renderer_draw_char(tr, pb, str[i],
-				x+i*tr->width, y, color);
+		w += text_renderer_draw_char(tr, pb, str[i],
+				x+w, y, color);
 	}
+
+	return w;
 }
 
 extern int
-text_renderer_text_width(TextRenderer_t *tr, const char *str)
+text_renderer_text_width(const TextRenderer_t *tr, const char *str)
 {
-	return strlen(str) * tr->width;
+	int width;
+	const struct fcft_glyph *g;
+
+	width = 0;
+
+	while (*str) {
+		g = fcft_rasterize_char_utf32(tr->font, *str++, FCFT_SUBPIXEL_DEFAULT);
+		if (NULL == g || pixman_image_get_format(g->pix) == PIXMAN_a8r8g8b8) continue;
+		width += g->advance.x;
+	}
+
+	return width;
 }
 
 extern int
-text_renderer_text_height(TextRenderer_t *tr)
+text_renderer_text_height(const TextRenderer_t *tr)
 {
-	return tr->height;
+	return tr->font->height;
 }
 
 extern void
 text_renderer_free(TextRenderer_t *tr)
 {
-	FT_Done_FreeType(tr->library);
+	size_t i;
+	for (i = 0; i < LEN(tr->colors); ++i) {
+		if (NULL != tr->colors[i].image)
+			pixman_image_unref(tr->colors[i].image);
+	}
+	fcft_fini();
 	free(tr);
 }
