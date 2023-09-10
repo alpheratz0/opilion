@@ -24,8 +24,10 @@
 #include "text-renderer.h"
 
 extern void
-render_util_render_slider(Pixbuf_t *pb, int x, int y, int w, int h, int pct, const uint32_t c[2]);
+render_util_render_slider(Pixbuf_t *pb, int x, int y, int w, int h, int pct,
+		const uint32_t c[2]);
 
 extern void
-render_util_render_key_value_pair(Pixbuf_t *pb, int x, int y, int w, TextRenderer_t *tr, const char *key, uint32_t key_color,
+render_util_render_key_value_pair(Pixbuf_t *pb, int x, int y, int w,
+		TextRenderer_t *tr, const char *key, uint32_t key_color,
 		const char *value, uint32_t value_color);

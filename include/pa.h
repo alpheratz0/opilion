@@ -55,16 +55,19 @@ extern bool
 pulseaudio_sink_is_muted(const PulseAudioSink_t *s);
 
 extern void
-pulseaudio_sink_format_volume(const PulseAudioSink_t *s, size_t str_len, char *str);
+pulseaudio_sink_format_volume(const PulseAudioSink_t *s, size_t len, char *str);
 
 extern void
-pulseaudio_sink_set_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s, int v);
+pulseaudio_sink_set_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s,
+		int v);
 
 extern void
-pulseaudio_sink_increase_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s, int v);
+pulseaudio_sink_increase_volume(PulseAudioConnection_t *pac,
+		PulseAudioSink_t *s, int v);
 
 extern void
-pulseaudio_sink_set_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s, bool mute);
+pulseaudio_sink_set_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s,
+		bool mute);
 
 extern void
 pulseaudio_sink_toggle_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s);

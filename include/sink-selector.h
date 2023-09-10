@@ -42,10 +42,12 @@ struct SinkColorTheme {
 /////////////////////////////////////////////////////////////
 
 extern SinkColorTheme_t
-sink_color_theme_from(uint32_t c_app_name, uint32_t c_volume, const uint32_t c_volume_bar[2]);
+sink_color_theme_from(uint32_t c_app_name, uint32_t c_volume,
+		const uint32_t c_volume_bar[2]);
 
 extern SinkSelector_t *
-sink_selector_new(PulseAudioSinkList_t *sl, TextRenderer_t *tr, SinkColorTheme_t *ct_nor, SinkColorTheme_t *ct_sel);
+sink_selector_new(PulseAudioSinkList_t *sl, TextRenderer_t *tr,
+		SinkColorTheme_t *ct_nor, SinkColorTheme_t *ct_sel);
 
 extern PulseAudioSink_t *
 sink_selector_get_selected(const SinkSelector_t *ss);
