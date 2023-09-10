@@ -112,9 +112,9 @@ text_renderer_draw_char(TextRenderer_t *tr, Pixbuf_t *pb, char c,
 
 	color_img = __text_renderer_get_image_for_color(tr, color);
 
-	pixman_image_composite32(
-			PIXMAN_OP_OVER, color_img, g->pix, pixbuf_get_pixman_image(pb), 0, 0, 0, 0,
-			x + g->x, y + tr->font->ascent - g->y, g->width, g->height);
+	pixman_image_composite32(PIXMAN_OP_OVER, color_img, g->pix,
+			pixbuf_get_pixman_image(pb), 0, 0, 0, 0, x + g->x,
+			y + tr->font->ascent - g->y, g->width, g->height);
 
 	return g->advance.x;
 }
@@ -147,7 +147,8 @@ text_renderer_text_width(const TextRenderer_t *tr, const char *str)
 
 	while (*str) {
 		g = fcft_rasterize_char_utf32(tr->font, *str++, FCFT_SUBPIXEL_DEFAULT);
-		if (NULL == g || pixman_image_get_format(g->pix) == PIXMAN_a8r8g8b8) continue;
+		if (NULL == g || pixman_image_get_format(g->pix) == PIXMAN_a8r8g8b8)
+			continue;
 		width += g->advance.x;
 	}
 

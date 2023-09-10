@@ -68,7 +68,8 @@ __sink_render_to(const PulseAudioSink_t *s, TextRenderer_t *tr,
 }
 
 extern SinkColorTheme_t
-sink_color_theme_from(uint32_t c_app_name, uint32_t c_volume, const uint32_t c_volume_bar[2])
+sink_color_theme_from(uint32_t c_app_name, uint32_t c_volume,
+		const uint32_t c_volume_bar[2])
 {
 	SinkColorTheme_t ct;
 	ct.c_app_name = c_app_name;
@@ -79,7 +80,8 @@ sink_color_theme_from(uint32_t c_app_name, uint32_t c_volume, const uint32_t c_v
 }
 
 extern SinkSelector_t *
-sink_selector_new(PulseAudioSinkList_t *sl, TextRenderer_t *tr, SinkColorTheme_t *ct_nor, SinkColorTheme_t *ct_sel)
+sink_selector_new(PulseAudioSinkList_t *sl, TextRenderer_t *tr,
+		SinkColorTheme_t *ct_nor, SinkColorTheme_t *ct_sel)
 {
 	SinkSelector_t *ss;
 
@@ -126,21 +128,26 @@ extern void
 sink_selector_render_to(const SinkSelector_t *ss, Pixbuf_t *pb)
 {
 	int i, x, y;
-	int sink_height;
+	int pb_w, pb_h, sink_h;
+	PulseAudioSink_t *sink;
+	const SinkColorTheme_t *ct;
 
-	sink_height = text_renderer_text_height(ss->tr) + SINK_VOL_SLIDER_HEIGHT;
-	x = (pixbuf_get_width(pb) - SINK_WIDTH) / 2;
+	pb_w = pixbuf_get_width(pb);
+	pb_h = pixbuf_get_height(pb);
+	sink_h = text_renderer_text_height(ss->tr) + SINK_VOL_SLIDER_HEIGHT;
+	x = (pb_w - SINK_WIDTH) / 2;
 
 	if (ss->len > 5) {
-		y = (pixbuf_get_height(pb) - sink_height) / 2 - ss->selected * (sink_height + SINK_MARGIN);
+		y = (pb_h - sink_h) / 2 - ss->selected * (sink_h + SINK_MARGIN);
 	} else {
-		y = (pixbuf_get_height(pb) - ss->len * sink_height - (ss->len - 1) * SINK_MARGIN) / 2;
+		y = (pb_h - ss->len * sink_h - (ss->len - 1) * SINK_MARGIN) / 2;
 	}
 
 	for (i = 0; i < ss->len; ++i) {
-		__sink_render_to(pulseaudio_sink_list_get(ss->sinks, i), ss->tr,
-				i == ss->selected ? &ss->ct_sel : &ss->ct_nor, x, y, pb);
-		y += sink_height + SINK_MARGIN;
+		sink = pulseaudio_sink_list_get(ss->sinks, i);
+		ct = i == ss->selected ? &ss->ct_sel : &ss->ct_nor;
+		__sink_render_to(sink, ss->tr, ct, x, y, pb);
+		y += sink_h + SINK_MARGIN;
 	}
 }
 

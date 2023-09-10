@@ -238,7 +238,8 @@ h_key_press(xcb_key_press_event_t *ev)
 	case XKB_KEY_4: case XKB_KEY_5:
 	case XKB_KEY_6: case XKB_KEY_7:
 	case XKB_KEY_8: case XKB_KEY_9:
-		pulseaudio_sink_set_volume(pac, sink, (((key - XKB_KEY_0 + 9) % 10 + 1) * 10));
+		pulseaudio_sink_set_volume(pac, sink,
+				(((key - XKB_KEY_0 + 9) % 10 + 1) * 10));
 		break;
 	default:
 		return;
@@ -320,8 +321,12 @@ main(int argc, char **argv)
 
 	text_renderer = text_renderer_new("Terminus", 12);
 
-	ct_nor = sink_color_theme_from(0xffffff, 0xffffff, (const uint32_t []){ 0x333333, 0x555555 });
-	ct_sel = sink_color_theme_from(0xa0e547, 0xa0e547, (const uint32_t []){ 0x333333, 0x5e5eed });
+	ct_nor = sink_color_theme_from(0xffffff, 0xffffff,
+			(const uint32_t []){ 0x333333, 0x555555 });
+
+	ct_sel = sink_color_theme_from(0xa0e547, 0xa0e547,
+			(const uint32_t []){ 0x333333, 0x5e5eed });
+
 	sink_selector = sink_selector_new(sinks, text_renderer, &ct_nor, &ct_sel);
 
 	sink_selector_render_to(sink_selector, pb);

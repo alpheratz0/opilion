@@ -68,7 +68,8 @@ __context_state_change_cb(UNUSED pa_context *ctx, void *userdata)
 }
 
 static void
-__get_sink_input_cb(pa_context *ctx, const pa_sink_input_info *sink_input, int eol, void *userdata)
+__get_sink_input_cb(pa_context *ctx, const pa_sink_input_info *sink_input,
+		int eol, void *userdata)
 {
 	PulseAudioConnection_t *pac;
 	PulseAudioSinkList_t *sink_list;
@@ -220,7 +221,8 @@ pulseaudio_sink_format_volume(const PulseAudioSink_t *s, size_t sz, char *str)
 }
 
 extern void
-pulseaudio_sink_set_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s, int v)
+pulseaudio_sink_set_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s,
+		int v)
 {
 	pa_operation *po;
 
@@ -240,14 +242,16 @@ pulseaudio_sink_set_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s, int
 }
 
 extern void
-pulseaudio_sink_increase_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s, int v)
+pulseaudio_sink_increase_volume(PulseAudioConnection_t *pac,
+		PulseAudioSink_t *s, int v)
 {
 	pulseaudio_sink_set_volume(pac, s,
 			pulseaudio_sink_get_volume(s)+v);
 }
 
 extern void
-pulseaudio_sink_set_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s, bool mute)
+pulseaudio_sink_set_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s,
+		bool mute)
 {
 	pa_operation *po;
 
