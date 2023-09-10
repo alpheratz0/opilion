@@ -28,8 +28,9 @@ PLIBS = -L$(X11LIB) -lxcb -lxcb-shm -lxcb-image \
 		`$(PKG_CONFIG) --libs fcft` \
 		`$(PKG_CONFIG) --libs pixman-1`
 
-CPPFLAGS = -DVERSION=\"$(VERSION)\"
-CFLAGS = -Wall -Wextra -pedantic $(PINCS) $(CPPFLAGS)
+CFLAGS = -Wall -Wextra -pedantic -Os $(PINCS) $(CPPFLAGS) \
+		 -DVERSION=\"$(VERSION)\"
+
 LDFLAGS = -s $(PLIBS)
 
 CC = cc
