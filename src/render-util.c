@@ -19,13 +19,14 @@
 #include <stdint.h>
 
 #include "pixbuf.h"
+#include "utils.h"
 #include "text-renderer.h"
 
 extern void
 render_util_render_slider(Pixbuf_t *pb, int x, int y, int w, int h, int pct, const uint32_t c[2])
 {
 	pixbuf_rect(pb, x, y, w, h, c[0]);
-	pixbuf_rect(pb, x, y, (w*pct)/100, h, c[1]);
+	pixbuf_rect(pb, x, y, (w*CLAMP(pct,0,100))/100, h, c[1]);
 }
 
 extern void

@@ -223,7 +223,7 @@ pulseaudio_sink_set_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s, int
 	pa_operation *po;
 
 	pa_cvolume_set(&s->volume, s->channels,
-			CLAMP(v,0,100)*(PA_VOLUME_NORM/100));
+			CLAMP(v,0,v)*(PA_VOLUME_NORM/100));
 
 	po = pa_context_set_sink_input_volume(pac->ctx, s->id, &s->volume,
 			__update_sink_input_cb, pac);
