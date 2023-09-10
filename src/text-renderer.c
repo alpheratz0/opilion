@@ -47,6 +47,7 @@ __pixman_color_from_uint32(uint32_t c)
 	pc.red = ((c>>16) & 0xff) * 257;
 	pc.green = ((c>>8) & 0xff) * 257;
 	pc.blue = ((c>>0) & 0xff) * 257;
+	pc.alpha = 0xffff;
 	return pc;
 }
 
