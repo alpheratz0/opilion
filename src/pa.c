@@ -207,13 +207,15 @@ pulseaudio_sink_is_muted(const PulseAudioSink_t *s)
 }
 
 extern void
-pulseaudio_sink_format_volume(const PulseAudioSink_t *s, size_t str_len, char *str)
+pulseaudio_sink_format_volume(const PulseAudioSink_t *s, size_t sz, char *str)
 {
+	int vol;
+
 	if (pulseaudio_sink_is_muted(s)) {
-		strncpy(str, "muted", str_len-1);
+		strncpy(str, "muted", sz-1);
 	} else {
-		snprintf(str, str_len, "%u%%",
-				pulseaudio_sink_get_volume(s));
+		vol = pulseaudio_sink_get_volume(s);
+		snprintf(str, sz, "%u%%", vol);
 	}
 }
 
