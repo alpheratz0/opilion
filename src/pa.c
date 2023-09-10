@@ -289,7 +289,7 @@ extern void
 pulseaudio_sink_list_resize(PulseAudioSinkList_t *sl, size_t new_size)
 {
 	if (new_size > sl->cap) {
-		sl->sinks = realloc(sl->sinks,
+		sl->sinks = xrealloc(sl->sinks,
 			(sl->cap=new_size) * sizeof(void *));
 	}
 }

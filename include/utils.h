@@ -32,5 +32,8 @@ xmalloc(size_t size);
 extern void *
 xcalloc(size_t nmemb, size_t size);
 
+extern void *
+xrealloc(void *orig_ptr, size_t size);
+
 extern char *
 xstrdup(const char *str);

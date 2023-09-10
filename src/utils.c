@@ -39,6 +39,15 @@ xcalloc(size_t nmemb, size_t size)
 	return ptr;
 }
 
+extern void *
+xrealloc(void *orig_ptr, size_t size)
+{
+	void *ptr;
+	if (NULL == (ptr = realloc(orig_ptr, size)))
+		die("OOM");
+	return ptr;
+}
+
 extern char *
 xstrdup(const char *str)
 {
