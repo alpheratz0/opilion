@@ -51,6 +51,9 @@ extern PulseAudioSink_t *
 sink_selector_get_selected(const SinkSelector_t *ss);
 
 extern void
+sink_selector_set_sink_list(SinkSelector_t *ss, PulseAudioSinkList_t *sl);
+
+extern void
 sink_selector_select_up(SinkSelector_t *ss);
 
 extern void

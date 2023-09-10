@@ -103,6 +103,14 @@ sink_selector_get_selected(const SinkSelector_t *ss)
 }
 
 extern void
+sink_selector_set_sink_list(SinkSelector_t *ss, PulseAudioSinkList_t *sl)
+{
+	ss->sinks = sl;
+	ss->selected = 0;
+	ss->len = pulseaudio_sink_list_get_length(sl);
+}
+
+extern void
 sink_selector_select_up(SinkSelector_t *ss)
 {
 	ss->selected = LOOPVAL(ss->selected-1, ss->len);

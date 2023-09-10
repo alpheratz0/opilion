@@ -61,6 +61,7 @@
 
 static Pixbuf_t *pb;
 static PulseAudioConnection_t *pac;
+static PulseAudioSinkList_t *sinks;
 static SinkSelector_t *sink_selector;
 static xcb_connection_t *conn;
 static xcb_screen_t *scr;
@@ -227,6 +228,11 @@ h_key_press(xcb_key_press_event_t *ev)
 	case XKB_KEY_k:
 		sink_selector_select_up(sink_selector);
 		break;
+	case XKB_KEY_F5:
+		pulseaudio_sink_list_free(sinks);
+		sinks = pulseaudio_get_all_input_sinks(pac);
+		sink_selector_set_sink_list(sink_selector, sinks);
+		break;
 	case XKB_KEY_0: case XKB_KEY_1:
 	case XKB_KEY_2: case XKB_KEY_3:
 	case XKB_KEY_4: case XKB_KEY_5:
@@ -284,7 +290,6 @@ is_instance_running(void)
 int
 main(int argc, char **argv)
 {
-	PulseAudioSinkList_t *sinks;
 	TextRenderer_t *text_renderer;
 	SinkColorTheme_t ct_nor, ct_sel;
 	xcb_generic_event_t *ev;
