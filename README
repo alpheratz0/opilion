@@ -1,5 +1,5 @@
-xpavm is a pulseaudio volume manager for X.
-For more information about it's usage check `man xpavm`.
+opilion is a pulseaudio volume manager for X.
+For more information about it's usage check `man opilion`.
 
 This program requires libxcb and libxcb-image, libxcb-keysyms, libxcb-xkb,
 libxcb-shm, libpulse, libfcft and libpixman-1 to be installed.

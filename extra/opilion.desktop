@@ -1,10 +1,10 @@
 [Desktop Entry]
 Categories=AudioVideo;Audio;
 Type=Application
-TryExec=xpavm
-Exec=xpavm
+TryExec=opilion
+Exec=opilion
 GenericName=PulseAudio Volume Manager
-Name=xpavm
+Name=opilion
 Comment=control pulseaudio sink inputs volume
 Terminal=false
-StartupWMClass=xpavm
+StartupWMClass=opilion

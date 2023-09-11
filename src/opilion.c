@@ -14,9 +14,9 @@
 	with this program; if not, write to the Free Software Foundation, Inc., 59
 	Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-	 _______________________
-	( bind super+v to xpavm )
-	 -----------------------
+	 _________________________
+	( bind super+v to opilion )
+	 -------------------------
 	    o               ,-----._
 	  .  o         .  ,'        `-.__,------._
 	 //   o      __\\'                        `-.
@@ -134,12 +134,12 @@ xwininit(void)
 
 	_NET_WM_NAME = get_x11_atom("_NET_WM_NAME");
 	UTF8_STRING = get_x11_atom("UTF8_STRING");
-	wm_name = "xpavm";
+	wm_name = "opilion";
 
 	xcb_change_property(conn, XCB_PROP_MODE_REPLACE, win,
 		_NET_WM_NAME, UTF8_STRING, 8, strlen(wm_name), wm_name);
 
-	wm_class = "xpavm\0xpavm\0";
+	wm_class = "opilion\0opilion\0";
 	xcb_change_property(conn, XCB_PROP_MODE_REPLACE, win, XCB_ATOM_WM_CLASS,
 		XCB_ATOM_STRING, 8, strlen(wm_class), wm_class);
 
@@ -266,14 +266,14 @@ h_mapping_notify(xcb_mapping_notify_event_t *ev)
 static void
 usage(void)
 {
-	puts("usage: xpavm [-hvw]");
+	puts("usage: opilion [-hvw]");
 	exit(0);
 }
 
 static void
 version(void)
 {
-	puts("xpavm version "VERSION);
+	puts("opilion version "VERSION);
 	exit(0);
 }
 
@@ -282,7 +282,7 @@ is_instance_running(void)
 {
 	int fd, rc;
 
-	fd = open("/tmp/xpavm.pid", O_CREAT | O_RDWR, 0666);
+	fd = open("/tmp/opilion.pid", O_CREAT | O_RDWR, 0666);
 	rc = flock(fd, LOCK_EX | LOCK_NB);
 
 	return rc && errno == EWOULDBLOCK;

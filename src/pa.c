@@ -101,7 +101,7 @@ __update_sink_input_cb(pa_context *ctx, int eol, void *userdata)
 	pac = userdata;
 
 	if (!eol) {
-		// Application was closed after xpavm started?
+		// Application was closed after opilion started?
 		info("couldn't update sink input state: %s",
 				pa_strerror(pa_context_errno(ctx)));
 	}

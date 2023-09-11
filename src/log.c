@@ -28,7 +28,7 @@
 static int
 __log_stderr(const char *s)
 {
-	fprintf(stderr, "xpavm: %s\n", s);
+	fprintf(stderr, "opilion: %s\n", s);
 	return 0;
 }
 
@@ -43,7 +43,7 @@ __log_notify_send(const char *s)
 
 	if (pid == 0) {
 		execlp("notify-send", "notify-send",
-				"xpavm", s, (char *)(NULL));
+				"opilion", s, (char *)(NULL));
 		_exit(127);
 	}
 
