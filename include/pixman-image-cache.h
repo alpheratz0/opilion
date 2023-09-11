@@ -18,5 +18,8 @@
 
 #pragma once
 
+#include <stdint.h>
+#include <pixman.h>
+
 extern pixman_image_t *
 pixman_image_create_solid_fill_cached(uint32_t c);

@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <stddef.h>
 #include <stdbool.h>
 #include <pulse/pulseaudio.h>
 
