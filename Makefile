@@ -17,7 +17,7 @@ OBJ=\
 all: xpavm
 
 xpavm: $(OBJ)
-	$(CC) $(LDFLAGS) -o xpavm $(OBJ)
+	$(CC) $(OBJ) -o xpavm $(LDFLAGS)
 
 clean:
 	rm -f xpavm $(OBJ) xpavm-$(VERSION).tar.gz
