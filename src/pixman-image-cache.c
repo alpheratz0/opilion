@@ -54,7 +54,7 @@ pixman_image_create_solid_fill_cached(uint32_t c)
 			.red = RED(c) * 257,
 			.green = GREEN(c) * 257,
 			.blue = BLUE(c) * 257,
-			.alpha = 0xff
+			.alpha = 0xffff
 		}
 	);
 
