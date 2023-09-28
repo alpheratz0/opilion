@@ -14,7 +14,7 @@ DEPENDENCIES = fcft xcb xcb-shm xcb-image xcb-keysyms xcb-xkb libpulse pixman-1
 INCS = $(shell $(PKG_CONFIG) --cflags $(DEPENDENCIES)) -Iinclude
 LIBS = $(shell $(PKG_CONFIG) --libs $(DEPENDENCIES))
 
-CFLAGS = -Os $(INCS) $(CPPFLAGS) -DVERSION=\"$(VERSION)\"
+CFLAGS = -Os $(INCS) -DVERSION=\"$(VERSION)\"
 LDFLAGS = -s $(LIBS)
 
 CC = cc
