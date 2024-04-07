@@ -1,7 +1,7 @@
 opilion is a pulseaudio volume manager for X.
 For more information about it's usage check `man opilion`.
 
-This program requires libxcb and libxcb-image, libxcb-keysyms, libxcb-xkb,
+This program requires libxcb ,libxcb-image, libxcb-keysyms, libxcb-xkb,
 libxcb-shm, libpulse, libfcft and libpixman-1 to be installed.
 In order to build this program you need to run `make`.
 
