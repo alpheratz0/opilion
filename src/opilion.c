@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022-2023 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2024 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -39,6 +39,7 @@
 
 */
 
+#include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -65,9 +66,8 @@ static PulseAudioSinkList_t *sinks;
 static SinkSelector_t *sink_selector;
 static xcb_connection_t *conn;
 static xcb_screen_t *scr;
-static xcb_window_t win;
+static xcb_window_t win, revert_focus;
 static xcb_key_symbols_t *ksyms;
-static bool start_windowed;
 static bool should_close;
 
 static xcb_atom_t
@@ -91,6 +91,66 @@ get_x11_atom(const char *name)
 	return atom;
 }
 
+static xcb_window_t
+get_focused_window(void)
+{
+	xcb_window_t win;
+	xcb_generic_error_t *error;
+	xcb_get_input_focus_cookie_t cookie;
+	xcb_get_input_focus_reply_t *reply;
+
+	cookie = xcb_get_input_focus(conn);
+	reply = xcb_get_input_focus_reply(conn, cookie, &error);
+
+	if (NULL != error)
+		die("xcb_get_input_focus failed with error code: %hhu",
+				error->error_code);
+
+	win = reply->focus;
+	free(reply);
+
+	return win;
+}
+
+static void
+set_focused_window(xcb_window_t win)
+{
+	xcb_generic_error_t *error;
+	xcb_void_cookie_t cookie;
+
+	cookie = xcb_set_input_focus_checked(conn,
+			XCB_INPUT_FOCUS_POINTER_ROOT, win, XCB_CURRENT_TIME);
+	xcb_flush(conn);
+	error = xcb_request_check(conn, cookie);
+
+	if (NULL != error)
+		die("xcb_set_input_focus failed with error code: %hhu",
+				error->error_code);
+}
+
+static bool
+grab_keyboard(void)
+{
+	bool grabbed;
+	xcb_generic_error_t *error;
+	xcb_grab_keyboard_cookie_t cookie;
+	xcb_grab_keyboard_reply_t *reply;
+
+	grabbed = false;
+	cookie = xcb_grab_keyboard(conn, 1, win, XCB_CURRENT_TIME,
+			XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+	reply = xcb_grab_keyboard_reply(conn, cookie, &error);
+
+	if (NULL != error)
+		die("xcb_grab_keyboard failed with error code: %hhu",
+				error->error_code);
+
+	grabbed = NULL != reply && reply->status == XCB_GRAB_STATUS_SUCCESS;
+	free(reply);
+
+	return grabbed;
+}
+
 static void
 xwininit(void)
 {
@@ -102,10 +162,11 @@ xwininit(void)
 	xcb_atom_t WM_PROTOCOLS,
 			   WM_DELETE_WINDOW;
 
-	xcb_atom_t _NET_WM_STATE,
-			   _NET_WM_STATE_FULLSCREEN;
-
 	xcb_atom_t UTF8_STRING;
+
+	uint32_t override_redirect;
+
+	int grab_attempt;
 
 	conn = xcb_connect(NULL, NULL);
 
@@ -117,12 +178,15 @@ xwininit(void)
 	if (NULL == scr)
 		die("can't get default screen");
 
+	revert_focus = get_focused_window();
+
 	ksyms = xcb_key_symbols_alloc(conn);
 	win = xcb_generate_id(conn);
 
 	xcb_create_window_aux(
 		conn, scr->root_depth, win, scr->root, 0, 0,
-		800, 600, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT,
+		scr->width_in_pixels, scr->height_in_pixels,
+		0, XCB_WINDOW_CLASS_INPUT_OUTPUT,
 		scr->root_visual, XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK,
 		(const xcb_create_window_value_list_t []) {{
 			.background_pixel = 0x000000,
@@ -149,13 +213,9 @@ xwininit(void)
 	xcb_change_property(conn, XCB_PROP_MODE_REPLACE, win,
 		WM_PROTOCOLS, XCB_ATOM_ATOM, 32, 1, &WM_DELETE_WINDOW);
 
-	_NET_WM_STATE = get_x11_atom("_NET_WM_STATE");
-	_NET_WM_STATE_FULLSCREEN = get_x11_atom("_NET_WM_STATE_FULLSCREEN");
-
-	if (!start_windowed) {
-		xcb_change_property(conn, XCB_PROP_MODE_REPLACE, win,
-			_NET_WM_STATE, XCB_ATOM_ATOM, 32, 1, &_NET_WM_STATE_FULLSCREEN);
-	}
+	override_redirect = 1;
+	xcb_change_window_attributes(conn, win, XCB_CW_OVERRIDE_REDIRECT,
+		&override_redirect);
 
 	xcb_xkb_use_extension(conn, XCB_XKB_MAJOR_VERSION, XCB_XKB_MINOR_VERSION);
 
@@ -165,14 +225,25 @@ xwininit(void)
 	);
 
 	pb = pixbuf_new(conn, win, 500, 1000);
+	pixbuf_set_container_size(pb, scr->width_in_pixels, scr->height_in_pixels);
 
 	xcb_map_window(conn, win);
+
+	for (grab_attempt = 10; grab_attempt >= 1; --grab_attempt) {
+		if (grab_keyboard()) break;
+		if (grab_attempt == 1) die("failed to grab keyboard");
+		usleep(100000);
+	}
+
+	xcb_set_input_focus(conn, XCB_INPUT_FOCUS_POINTER_ROOT, win,
+			XCB_CURRENT_TIME);
 	xcb_flush(conn);
 }
 
 static void
 xwindestroy(void)
 {
+	set_focused_window(revert_focus);
 	pixbuf_free(pb);
 	xcb_key_symbols_free(ksyms);
 	xcb_destroy_window(conn, win);
@@ -266,7 +337,7 @@ h_mapping_notify(xcb_mapping_notify_event_t *ev)
 static void
 usage(void)
 {
-	puts("usage: opilion [-hvw]");
+	puts("usage: opilion [-hv]");
 	exit(0);
 }
 
@@ -300,7 +371,6 @@ main(int argc, char **argv)
 			switch ((*argv)[1]) {
 			case 'h': usage(); break;
 			case 'v': version(); break;
-			case 'w': start_windowed = true; break;
 			default: die("invalid option %s", *argv); break;
 			}
 		} else {
