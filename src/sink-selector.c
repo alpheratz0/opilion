@@ -108,8 +108,11 @@ extern void
 sink_selector_set_sink_list(SinkSelector_t *ss, PulseAudioSinkList_t *sl)
 {
 	ss->sinks = sl;
-	ss->selected = 0;
 	ss->len = pulseaudio_sink_list_get_length(sl);
+	if (ss->len == 0)
+		ss->selected = 0;
+	else if (ss->selected >= ss->len)
+		ss->selected = ss->len - 1;
 }
 
 extern void
