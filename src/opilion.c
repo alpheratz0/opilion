@@ -70,6 +70,9 @@ static xcb_window_t win, revert_focus;
 static xcb_key_symbols_t *ksyms;
 static bool should_close;
 
+#define OPILION_WM_NAME "opilion"
+#define OPILION_WM_CLASS "opilion\0opilion\0"
+
 static xcb_atom_t
 get_x11_atom(const char *name)
 {
@@ -154,9 +157,6 @@ grab_keyboard(void)
 static void
 xwininit(void)
 {
-	const char *wm_class,
-		       *wm_name;
-
 	xcb_atom_t _NET_WM_NAME;
 
 	xcb_atom_t WM_PROTOCOLS,
@@ -198,14 +198,12 @@ xwininit(void)
 
 	_NET_WM_NAME = get_x11_atom("_NET_WM_NAME");
 	UTF8_STRING = get_x11_atom("UTF8_STRING");
-	wm_name = "opilion";
 
-	xcb_change_property(conn, XCB_PROP_MODE_REPLACE, win,
-		_NET_WM_NAME, UTF8_STRING, 8, strlen(wm_name), wm_name);
+	xcb_change_property(conn, XCB_PROP_MODE_REPLACE, win, _NET_WM_NAME,
+			UTF8_STRING, 8, sizeof(OPILION_WM_NAME) - 1, OPILION_WM_NAME);
 
-	wm_class = "opilion\0opilion\0";
 	xcb_change_property(conn, XCB_PROP_MODE_REPLACE, win, XCB_ATOM_WM_CLASS,
-		XCB_ATOM_STRING, 8, strlen(wm_class), wm_class);
+		XCB_ATOM_STRING, 8, sizeof(OPILION_WM_CLASS) - 1, OPILION_WM_CLASS);
 
 	WM_PROTOCOLS = get_x11_atom("WM_PROTOCOLS");
 	WM_DELETE_WINDOW = get_x11_atom("WM_DELETE_WINDOW");
