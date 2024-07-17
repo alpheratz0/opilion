@@ -379,13 +379,13 @@ main(int argc, char **argv)
 	if (is_instance_running())
 		die("another instance is already running");
 
-	xwininit();
-
 	pac = pulseaudio_connect();
 	sinks = pulseaudio_get_all_input_sinks(pac);
 
 	if (pulseaudio_sink_list_get_length(sinks) == 0)
 		die("no sinks were found");
+
+	xwininit();
 
 	text_renderer = text_renderer_new("Terminus", 12);
 
