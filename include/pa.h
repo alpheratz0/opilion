@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022-2023 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2025 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -47,7 +47,7 @@ extern PulseAudioSink_t *
 pulseaudio_sink_new(const pa_sink_input_info *sink_input);
 
 extern const char *
-pulseaudio_sink_get_app_name(const PulseAudioSink_t *s);
+pulseaudio_sink_get_display_name(const PulseAudioSink_t *s);
 
 extern int
 pulseaudio_sink_get_volume(const PulseAudioSink_t *s);

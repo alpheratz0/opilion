@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022-2023 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2025 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -20,6 +20,14 @@
 #include <string.h>
 #include "utils.h"
 #include "log.h"
+
+extern const char *
+str_fallback(const char *str, const char *fallback)
+{
+	if (NULL == str)
+		return fallback;
+	return str;
+}
 
 extern void *
 xmalloc(size_t size)

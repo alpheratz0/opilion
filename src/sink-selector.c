@@ -58,7 +58,7 @@ __sink_render_to(const PulseAudioSink_t *s, TextRenderer_t *tr,
 	pulseaudio_sink_format_volume(s, sizeof(volume_str), volume_str);
 
 	render_util_render_key_value_pair(pb, x, y, pixbuf_get_width(pb),
-			tr, pulseaudio_sink_get_app_name(s), ct->c_app_name,
+			tr, pulseaudio_sink_get_display_name(s), ct->c_app_name,
 			volume_str, ct->c_volume);
 
 	render_util_render_slider(pb, x, y+text_renderer_text_height(tr),

@@ -42,7 +42,7 @@ struct PulseAudioConnection {
 
 struct PulseAudioSink {
 	unsigned int id;
-	char *application_name;
+	char display_name[512];
 	pa_cvolume volume;
 	uint8_t channels;
 	bool is_muted;
@@ -170,18 +170,18 @@ extern PulseAudioSink_t *
 pulseaudio_sink_new(const pa_sink_input_info *sink_input)
 {
 	PulseAudioSink_t *s;
-	const char *orig_app_name;
+	const char *app_name, *media_name;
+	bool has_media_name;
 
 	s = xmalloc(sizeof(PulseAudioSink_t));
 
-	orig_app_name = pa_proplist_gets(sink_input->proplist,
-			"application.name");
-
-	if (NULL == orig_app_name)
-		orig_app_name = "Unknown";
+	app_name = pa_proplist_gets(sink_input->proplist, "application.name");
+	media_name = pa_proplist_gets(sink_input->proplist, "media.name");
+	has_media_name = NULL != media_name;
 
 	s->id = sink_input->index;
-	s->application_name = xstrdup(orig_app_name);
+	snprintf(&s->display_name[0], sizeof(s->display_name), "%s%s%s", str_fallback(app_name, "Unknown"),
+			has_media_name ? " - " : "", has_media_name ? media_name : "");
 	s->volume = sink_input->volume;
 	s->channels = sink_input->channel_map.channels;
 	s->is_muted = sink_input->mute > 0;
@@ -190,9 +190,9 @@ pulseaudio_sink_new(const pa_sink_input_info *sink_input)
 }
 
 extern const char *
-pulseaudio_sink_get_app_name(const PulseAudioSink_t *s)
+pulseaudio_sink_get_display_name(const PulseAudioSink_t *s)
 {
-	return s->application_name;
+	return &s->display_name[0];
 }
 
 extern int
@@ -277,7 +277,6 @@ pulseaudio_sink_toggle_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s)
 extern void
 pulseaudio_sink_free(PulseAudioSink_t *s)
 {
-	free(s->application_name);
 	free(s);
 }
 
