@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022-2023 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2025 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -140,7 +140,7 @@ sink_selector_render_to(const SinkSelector_t *ss, Pixbuf_t *pb)
 	sink_h = text_renderer_text_height(ss->tr) + SINK_VOL_SLIDER_HEIGHT;
 	x = (pb_w - SINK_WIDTH) / 2;
 
-	if (ss->len > 5) {
+	if (ss->len > 10) {
 		y = (pb_h - sink_h) / 2 - ss->selected * (sink_h + SINK_MARGIN);
 	} else {
 		y = (pb_h - ss->len * sink_h - (ss->len - 1) * SINK_MARGIN) / 2;
