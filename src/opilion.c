@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022-2024 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2025 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -226,6 +226,7 @@ xwininit(void)
 	pixbuf_set_container_size(pb, scr->width_in_pixels, scr->height_in_pixels);
 
 	xcb_map_window(conn, win);
+	xcb_flush(conn);
 
 	for (grab_attempt = 10; grab_attempt >= 1; --grab_attempt) {
 		if (grab_keyboard()) break;
@@ -235,7 +236,6 @@ xwininit(void)
 
 	xcb_set_input_focus(conn, XCB_INPUT_FOCUS_POINTER_ROOT, win,
 			XCB_CURRENT_TIME);
-	xcb_flush(conn);
 }
 
 static void
