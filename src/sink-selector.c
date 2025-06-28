@@ -28,7 +28,6 @@
 #include "pa.h"
 #include "utils.h"
 
-#define SINK_WIDTH 450
 #define SINK_VOL_SLIDER_HEIGHT 5
 #define SINK_MARGIN 15
 
@@ -58,12 +57,12 @@ __sink_render_to(const PulseAudioSink_t *s, TextRenderer_t *tr,
 
 	pulseaudio_sink_format_volume(s, sizeof(volume_str), volume_str);
 
-	render_util_render_key_value_pair(pb, x, y, SINK_WIDTH,
+	render_util_render_key_value_pair(pb, x, y, pixbuf_get_width(pb),
 			tr, pulseaudio_sink_get_app_name(s), ct->c_app_name,
 			volume_str, ct->c_volume);
 
 	render_util_render_slider(pb, x, y+text_renderer_text_height(tr),
-			SINK_WIDTH, SINK_VOL_SLIDER_HEIGHT, pulseaudio_sink_get_volume(s),
+			pixbuf_get_width(pb), SINK_VOL_SLIDER_HEIGHT, pulseaudio_sink_get_volume(s),
 			ct->c_volume_bar);
 }
 
@@ -138,7 +137,7 @@ sink_selector_render_to(const SinkSelector_t *ss, Pixbuf_t *pb)
 	pb_w = pixbuf_get_width(pb);
 	pb_h = pixbuf_get_height(pb);
 	sink_h = text_renderer_text_height(ss->tr) + SINK_VOL_SLIDER_HEIGHT;
-	x = (pb_w - SINK_WIDTH) / 2;
+	x = (pb_w - pixbuf_get_width(pb)) / 2;
 
 	if (ss->len > 10) {
 		y = (pb_h - sink_h) / 2 - ss->selected * (sink_h + SINK_MARGIN);
