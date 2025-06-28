@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022-2023 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2025 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -31,6 +31,7 @@
 #include "utils.h"
 
 struct TextRenderer {
+	struct fcft_font_options *font_options;
 	struct fcft_font *font;
 };
 
@@ -45,20 +46,17 @@ text_renderer_new(const char *font_family, int size)
 
 	fcft_init(FCFT_LOG_COLORIZE_ALWAYS, false, FCFT_LOG_CLASS_NONE);
 
-	if (!fcft_set_scaling_filter(FCFT_SCALING_FILTER_LANCZOS3))
-		die("fcft_set_scaling_filter failed");
-
 	tr = xcalloc(1, sizeof(TextRenderer_t));
 
-	tr->font = fcft_from_name(1, (const char *[]){font_query}, NULL);
+	tr->font_options = fcft_font_options_create();;
+	tr->font_options->scaling_filter = FCFT_SCALING_FILTER_LANCZOS3;
+	tr->font_options->emoji_presentation = FCFT_EMOJI_PRESENTATION_DEFAULT;
+	tr->font = fcft_from_name2(1, (const char *[]){font_query}, NULL, tr->font_options);
 
 	if (NULL == tr->font) {
 		die("fcft_from_name couldn't load font: %s:size=%d",
 				font_family, size);
 	}
-
-	fcft_set_emoji_presentation(tr->font,
-			FCFT_EMOJI_PRESENTATION_DEFAULT);
 
 	return tr;
 }
@@ -134,6 +132,7 @@ text_renderer_text_height(const TextRenderer_t *tr)
 extern void
 text_renderer_free(TextRenderer_t *tr)
 {
+	fcft_font_options_destroy(tr->font_options);
 	fcft_fini();
 	free(tr);
 }
