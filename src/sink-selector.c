@@ -29,7 +29,7 @@
 #include "utils.h"
 
 #define SINK_VOL_SLIDER_HEIGHT 5
-#define SINK_MARGIN 15
+#define SINK_MARGIN 20
 
 #define LOOPVAL(v,n) \
 	(((v)%(n)+(n))%(n))
