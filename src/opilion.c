@@ -222,7 +222,7 @@ xwininit(void)
 		XCB_XKB_PER_CLIENT_FLAG_DETECTABLE_AUTO_REPEAT, 1, 0, 0, 0
 	);
 
-	pb = pixbuf_new(conn, win, 500, 1000);
+	pb = pixbuf_new(conn, win, 900, 1000);
 	pixbuf_set_container_size(pb, scr->width_in_pixels, scr->height_in_pixels);
 
 	xcb_map_window(conn, win);
