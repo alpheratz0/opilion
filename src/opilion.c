@@ -363,14 +363,14 @@ main(int argc, char **argv)
 	TextRenderer_t *text_renderer;
 	SinkTheme_t ct_nor, ct_sel;
 	xcb_generic_event_t *ev;
-	bool draw_icons = false;
+	bool draw_icons = true;
 
 	while (++argv, --argc > 0) {
 		if ((*argv)[0] == '-' && (*argv)[1] != '\0' && (*argv)[2] == '\0') {
 			switch ((*argv)[1]) {
 			case 'h': usage(); break;
 			case 'v': version(); break;
-			case 'i': draw_icons = true; break;
+			case 'I': draw_icons = false; break;
 			default: die("invalid option %s", *argv); break;
 			}
 		} else {
