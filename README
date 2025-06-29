@@ -1,4 +1,4 @@
-opilion is a pulseaudio volume manager for X.
+opilion is a pulseaudio volume manager for X with vim-like keybidings.
 For more information about it's usage check `man opilion`.
 
 This program requires libxcb, libxcb-image, libxcb-keysyms, libxcb-xkb,
