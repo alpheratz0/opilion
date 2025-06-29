@@ -8,6 +8,7 @@ OBJ=\
 	src/pixbuf.o \
 	src/pa.o \
 	src/log.o \
+	src/icon.o \
 	src/pixman-image-cache.o \
 	src/render-util.o \
 	src/sink-selector.o \

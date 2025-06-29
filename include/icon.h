@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022-2025 <alpheratz99@protonmail.com>
+	Copyright (C) 2025 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -18,28 +18,22 @@
 
 #pragma once
 
-#include <stddef.h>
+#include <stdint.h>
 
-#define LEN(arr) \
-	(sizeof(arr)/sizeof(arr[0]))
+#include "pixbuf.h"
 
-#define CLAMP(v,min,max) \
-	((v)>(max)?(max):(v)<(min)?(min):(v))
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
-#define UNUSED \
-	__attribute__((unused))
+typedef struct Icon Icon_t;
 
-extern const char *
-str_fallback(const char *str, const char *fallback);
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
-extern void *
-xmalloc(size_t size);
+extern const Icon_t *
+icon_from_name(const char *name);
 
-extern void *
-xcalloc(size_t nmemb, size_t size);
-
-extern void *
-xrealloc(void *orig_ptr, size_t size);
-
-extern char *
-xstrdup(const char *str);
+extern void
+icon_render_to(const Icon_t *icon, Pixbuf_t *pb, int x, int y, int w, int h);

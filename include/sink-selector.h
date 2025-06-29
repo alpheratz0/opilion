@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022-2023 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2025 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -19,6 +19,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "pa.h"
 #include "text-renderer.h"
@@ -28,26 +29,27 @@
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 
-typedef struct SinkColorTheme SinkColorTheme_t;
+typedef struct SinkTheme SinkTheme_t;
 typedef struct SinkSelector SinkSelector_t;
 
-struct SinkColorTheme {
+struct SinkTheme {
 	uint32_t c_app_name;
 	uint32_t c_volume;
 	uint32_t c_volume_bar[2];
+	bool draw_icons;
 };
 
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 
-extern SinkColorTheme_t
-sink_color_theme_from(uint32_t c_app_name, uint32_t c_volume,
-		const uint32_t c_volume_bar[2]);
+extern SinkTheme_t
+sink_theme_from(uint32_t c_app_name, uint32_t c_volume,
+		const uint32_t c_volume_bar[2], bool draw_icons);
 
 extern SinkSelector_t *
 sink_selector_new(PulseAudioSinkList_t *sl, TextRenderer_t *tr,
-		SinkColorTheme_t *ct_nor, SinkColorTheme_t *ct_sel);
+		SinkTheme_t *ct_nor, SinkTheme_t *ct_sel);
 
 extern PulseAudioSink_t *
 sink_selector_get_selected(const SinkSelector_t *ss);

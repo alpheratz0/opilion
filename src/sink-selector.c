@@ -20,9 +20,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "pixbuf.h"
 #include "sink-selector.h"
+#include "icon.h"
 #include "text-renderer.h"
 #include "render-util.h"
 #include "pa.h"
@@ -30,6 +32,7 @@
 
 #define SINK_VOL_SLIDER_HEIGHT 5
 #define SINK_MARGIN 20
+#define SINK_ICON_SIZE 10
 
 #define LOOPVAL(v,n) \
 	(((v)%(n)+(n))%(n))
@@ -41,7 +44,7 @@
 struct SinkSelector {
 	TextRenderer_t *tr;
 	PulseAudioSinkList_t *sinks;
-	SinkColorTheme_t ct_nor, ct_sel;
+	SinkTheme_t ct_nor, ct_sel;
 	int len, selected;
 };
 
@@ -51,36 +54,44 @@ struct SinkSelector {
 
 static void
 __sink_render_to(const PulseAudioSink_t *s, TextRenderer_t *tr,
-		const SinkColorTheme_t *ct, int x, int y, Pixbuf_t *pb)
+		const SinkTheme_t *ct, int x, int y, Pixbuf_t *pb)
 {
 	char volume_str[128];
+	const Icon_t *icon;
+
+	icon = ct->draw_icons ? pulseaudio_sink_get_icon(s) : NULL;
 
 	pulseaudio_sink_format_volume(s, sizeof(volume_str), volume_str);
 
-	render_util_render_key_value_pair(pb, x, y, pixbuf_get_width(pb),
+	render_util_render_key_value_pair(pb, x + (NULL!=icon)*25, y, pixbuf_get_width(pb) - (NULL!=icon)*25,
 			tr, pulseaudio_sink_get_display_name(s), ct->c_app_name,
 			volume_str, ct->c_volume);
 
 	render_util_render_slider(pb, x, y+text_renderer_text_height(tr),
 			pixbuf_get_width(pb), SINK_VOL_SLIDER_HEIGHT, pulseaudio_sink_get_volume(s),
 			ct->c_volume_bar);
+
+	if (NULL!=icon)
+		icon_render_to(icon, pb, x+5,
+				y+(text_renderer_text_height(tr)-SINK_ICON_SIZE)/2, SINK_ICON_SIZE, SINK_ICON_SIZE);
 }
 
-extern SinkColorTheme_t
-sink_color_theme_from(uint32_t c_app_name, uint32_t c_volume,
-		const uint32_t c_volume_bar[2])
+extern SinkTheme_t
+sink_theme_from(uint32_t c_app_name, uint32_t c_volume,
+		const uint32_t c_volume_bar[2], bool draw_icons)
 {
-	SinkColorTheme_t ct;
+	SinkTheme_t ct;
 	ct.c_app_name = c_app_name;
 	ct.c_volume = c_volume;
 	ct.c_volume_bar[0] = c_volume_bar[0];
 	ct.c_volume_bar[1] = c_volume_bar[1];
+	ct.draw_icons = draw_icons;
 	return ct;
 }
 
 extern SinkSelector_t *
 sink_selector_new(PulseAudioSinkList_t *sl, TextRenderer_t *tr,
-		SinkColorTheme_t *ct_nor, SinkColorTheme_t *ct_sel)
+		SinkTheme_t *ct_nor, SinkTheme_t *ct_sel)
 {
 	SinkSelector_t *ss;
 
@@ -132,7 +143,7 @@ sink_selector_render_to(const SinkSelector_t *ss, Pixbuf_t *pb)
 	int i, x, y;
 	int pb_w, pb_h, sink_h;
 	PulseAudioSink_t *sink;
-	const SinkColorTheme_t *ct;
+	const SinkTheme_t *ct;
 
 	pb_w = pixbuf_get_width(pb);
 	pb_h = pixbuf_get_height(pb);

@@ -22,6 +22,8 @@
 #include <stdbool.h>
 #include <pulse/pulseaudio.h>
 
+#include "icon.h"
+
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
@@ -48,6 +50,9 @@ pulseaudio_sink_new(const pa_sink_input_info *sink_input);
 
 extern const char *
 pulseaudio_sink_get_display_name(const PulseAudioSink_t *s);
+
+extern const Icon_t *
+pulseaudio_sink_get_icon(const PulseAudioSink_t *s);
 
 extern int
 pulseaudio_sink_get_volume(const PulseAudioSink_t *s);
