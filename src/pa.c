@@ -44,7 +44,7 @@ struct PulseAudioConnection {
 
 struct PulseAudioSink {
 	unsigned int id;
-	char display_name[512];
+	char *display_name;
 	const Icon_t *icon;
 	pa_cvolume volume;
 	uint8_t channels;
@@ -174,18 +174,24 @@ pulseaudio_sink_new(const pa_sink_input_info *sink_input)
 {
 	PulseAudioSink_t *s;
 	const char *app_name, *media_name, *icon_name;
-	bool has_media_name;
+	char display_name[512];
 
 	s = xmalloc(sizeof(PulseAudioSink_t));
 
 	app_name = pa_proplist_gets(sink_input->proplist, "application.name");
 	icon_name = pa_proplist_gets(sink_input->proplist, "application.icon_name");
 	media_name = pa_proplist_gets(sink_input->proplist, "media.name");
-	has_media_name = NULL != media_name;
+
+	if (NULL!=media_name) {
+		snprintf(&display_name[0], sizeof(display_name), "%s - %s",
+				str_fallback(app_name, "Unknown"), media_name);
+	} else {
+		snprintf(&display_name[0], sizeof(display_name), "%s",
+				str_fallback(app_name, "Unknown"));
+	}
 
 	s->id = sink_input->index;
-	snprintf(&s->display_name[0], sizeof(s->display_name), "%s%s%s", str_fallback(app_name, "Unknown"),
-			has_media_name ? " - " : "", has_media_name ? media_name : "");
+	s->display_name = xstrdup(&display_name[0]);
 	s->icon = icon_from_name(str_fallback(icon_name, "audio-x-generic"));
 	s->volume = sink_input->volume;
 	s->channels = sink_input->channel_map.channels;
@@ -197,7 +203,7 @@ pulseaudio_sink_new(const pa_sink_input_info *sink_input)
 extern const char *
 pulseaudio_sink_get_display_name(const PulseAudioSink_t *s)
 {
-	return &s->display_name[0];
+	return s->display_name;
 }
 
 extern const Icon_t *
@@ -288,6 +294,7 @@ pulseaudio_sink_toggle_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s)
 extern void
 pulseaudio_sink_free(PulseAudioSink_t *s)
 {
+	free(s->display_name);
 	free(s);
 }
 
