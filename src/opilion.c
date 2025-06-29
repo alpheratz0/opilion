@@ -354,7 +354,7 @@ h_mapping_notify(xcb_mapping_notify_event_t *ev)
 static void
 usage(void)
 {
-	puts("usage: opilion [-hv]");
+	puts("usage: opilion [-hvI]");
 	exit(0);
 }
 
