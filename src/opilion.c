@@ -50,6 +50,7 @@
 #include <xcb/xproto.h>
 #include <xcb/xcb_keysyms.h>
 #include <xkbcommon/xkbcommon-keysyms.h>
+#include <xcb/xcb_cursor.h>
 #include <xcb/xkb.h>
 #include <sys/file.h>
 
@@ -68,6 +69,8 @@ static xcb_connection_t *conn;
 static xcb_screen_t *scr;
 static xcb_window_t win, revert_focus;
 static xcb_key_symbols_t *ksyms;
+static xcb_cursor_context_t *cctx;
+static xcb_cursor_t curdft, curbsy;
 static bool should_close;
 
 #define OPILION_WM_NAME "opilion"
@@ -178,7 +181,13 @@ xwininit(void)
 	if (NULL == scr)
 		die("can't get default screen");
 
+	if (xcb_cursor_context_new(conn, scr, &cctx) != 0)
+		die("can't create cursor context");
+
 	revert_focus = get_focused_window();
+
+	curdft = xcb_cursor_load_cursor(cctx, "left_ptr");
+	curbsy = xcb_cursor_load_cursor(cctx, "watch");
 
 	ksyms = xcb_key_symbols_alloc(conn);
 	win = xcb_generate_id(conn);
@@ -243,7 +252,10 @@ xwindestroy(void)
 {
 	set_focused_window(revert_focus);
 	pixbuf_free(pb);
+	xcb_free_cursor(conn, curdft);
+	xcb_free_cursor(conn, curbsy);
 	xcb_key_symbols_free(ksyms);
+	xcb_cursor_context_free(cctx);
 	xcb_destroy_window(conn, win);
 	xcb_disconnect(conn);
 }
@@ -298,9 +310,16 @@ h_key_press(xcb_key_press_event_t *ev)
 		sink_selector_select_up(sink_selector);
 		break;
 	case XKB_KEY_F5:
+		pixbuf_clear(pb, 0x000000);
+		pixbuf_render(pb);
+		xcb_change_window_attributes(conn, win, XCB_CW_CURSOR, &curbsy);
+		xcb_flush(conn);
 		pulseaudio_sink_list_free(sinks);
 		sinks = pulseaudio_get_all_input_sinks(pac);
 		sink_selector_set_sink_list(sink_selector, sinks);
+		usleep(1000*50);
+		xcb_change_window_attributes(conn, win, XCB_CW_CURSOR, &curdft);
+		xcb_flush(conn);
 		break;
 	case XKB_KEY_0: case XKB_KEY_1:
 	case XKB_KEY_2: case XKB_KEY_3:
