@@ -16,6 +16,9 @@
 
 */
 
+// TODO: add fallback emoji font and modify the text rendering function to
+// allow emojis, for the utf8 processing use libgrapheme
+
 #include <pixman.h>
 #include <stdio.h>
 #include <stdint.h>
