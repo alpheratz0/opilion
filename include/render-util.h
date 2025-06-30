@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2023 <alpheratz99@protonmail.com>
+	Copyright (C) 2023-2025 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -25,7 +25,7 @@
 
 extern void
 render_util_render_slider(Pixbuf_t *pb, int x, int y, int w, int h, int pct,
-		const uint32_t c[2]);
+		uint32_t fill, uint32_t bg);
 
 extern void
 render_util_render_key_value_pair(Pixbuf_t *pb, int x, int y, int w,

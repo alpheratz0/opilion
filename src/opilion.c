@@ -410,11 +410,8 @@ main(int argc, char **argv)
 
 	text_renderer = text_renderer_new("Terminus", 12);
 
-	ct_nor = sink_theme_from(0xffffff, 0xffffff,
-			(const uint32_t []){ 0x333333, 0x555555 }, draw_icons);
-
-	ct_sel = sink_theme_from(0xa0e547, 0xa0e547,
-			(const uint32_t []){ 0x333333, 0x5e5eed /* just like the seeed */ }, draw_icons);
+	ct_nor = sink_theme_from(0xffffff, 0xffffff, 0x333333, 0x555555, draw_icons);
+	ct_sel = sink_theme_from(0xa0e547, 0xa0e547, 0x333333, 0x5e5eed /* just like the seeed */, draw_icons);
 
 	sink_selector = sink_selector_new(sinks, text_renderer, &ct_nor, &ct_sel);
 

@@ -64,12 +64,12 @@ __sink_render_to(const PulseAudioSink_t *s, TextRenderer_t *tr,
 	pulseaudio_sink_format_volume(s, sizeof(volume_str), volume_str);
 
 	render_util_render_key_value_pair(pb, x + (NULL!=icon)*25, y, pixbuf_get_width(pb) - (NULL!=icon)*25,
-			tr, pulseaudio_sink_get_display_name(s), ct->c_app_name,
+			tr, pulseaudio_sink_get_display_name(s), ct->c_display_name,
 			volume_str, ct->c_volume);
 
 	render_util_render_slider(pb, x, y+text_renderer_text_height(tr),
 			pixbuf_get_width(pb), SINK_VOL_SLIDER_HEIGHT, pulseaudio_sink_get_volume(s),
-			ct->c_volume_bar);
+			ct->c_volume_bar_fill, ct->c_volume_bar_bg);
 
 	if (NULL!=icon)
 		icon_render_to(icon, pb, x+5,
@@ -77,14 +77,15 @@ __sink_render_to(const PulseAudioSink_t *s, TextRenderer_t *tr,
 }
 
 extern SinkTheme_t
-sink_theme_from(uint32_t c_app_name, uint32_t c_volume,
-		const uint32_t c_volume_bar[2], bool draw_icons)
+sink_theme_from(uint32_t c_display_name, uint32_t c_volume,
+		uint32_t c_volume_bar_fill, uint32_t c_volume_bar_bg,
+		bool draw_icons)
 {
 	SinkTheme_t ct;
-	ct.c_app_name = c_app_name;
+	ct.c_display_name = c_display_name;
 	ct.c_volume = c_volume;
-	ct.c_volume_bar[0] = c_volume_bar[0];
-	ct.c_volume_bar[1] = c_volume_bar[1];
+	ct.c_volume_bar_fill = c_volume_bar_fill;
+	ct.c_volume_bar_bg = c_volume_bar_bg;
 	ct.draw_icons = draw_icons;
 	return ct;
 }

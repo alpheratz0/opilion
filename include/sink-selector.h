@@ -33,9 +33,10 @@ typedef struct SinkTheme SinkTheme_t;
 typedef struct SinkSelector SinkSelector_t;
 
 struct SinkTheme {
-	uint32_t c_app_name;
+	uint32_t c_display_name;
 	uint32_t c_volume;
-	uint32_t c_volume_bar[2];
+	uint32_t c_volume_bar_fill;
+	uint32_t c_volume_bar_bg;
 	bool draw_icons;
 };
 
@@ -44,8 +45,9 @@ struct SinkTheme {
 /////////////////////////////////////////////////////////////
 
 extern SinkTheme_t
-sink_theme_from(uint32_t c_app_name, uint32_t c_volume,
-		const uint32_t c_volume_bar[2], bool draw_icons);
+sink_theme_from(uint32_t c_display_name, uint32_t c_volume,
+		uint32_t c_volume_bar_fill, uint32_t c_volume_bar_bg,
+		bool draw_icons);
 
 extern SinkSelector_t *
 sink_selector_new(PulseAudioSinkList_t *sl, TextRenderer_t *tr,
