@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022-2023 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2025 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -36,8 +36,8 @@ extern TextRenderer_t *
 text_renderer_new(const char *font_family, int size);
 
 extern int
-text_renderer_draw_char(TextRenderer_t *tr, Pixbuf_t *pb, char c, int x, int y,
-		uint32_t color);
+text_renderer_draw_char(TextRenderer_t *tr, Pixbuf_t *pb, uint32_t cp,
+		int x, int y, uint32_t color);
 
 extern int
 text_renderer_draw_string(TextRenderer_t *tr, Pixbuf_t *pb, const char *str,
