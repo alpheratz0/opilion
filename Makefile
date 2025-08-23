@@ -17,6 +17,8 @@ OBJ=\
 
 all: opilion
 
+src/opilion.o: include/config.h
+
 opilion: $(OBJ)
 	$(CC) $(OBJ) -o opilion $(LDFLAGS)
 
