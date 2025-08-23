@@ -75,6 +75,7 @@ static bool should_close;
 
 #define OPILION_WM_NAME "opilion"
 #define OPILION_WM_CLASS "opilion\0opilion\0"
+#define OPILION_BACKGROUND_COLOR (0x000000)
 
 static xcb_atom_t
 get_x11_atom(const char *name)
@@ -198,7 +199,7 @@ xwininit(void)
 		0, XCB_WINDOW_CLASS_INPUT_OUTPUT,
 		scr->root_visual, XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK,
 		(const xcb_create_window_value_list_t []) {{
-			.background_pixel = 0x000000,
+			.background_pixel = OPILION_BACKGROUND_COLOR,
 			.event_mask = XCB_EVENT_MASK_EXPOSURE |
 			              XCB_EVENT_MASK_KEY_PRESS |
 			              XCB_EVENT_MASK_STRUCTURE_NOTIFY
@@ -233,6 +234,7 @@ xwininit(void)
 
 	pb = pixbuf_new(conn, win, 900, 1000);
 	pixbuf_set_container_size(pb, scr->width_in_pixels, scr->height_in_pixels);
+	pixbuf_clear(pb, OPILION_BACKGROUND_COLOR);
 
 	xcb_map_window(conn, win);
 	xcb_flush(conn);
@@ -313,7 +315,7 @@ h_key_press(xcb_key_press_event_t *ev)
 		sink_selector_select_up(sink_selector);
 		break;
 	case XKB_KEY_F5:
-		pixbuf_clear(pb, 0x000000);
+		pixbuf_clear(pb, OPILION_BACKGROUND_COLOR);
 		pixbuf_render(pb);
 		xcb_change_window_attributes(conn, win, XCB_CW_CURSOR, &curbsy);
 		xcb_flush(conn);
@@ -336,7 +338,7 @@ h_key_press(xcb_key_press_event_t *ev)
 		return;
 	}
 
-	pixbuf_clear(pb, 0x000000);
+	pixbuf_clear(pb, OPILION_BACKGROUND_COLOR);
 	sink_selector_render_to(sink_selector, pb);
 	pixbuf_render(pb);
 }
