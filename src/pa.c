@@ -224,6 +224,22 @@ pulseaudio_sink_is_muted(const PulseAudioSink_t *s)
 	return s->is_muted;
 }
 
+extern bool
+pulseaudio_sink_is_isolated(const PulseAudioSink_t *s, PulseAudioSinkList_t *sinks)
+{
+	PulseAudioSink_t *iterated_sink;
+	int n_sinks = pulseaudio_sink_list_get_length(sinks);
+
+	for (int i = 0; i < n_sinks; ++i) {
+		iterated_sink = pulseaudio_sink_list_get(sinks, i);
+
+		if (iterated_sink != s && !pulseaudio_sink_is_muted(iterated_sink))
+			return false;
+	}
+
+	return true;
+}
+
 extern void
 pulseaudio_sink_format_volume(const PulseAudioSink_t *s, size_t sz, char *str)
 {
@@ -289,6 +305,26 @@ extern void
 pulseaudio_sink_toggle_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s)
 {
 	pulseaudio_sink_set_mute(pac, s, !s->is_muted);
+}
+
+extern void
+pulseaudio_sink_set_isolate(PulseAudioConnection_t *pac, PulseAudioSink_t *s,
+		PulseAudioSinkList_t *sinks, bool isolated)
+{
+	PulseAudioSink_t *iterated_sink;
+	int n_sinks = pulseaudio_sink_list_get_length(sinks);
+
+	for (int i = 0; i < n_sinks; ++i) {
+		iterated_sink = pulseaudio_sink_list_get(sinks, i);
+		pulseaudio_sink_set_mute(pac, iterated_sink, iterated_sink == s ? false : isolated);
+	}
+}
+
+extern void
+pulseaudio_sink_toggle_isolate(PulseAudioConnection_t *pac, PulseAudioSink_t *s,
+		PulseAudioSinkList_t *sinks)
+{
+	pulseaudio_sink_set_isolate(pac, s, sinks, !pulseaudio_sink_is_isolated(s, sinks));
 }
 
 extern void

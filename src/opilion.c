@@ -294,6 +294,9 @@ h_key_press(xcb_key_press_event_t *ev)
 	case XKB_KEY_q:
 		should_close = true;
 		return;
+	case XKB_KEY_i:
+		pulseaudio_sink_toggle_isolate(pac, sink, sinks);
+		break;
 	case XKB_KEY_m:
 		pulseaudio_sink_toggle_mute(pac, sink);
 		break;
