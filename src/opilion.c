@@ -60,6 +60,7 @@
 #include "text-renderer.h"
 #include "pixbuf.h"
 #include "log.h"
+#include "config.h"
 
 static Pixbuf_t *pb;
 static PulseAudioConnection_t *pac;
@@ -75,7 +76,6 @@ static bool should_close;
 
 #define OPILION_WM_NAME "opilion"
 #define OPILION_WM_CLASS "opilion\0opilion\0"
-#define OPILION_BACKGROUND_COLOR (0x000000)
 
 static xcb_atom_t
 get_x11_atom(const char *name)
@@ -232,7 +232,7 @@ xwininit(void)
 		XCB_XKB_PER_CLIENT_FLAG_DETECTABLE_AUTO_REPEAT, 1, 0, 0, 0
 	);
 
-	pb = pixbuf_new(conn, win, 900, 1000);
+	pb = pixbuf_new(conn, win, OPILION_SINK_SELECTOR_WIDTH, OPILION_SINK_SELECTOR_HEIGHT);
 	pixbuf_set_container_size(pb, scr->width_in_pixels, scr->height_in_pixels);
 	pixbuf_clear(pb, OPILION_BACKGROUND_COLOR);
 
@@ -413,10 +413,13 @@ main(int argc, char **argv)
 
 	xwininit();
 
-	text_renderer = text_renderer_new("Terminus", 12);
+	text_renderer = text_renderer_new(OPILION_FONT_FAMILY, OPILION_FONT_SIZE);
 
-	ct_nor = sink_theme_from(0xffffff, 0xffffff, 0x333333, 0x555555, draw_icons);
-	ct_sel = sink_theme_from(0xa0e547, 0xa0e547, 0x333333, 0x5e5eed /* just like the seeed */, draw_icons);
+	ct_nor = sink_theme_from(OPILION_THEME_NORMAL_SINK_NAME, OPILION_THEME_NORMAL_VOLUME,
+			OPILION_THEME_NORMAL_VOLUME_BAR_FILL, OPILION_THEME_NORMAL_VOLUME_BAR_BG, draw_icons);
+
+	ct_sel = sink_theme_from(OPILION_THEME_SELECTED_SINK_NAME, OPILION_THEME_SELECTED_VOLUME,
+			OPILION_THEME_SELECTED_VOLUME_BAR_FILL, OPILION_THEME_SELECTED_VOLUME_BAR_BG, draw_icons);
 
 	sink_selector = sink_selector_new(sinks, text_renderer, &ct_nor, &ct_sel);
 
