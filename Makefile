@@ -25,6 +25,8 @@ vendor/libgrapheme/libgrapheme.a:
 
 src/opilion.o: include/config.h
 
+src/sink-selector.o: include/config.h
+
 opilion: $(OBJ)
 	$(CC) $(OBJ) -o opilion $(LDFLAGS)
 

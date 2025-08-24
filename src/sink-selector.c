@@ -21,6 +21,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include "pixbuf.h"
 #include "sink-selector.h"
@@ -29,10 +30,11 @@
 #include "render-util.h"
 #include "pa.h"
 #include "utils.h"
+#include "config.h"
 
 #define SINK_VOL_SLIDER_HEIGHT 5
 #define SINK_MARGIN 20
-#define SINK_ICON_SIZE 10
+#define SINK_ICON_SIZE ((int) ceil((float)OPILION_FONT_SIZE * 0.83f))
 
 #define LOOPVAL(v,n) \
 	(((v)%(n)+(n))%(n))
@@ -63,7 +65,8 @@ __sink_render_to(const PulseAudioSink_t *s, TextRenderer_t *tr,
 
 	pulseaudio_sink_format_volume(s, sizeof(volume_str), volume_str);
 
-	render_util_render_key_value_pair(pb, x + (NULL!=icon)*25, y, pixbuf_get_width(pb) - (NULL!=icon)*25,
+	render_util_render_key_value_pair(pb, x + (NULL!=icon)*(15 + SINK_ICON_SIZE),
+			y, pixbuf_get_width(pb) - (NULL!=icon)*(15 + SINK_ICON_SIZE),
 			tr, pulseaudio_sink_get_display_name(s), ct->c_display_name,
 			volume_str, ct->c_volume);
 
