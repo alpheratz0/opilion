@@ -1,3 +1,4 @@
 vendor/libgrapheme
 src/*.o
 opilion
+compile_flags.txt
