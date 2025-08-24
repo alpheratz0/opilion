@@ -244,6 +244,11 @@ pulseaudio_sink_from_source(const pa_source_info *source)
 {
 	PulseAudioSink_t *s;
 
+	const char *source_class = str_fallback(pa_proplist_gets(source->proplist, "device.class"), "monitor");
+
+	if (0 == strcmp(source_class, "monitor")) // ignore monitor devices
+		return NULL;
+
 	s = xmalloc(sizeof(PulseAudioSink_t));
 
 	s->is_source = true;
