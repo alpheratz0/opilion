@@ -19,7 +19,7 @@ OBJ=\
 all: opilion
 
 vendor/libgrapheme/libgrapheme.a:
-	test -d vendor/libgrapheme || git clone https://git.suckless.org/libgrapheme vendor/libgrapheme
+	test -d vendor/libgrapheme || git clone --depth 1 https://git.suckless.org/libgrapheme vendor/libgrapheme
 	./vendor/libgrapheme/configure
 	make -C ./vendor/libgrapheme
 
