@@ -429,6 +429,7 @@ pulseaudio_sink_list_resize(PulseAudioSinkList_t *sl, size_t new_size)
 extern void
 pulseaudio_sink_list_push_back(PulseAudioSinkList_t *sl, PulseAudioSink_t *s)
 {
+	if (NULL == s) return;
 	if (sl->len == sl->cap)
 		pulseaudio_sink_list_resize(sl, sl->len + 16);
 	sl->sinks[sl->len++] = s;
