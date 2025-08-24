@@ -14,6 +14,7 @@ pkgbase = opilion
 	depends = libpulse
 	depends = pixman
 	depends = fcft
+	options = !debug
 	source = opilion-0.14.4.tar.gz::https://github.com/alpheratz0/opilion/archive/refs/tags/v0.14.4.tar.gz
 	sha256sums = e1bdbdac74bd32304987d5afc6c0bffa7cd19b2da4e617e60f9021f02f6b9964
 
