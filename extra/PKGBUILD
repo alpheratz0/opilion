@@ -1,0 +1,43 @@
+# Maintainer: alpheratz0 <alpheratz99@protonmail.com>
+pkgname=opilion
+pkgver=0.14.4
+pkgrel=1
+pkgdesc='PulseAudio volume manager for X11 with vim-like keybindings'
+arch=(x86_64)
+url='https://github.com/alpheratz0/opilion'
+license=(GPL2)
+depends=(
+	libxcb
+	xcb-util-image
+	xcb-util-keysyms
+	xcb-util-cursor
+	libpulse
+	pixman
+	fcft
+)
+makedepends=(pkgconf git)
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('e1bdbdac74bd32304987d5afc6c0bffa7cd19b2da4e617e60f9021f02f6b9964')
+
+prepare() {
+	cd "$srcdir/$pkgname-$pkgver"
+
+	sed -Ei 's|^PREFIX = .*|PREFIX = /usr|' config.mk
+	sed -Ei 's/^CFLAGS =/CFLAGS +=/' config.mk
+	sed -Ei 's/^LDFLAGS =/LDFLAGS +=/' config.mk
+	sed -Ei 's/(^|[[:space:]])-Os($|[[:space:]])/\1\2/g' config.mk
+	sed -Ei 's/(^|[[:space:]])-s($|[[:space:]])/\1\2/g' config.mk
+}
+
+build() {
+	cd "$srcdir/$pkgname-$pkgver"
+	make PREFIX=/usr
+}
+
+package() {
+	cd "$srcdir/$pkgname-$pkgver"
+	make DESTDIR="$pkgdir" PREFIX=/usr install
+
+	install -Dm644 COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+	install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+}
