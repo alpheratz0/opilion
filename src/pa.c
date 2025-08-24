@@ -43,6 +43,7 @@ struct PulseAudioConnection {
 };
 
 struct PulseAudioSink {
+	bool is_source;
 	unsigned int id;
 	char *display_name;
 	const Icon_t *icon;
@@ -92,12 +93,39 @@ __get_sink_input_cb(pa_context *ctx, const pa_sink_input_info *sink_input,
 
 	if (NULL != sink_input) {
 		pulseaudio_sink_list_push_back(sink_list,
-				pulseaudio_sink_new(sink_input));
+				pulseaudio_sink_from_sink_input(sink_input));
 	}
 }
 
 static void
-__update_sink_input_cb(pa_context *ctx, int eol, void *userdata)
+__get_source_cb(pa_context *ctx, const pa_source_info *source,
+		int eol, void *userdata)
+{
+	PulseAudioConnection_t *pac;
+	PulseAudioSinkList_t *sink_list;
+
+	pac = userdata;
+	sink_list = pac->userdata;
+
+	if (eol < 0) {
+		die("couldn't get source info: %s",
+				pa_strerror(pa_context_errno(ctx)));
+	}
+
+	if (eol > 0) {
+		pa_threaded_mainloop_signal(pac->mainloop, 0);
+		return;
+	}
+
+	if (NULL != source) {
+		if (source->state == PA_SOURCE_IDLE || source->state == PA_SOURCE_RUNNING)
+			pulseaudio_sink_list_push_back(sink_list,
+					pulseaudio_sink_from_source(source));
+	}
+}
+
+static void
+__update_sink_cb(pa_context *ctx, int eol, void *userdata)
 {
 	PulseAudioConnection_t *pac;
 
@@ -105,7 +133,7 @@ __update_sink_input_cb(pa_context *ctx, int eol, void *userdata)
 
 	if (!eol) {
 		// Application was closed after opilion started?
-		info("couldn't update sink input state: %s",
+		info("couldn't update sink state: %s",
 				pa_strerror(pa_context_errno(ctx)));
 	}
 
@@ -139,12 +167,23 @@ pulseaudio_connect(void)
 }
 
 extern PulseAudioSinkList_t *
-pulseaudio_get_all_input_sinks(PulseAudioConnection_t *pac)
+pulseaudio_get_all_sinks(PulseAudioConnection_t *pac)
 {
 	pa_operation *po;
 	PulseAudioSinkList_t *sl;
 
 	pac->userdata = sl = pulseaudio_sink_list_new();
+
+	po = pa_context_get_source_info_list(pac->ctx,
+			__get_source_cb, pac);
+
+	if (NULL == po) {
+		die("pa_context_get_source_info_list failed: %s",
+				pa_strerror(pa_context_errno(pac->ctx)));
+	}
+
+	pa_operation_unref(po);
+	pa_threaded_mainloop_wait(pac->mainloop);
 
 	po = pa_context_get_sink_input_info_list(pac->ctx,
 			__get_sink_input_cb, pac);
@@ -170,7 +209,7 @@ pulseaudio_disconnect(PulseAudioConnection_t *pac)
 }
 
 extern PulseAudioSink_t *
-pulseaudio_sink_new(const pa_sink_input_info *sink_input)
+pulseaudio_sink_from_sink_input(const pa_sink_input_info *sink_input)
 {
 	PulseAudioSink_t *s;
 	const char *app_name, *media_name, *icon_name;
@@ -190,12 +229,31 @@ pulseaudio_sink_new(const pa_sink_input_info *sink_input)
 				str_fallback(app_name, "Unknown"));
 	}
 
+	s->is_source = false;
 	s->id = sink_input->index;
 	s->display_name = xstrdup(&display_name[0]);
 	s->icon = icon_from_name(str_fallback(icon_name, "audio-x-generic"));
 	s->volume = sink_input->volume;
 	s->channels = sink_input->channel_map.channels;
 	s->is_muted = sink_input->mute > 0;
+
+	return s;
+}
+
+extern PulseAudioSink_t *
+pulseaudio_sink_from_source(const pa_source_info *source)
+{
+	PulseAudioSink_t *s;
+
+	s = xmalloc(sizeof(PulseAudioSink_t));
+
+	s->is_source = true;
+	s->id = source->index;
+	s->display_name = xstrdup(str_fallback(str_fallback(source->description, source->name), "Microphone"));
+	s->icon = icon_from_name("audio-input-microphone");
+	s->volume = source->volume;
+	s->channels = source->channel_map.channels;
+	s->is_muted = source->mute > 0;
 
 	return s;
 }
@@ -233,6 +291,7 @@ pulseaudio_sink_is_isolated(const PulseAudioSink_t *s, PulseAudioSinkList_t *sin
 	for (int i = 0; i < n_sinks; ++i) {
 		iterated_sink = pulseaudio_sink_list_get(sinks, i);
 
+		if (iterated_sink->is_source) continue;
 		if (iterated_sink != s && !pulseaudio_sink_is_muted(iterated_sink))
 			return false;
 	}
@@ -262,11 +321,16 @@ pulseaudio_sink_set_volume(PulseAudioConnection_t *pac, PulseAudioSink_t *s,
 	pa_cvolume_set(&s->volume, s->channels,
 			CLAMP(v,0,v)*(PA_VOLUME_NORM/100));
 
-	po = pa_context_set_sink_input_volume(pac->ctx, s->id, &s->volume,
-			__update_sink_input_cb, pac);
+	if (s->is_source) {
+		po = pa_context_set_source_volume_by_index(pac->ctx, s->id, &s->volume,
+				__update_sink_cb, pac);
+	} else {
+		po = pa_context_set_sink_input_volume(pac->ctx, s->id, &s->volume,
+				__update_sink_cb, pac);
+	}
 
 	if (NULL == po) {
-		die("pa_context_set_sink_input_volume failed: %s",
+		die("pulseaudio_sink_set_volume failed: %s",
 				pa_strerror(pa_context_errno(pac->ctx)));
 	}
 
@@ -289,11 +353,18 @@ pulseaudio_sink_set_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s,
 	pa_operation *po;
 
 	s->is_muted = mute;
-	po = pa_context_set_sink_input_mute(pac->ctx, s->id, mute,
-			__update_sink_input_cb, pac);
+
+	if (s->is_source) {
+		po = pa_context_set_source_mute_by_index(pac->ctx, s->id, mute,
+				__update_sink_cb, pac);
+
+	} else {
+		po = pa_context_set_sink_input_mute(pac->ctx, s->id, mute,
+				__update_sink_cb, pac);
+	}
 
 	if (NULL == po) {
-		die("pa_context_set_sink_input_mute failed: %s",
+		die("pulseaudio_sink_set_mute failed: %s",
 				pa_strerror(pa_context_errno(pac->ctx)));
 	}
 
@@ -311,11 +382,14 @@ extern void
 pulseaudio_sink_set_isolate(PulseAudioConnection_t *pac, PulseAudioSink_t *s,
 		PulseAudioSinkList_t *sinks, bool isolated)
 {
+	if (s->is_source) return;
+
 	PulseAudioSink_t *iterated_sink;
 	int n_sinks = pulseaudio_sink_list_get_length(sinks);
 
 	for (int i = 0; i < n_sinks; ++i) {
 		iterated_sink = pulseaudio_sink_list_get(sinks, i);
+		if (iterated_sink->is_source) continue;
 		pulseaudio_sink_set_mute(pac, iterated_sink, iterated_sink == s ? false : isolated);
 	}
 }

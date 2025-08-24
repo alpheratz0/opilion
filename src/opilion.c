@@ -320,7 +320,7 @@ h_key_press(xcb_key_press_event_t *ev)
 		xcb_change_window_attributes(conn, win, XCB_CW_CURSOR, &curbsy);
 		xcb_flush(conn);
 		pulseaudio_sink_list_free(sinks);
-		sinks = pulseaudio_get_all_input_sinks(pac);
+		sinks = pulseaudio_get_all_sinks(pac);
 		sink_selector_set_sink_list(sink_selector, sinks);
 		usleep(1000*50);
 		xcb_change_window_attributes(conn, win, XCB_CW_CURSOR, &curdft);
@@ -406,7 +406,7 @@ main(int argc, char **argv)
 		die("another instance is already running");
 
 	pac = pulseaudio_connect();
-	sinks = pulseaudio_get_all_input_sinks(pac);
+	sinks = pulseaudio_get_all_sinks(pac);
 
 	if (pulseaudio_sink_list_get_length(sinks) == 0)
 		die("no sinks were found");

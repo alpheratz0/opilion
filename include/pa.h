@@ -40,13 +40,16 @@ extern PulseAudioConnection_t *
 pulseaudio_connect(void);
 
 extern PulseAudioSinkList_t *
-pulseaudio_get_all_input_sinks(PulseAudioConnection_t *pac);
+pulseaudio_get_all_sinks(PulseAudioConnection_t *pac);
 
 extern void
 pulseaudio_disconnect(PulseAudioConnection_t *pac);
 
 extern PulseAudioSink_t *
-pulseaudio_sink_new(const pa_sink_input_info *sink_input);
+pulseaudio_sink_from_source(const pa_source_info *source);
+
+extern PulseAudioSink_t *
+pulseaudio_sink_from_sink_input(const pa_sink_input_info *sink_input);
 
 extern const char *
 pulseaudio_sink_get_display_name(const PulseAudioSink_t *s);
