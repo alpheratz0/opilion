@@ -1,5 +1,5 @@
 .POSIX:
-.PHONY: all clean install uninstall dist
+.PHONY: all clean install uninstall dist clangd
 
 include config.mk
 
@@ -56,3 +56,10 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/opilion
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/opilion.1
 	rm -f $(DESTDIR)$(APPPREFIX)/opilion.desktop
+
+clangd:
+	@echo "Generating compile_flags.txt"
+	@rm -f compile_flags.txt
+	@for flag in $(CFLAGS); do \
+		echo $$flag >> compile_flags.txt; \
+		done
