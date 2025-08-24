@@ -52,7 +52,7 @@ text_renderer_new(const char *font_family, int size)
 
 	tr = xcalloc(1, sizeof(TextRenderer_t));
 
-	tr->font_options = fcft_font_options_create();;
+	tr->font_options = fcft_font_options_create();
 	tr->font_options->scaling_filter = FCFT_SCALING_FILTER_LANCZOS3;
 	tr->font_options->emoji_presentation = FCFT_EMOJI_PRESENTATION_DEFAULT;
 	tr->font = fcft_from_name2(2, (const char *[]){font_query_main, font_query_fallback}, NULL, tr->font_options);
