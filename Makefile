@@ -13,9 +13,15 @@ OBJ=\
 	src/render-util.o \
 	src/sink-selector.o \
 	src/text-renderer.o \
-	src/utils.o
+	src/utils.o \
+	vendor/libgrapheme/libgrapheme.a
 
 all: opilion
+
+vendor/libgrapheme/libgrapheme.a:
+	test -d vendor/libgrapheme || git clone https://git.suckless.org/libgrapheme vendor/libgrapheme
+	./vendor/libgrapheme/configure
+	make -C ./vendor/libgrapheme
 
 src/opilion.o: include/config.h
 
