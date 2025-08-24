@@ -118,9 +118,8 @@ __get_source_cb(pa_context *ctx, const pa_source_info *source,
 	}
 
 	if (NULL != source) {
-		if (source->state == PA_SOURCE_IDLE || source->state == PA_SOURCE_RUNNING)
-			pulseaudio_sink_list_push_back(sink_list,
-					pulseaudio_sink_from_source(source));
+		pulseaudio_sink_list_push_back(sink_list,
+				pulseaudio_sink_from_source(source));
 	}
 }
 
