@@ -282,12 +282,33 @@ h_expose(UNUSED xcb_expose_event_t *ev)
 }
 
 static void
+refresh_sink_list(bool delay)
+{
+	pixbuf_clear(pb, OPILION_BACKGROUND_COLOR);
+	pixbuf_render(pb);
+	xcb_change_window_attributes(conn, win, XCB_CW_CURSOR, &curbsy);
+	xcb_flush(conn);
+	pulseaudio_sink_list_free(sinks);
+	sinks = pulseaudio_get_all_sinks(pac);
+	sink_selector_set_sink_list(sink_selector, sinks);
+	if (delay) usleep(1000*50);
+	xcb_change_window_attributes(conn, win, XCB_CW_CURSOR, &curdft);
+	xcb_flush(conn);
+}
+
+static void
 h_key_press(xcb_key_press_event_t *ev)
 {
 	xcb_keysym_t key;
 	PulseAudioSink_t *sink;
+	static xcb_keysym_t prev_key_pressed = 0;
+	bool double_key_press;
 
 	key = xcb_key_symbols_get_keysym(ksyms, ev->detail, 0);
+	double_key_press = prev_key_pressed == key;
+	prev_key_pressed = key;
+
+	if (double_key_press) prev_key_pressed = 0;
 
 	sink = sink_selector_get_selected(sink_selector);
 
@@ -296,6 +317,12 @@ h_key_press(xcb_key_press_event_t *ev)
 	case XKB_KEY_q:
 		should_close = true;
 		return;
+	case XKB_KEY_d:
+		if (double_key_press) {
+			pulseaudio_sink_kill(pac, sink);
+			refresh_sink_list(false);
+		}
+		break;
 	case XKB_KEY_i:
 		pulseaudio_sink_toggle_isolate(pac, sink, sinks);
 		break;
@@ -315,16 +342,7 @@ h_key_press(xcb_key_press_event_t *ev)
 		sink_selector_select_up(sink_selector);
 		break;
 	case XKB_KEY_F5:
-		pixbuf_clear(pb, OPILION_BACKGROUND_COLOR);
-		pixbuf_render(pb);
-		xcb_change_window_attributes(conn, win, XCB_CW_CURSOR, &curbsy);
-		xcb_flush(conn);
-		pulseaudio_sink_list_free(sinks);
-		sinks = pulseaudio_get_all_sinks(pac);
-		sink_selector_set_sink_list(sink_selector, sinks);
-		usleep(1000*50);
-		xcb_change_window_attributes(conn, win, XCB_CW_CURSOR, &curdft);
-		xcb_flush(conn);
+		refresh_sink_list(true);
 		break;
 	case XKB_KEY_0: case XKB_KEY_1:
 	case XKB_KEY_2: case XKB_KEY_3:

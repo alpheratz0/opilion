@@ -93,6 +93,9 @@ pulseaudio_sink_toggle_isolate(PulseAudioConnection_t *pac, PulseAudioSink_t *s,
 		PulseAudioSinkList_t *sinks);
 
 extern void
+pulseaudio_sink_kill(PulseAudioConnection_t *pac, PulseAudioSink_t *s);
+
+extern void
 pulseaudio_sink_free(PulseAudioSink_t *s);
 
 extern PulseAudioSinkList_t *
