@@ -49,6 +49,9 @@ extern PulseAudioSink_t *
 pulseaudio_sink_from_source(const pa_source_info *source);
 
 extern PulseAudioSink_t *
+pulseaudio_sink_from_sink(const pa_sink_info *sink);
+
+extern PulseAudioSink_t *
 pulseaudio_sink_from_sink_input(const pa_sink_input_info *sink_input);
 
 extern const char *
