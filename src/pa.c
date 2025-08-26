@@ -29,6 +29,9 @@
 #include "utils.h"
 #include "pa.h"
 
+
+// TODO (alpheratz0): please clean up this repetitive mess
+
 #define PULSEAUDIO_SINK_LIST_DEFAULT_CAPACITY 16
 
 /////////////////////////////////////////////////////////////
