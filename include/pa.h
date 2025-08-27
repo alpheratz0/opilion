@@ -102,6 +102,10 @@ pulseaudio_sink_set_isolate(PulseAudioConnection_t *pac, PulseAudioSink_t *s,
 		PulseAudioSinkList_t *sinks, bool isolated);
 
 extern void
+pulseaudio_sink_set_default(PulseAudioConnection_t *pac, PulseAudioSink_t *s,
+		PulseAudioSinkList_t *sl);
+
+extern void
 pulseaudio_sink_toggle_mute(PulseAudioConnection_t *pac, PulseAudioSink_t *s);
 
 extern void

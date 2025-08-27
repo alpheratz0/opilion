@@ -304,7 +304,7 @@ h_key_press(xcb_key_press_event_t *ev)
 	static xcb_keysym_t prev_key_pressed = 0;
 	bool double_key_press;
 
-	key = xcb_key_symbols_get_keysym(ksyms, ev->detail, 0);
+	key = xcb_key_symbols_get_keysym(ksyms, ev->detail, ev->state & XCB_MOD_MASK_SHIFT);
 	double_key_press = prev_key_pressed == key;
 	prev_key_pressed = key;
 
@@ -317,6 +317,11 @@ h_key_press(xcb_key_press_event_t *ev)
 	case XKB_KEY_q:
 		should_close = true;
 		return;
+	case XKB_KEY_Return:
+	case XKB_KEY_D:
+		if (pulseaudio_sink_is_sink(sink) || pulseaudio_sink_is_source(sink))
+			pulseaudio_sink_set_default(pac, sink, sinks);
+		break;
 	case XKB_KEY_d:
 		if (!double_key_press || !pulseaudio_sink_is_sink_input(sink)) break;
 		pulseaudio_sink_kill(pac, sink);

@@ -399,7 +399,7 @@ pulseaudio_sink_get_display_name(const PulseAudioSink_t *s)
 	static char display_name[512] = {0};
 	if (!s->is_default)
 		return s->display_name;
-	snprintf(&display_name[0], sizeof(display_name), "%s (default)", s->display_name);
+	snprintf(&display_name[0], sizeof(display_name), "%s [D]", s->display_name);
 	return &display_name[0];
 }
 
@@ -595,6 +595,51 @@ pulseaudio_sink_kill(PulseAudioConnection_t *pac, PulseAudioSink_t *s)
 
 	pa_operation_unref(po);
 	pa_threaded_mainloop_wait(pac->mainloop);
+}
+
+extern void
+pulseaudio_sink_set_default(PulseAudioConnection_t *pac, PulseAudioSink_t *s,
+		PulseAudioSinkList_t *sl)
+{
+	pa_operation *po;
+	PulseAudioSink_t *iterated_sink;
+	int n_sinks;
+
+	if (!pulseaudio_sink_is_sink(s) && !pulseaudio_sink_is_source(s))
+		return;
+
+	if (pulseaudio_sink_is_default(s))
+		return;
+
+	switch (s->kind) {
+	case PULSEAUDIO_ENTITY_KIND_SINK:
+		po = pa_context_set_default_sink(pac->ctx, s->name,
+				__sink_action_finished_callback, pac);
+		break;
+	case PULSEAUDIO_ENTITY_KIND_SOURCE:
+		po = pa_context_set_default_source(pac->ctx, s->name,
+				__sink_action_finished_callback, pac);
+		break;
+	}
+
+	if (NULL == po) {
+		die("pulseaudio_sink_set_default failed: %s",
+				pa_strerror(pa_context_errno(pac->ctx)));
+	}
+
+	pa_operation_unref(po);
+	pa_threaded_mainloop_wait(pac->mainloop);
+
+	n_sinks = pulseaudio_sink_list_get_length(sl);
+
+	for (int i = 0; i < n_sinks; ++i) {
+		iterated_sink = pulseaudio_sink_list_get(sl, i);
+
+		if (iterated_sink->kind == s->kind && iterated_sink->is_default)
+			iterated_sink->is_default = false;
+	}
+
+	s->is_default = true;
 }
 
 extern void
