@@ -258,26 +258,17 @@ pulseaudio_sink_from_sink_input(const pa_sink_input_info *sink_input)
 {
 	PulseAudioSink_t *s;
 	const char *app_name, *media_name, *icon_name;
-	char display_name[512];
+
+	app_name = str_fallback(pa_proplist_gets(sink_input->proplist, "application.name"), "Unknown");
+	icon_name = str_fallback(pa_proplist_gets(sink_input->proplist, "application.icon_name"), "audio-x-generic");
+	media_name = pa_proplist_gets(sink_input->proplist, "media.name");
 
 	s = xmalloc(sizeof(PulseAudioSink_t));
 
-	app_name = pa_proplist_gets(sink_input->proplist, "application.name");
-	icon_name = pa_proplist_gets(sink_input->proplist, "application.icon_name");
-	media_name = pa_proplist_gets(sink_input->proplist, "media.name");
-
-	if (NULL!=media_name) {
-		snprintf(&display_name[0], sizeof(display_name), "%s - %s",
-				str_fallback(app_name, "Unknown"), media_name);
-	} else {
-		snprintf(&display_name[0], sizeof(display_name), "%s",
-				str_fallback(app_name, "Unknown"));
-	}
-
 	s->kind = PULSEAUDIO_ENTITY_KIND_SINK_INPUT;
 	s->id = sink_input->index;
-	s->display_name = xstrdup(&display_name[0]);
-	s->icon = icon_from_name(str_fallback(icon_name, "audio-x-generic"));
+	s->display_name = NULL != media_name ? str_fmt("%s - %s", app_name, media_name) : xstrdup(app_name);
+	s->icon = icon_from_name(icon_name);
 	s->volume = sink_input->volume;
 	s->channels = sink_input->channel_map.channels;
 	s->is_muted = sink_input->mute > 0;
@@ -288,27 +279,22 @@ pulseaudio_sink_from_sink_input(const pa_sink_input_info *sink_input)
 extern PulseAudioSink_t *
 pulseaudio_sink_from_sink(const pa_sink_info *sink)
 {
+	const char *dev_class, *sink_name;
 	PulseAudioSink_t *s;
 
-	const char *sink_class = str_fallback(pa_proplist_gets(sink->proplist, "device.class"), "monitor");
+	dev_class = pa_proplist_gets(sink->proplist, "device.class");
 
-	if (0 == strcmp(sink_class, "monitor")) // ignore monitor devices
+	if (NULL == dev_class ||
+			0 == strcmp(dev_class, "monitor")) // ignore monitor devices
 		return NULL;
 
-	char display_name[512];
-	const char *sink_name = str_fallback(sink->description, sink->name);
-
-	if (NULL != sink_name) {
-		snprintf(&display_name[0], sizeof(display_name), "%s [Speakers]", sink_name);
-	} else {
-		snprintf(&display_name[0], sizeof(display_name), "Speakers");
-	}
+	sink_name = str_fallback(sink->description, sink->name);
 
 	s = xmalloc(sizeof(PulseAudioSink_t));
 
 	s->kind = PULSEAUDIO_ENTITY_KIND_SINK;
 	s->id = sink->index;
-	s->display_name = xstrdup(display_name);
+	s->display_name = NULL != sink_name ? str_fmt("%s [Speakers]", sink_name) : xstrdup("Speakers");
 	s->icon = icon_from_name("audio-speakers");
 	s->volume = sink->volume;
 	s->channels = sink->channel_map.channels;
@@ -320,27 +306,22 @@ pulseaudio_sink_from_sink(const pa_sink_info *sink)
 extern PulseAudioSink_t *
 pulseaudio_sink_from_source(const pa_source_info *source)
 {
+	const char *dev_class, *src_name;
 	PulseAudioSink_t *s;
 
-	const char *source_class = str_fallback(pa_proplist_gets(source->proplist, "device.class"), "monitor");
+	dev_class = pa_proplist_gets(source->proplist, "device.class");
 
-	if (0 == strcmp(source_class, "monitor")) // ignore monitor devices
+	if (NULL == dev_class ||
+			0 == strcmp(dev_class, "monitor")) // ignore monitor devices
 		return NULL;
 
-	char display_name[512];
-	const char *source_name = str_fallback(source->description, source->name);
-
-	if (NULL != source_name) {
-		snprintf(&display_name[0], sizeof(display_name), "%s [Mic]", source_name);
-	} else {
-		snprintf(&display_name[0], sizeof(display_name), "Microphone");
-	}
+	src_name = str_fallback(source->description, source->name);
 
 	s = xmalloc(sizeof(PulseAudioSink_t));
 
 	s->kind = PULSEAUDIO_ENTITY_KIND_SOURCE;
 	s->id = source->index;
-	s->display_name = xstrdup(display_name);
+	s->display_name = NULL != src_name ? str_fmt("%s [Mic]", src_name) : xstrdup("Microphone");
 	s->icon = icon_from_name("audio-input-microphone");
 	s->volume = source->volume;
 	s->channels = source->channel_map.channels;

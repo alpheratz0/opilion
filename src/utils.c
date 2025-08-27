@@ -16,8 +16,10 @@
 
 */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include "utils.h"
 #include "log.h"
 
@@ -27,6 +29,19 @@ str_fallback(const char *str, const char *fallback)
 	if (NULL == str)
 		return fallback;
 	return str;
+}
+
+extern char *
+str_fmt(const char *fmt, ...)
+{
+	va_list args;
+	static char fmt_buf[512];
+
+	va_start(args, fmt);
+	vsnprintf(fmt_buf, sizeof(fmt_buf), fmt, args);
+	va_end(args);
+
+	return xstrdup(&fmt_buf[0]);
 }
 
 extern void *

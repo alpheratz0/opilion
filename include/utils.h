@@ -32,6 +32,9 @@
 extern const char *
 str_fallback(const char *str, const char *fallback);
 
+extern char *
+str_fmt(const char *fmt, ...);
+
 extern void *
 xmalloc(size_t size);
 
