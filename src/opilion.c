@@ -327,12 +327,16 @@ h_key_press(xcb_key_press_event_t *ev)
 		pulseaudio_sink_toggle_isolate(pac, sink, sinks);
 		break;
 	case XKB_KEY_m:
+	case XKB_KEY_XF86AudioMute:
+	case XKB_KEY_XF86AudioMicMute:
 		pulseaudio_sink_toggle_mute(pac, sink);
 		break;
 	case XKB_KEY_h:
+	case XKB_KEY_XF86AudioLowerVolume:
 		pulseaudio_sink_increase_volume(pac, sink, -1);
 		break;
 	case XKB_KEY_l:
+	case XKB_KEY_XF86AudioRaiseVolume:
 		pulseaudio_sink_increase_volume(pac, sink, 1);
 		break;
 	case XKB_KEY_j:
