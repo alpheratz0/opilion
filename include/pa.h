@@ -31,6 +31,7 @@
 typedef struct PulseAudioConnection   PulseAudioConnection_t;
 typedef struct PulseAudioSink               PulseAudioSink_t;
 typedef struct PulseAudioSinkList       PulseAudioSinkList_t;
+typedef struct PulseAudioServerInfo   PulseAudioServerInfo_t;
 
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
@@ -68,6 +69,9 @@ pulseaudio_sink_is_muted(const PulseAudioSink_t *s);
 
 extern bool
 pulseaudio_sink_is_isolated(const PulseAudioSink_t *s, PulseAudioSinkList_t *sinks);
+
+extern bool
+pulseaudio_sink_is_default(const PulseAudioSink_t *s);
 
 extern bool
 pulseaudio_sink_is_sink(const PulseAudioSink_t *s);

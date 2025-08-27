@@ -30,8 +30,6 @@
 #include "pa.h"
 
 
-// TODO (alpheratz0): please clean up this repetitive mess
-
 #define PULSEAUDIO_SINK_LIST_DEFAULT_CAPACITY 16
 
 /////////////////////////////////////////////////////////////
@@ -54,16 +52,23 @@ struct PulseAudioConnection {
 struct PulseAudioSink {
 	PulseAudioSinkKind kind;
 	unsigned int id;
+	char *name;
 	char *display_name;
 	const Icon_t *icon;
 	pa_cvolume volume;
 	uint8_t channels;
 	bool is_muted;
+	bool is_default;
 };
 
 struct PulseAudioSinkList {
 	size_t len, cap;
 	PulseAudioSink_t **sinks;
+};
+
+struct PulseAudioServerInfo {
+	char *default_sink;
+	char *default_source;
 };
 
 /////////////////////////////////////////////////////////////
@@ -159,6 +164,25 @@ __get_source_cb(pa_context *ctx, const pa_source_info *source,
 }
 
 static void
+__get_server_info_cb(pa_context *ctx, const pa_server_info *si, void *userdata)
+{
+	PulseAudioConnection_t *pac;
+	PulseAudioServerInfo_t *serverinfo;
+
+	pac = userdata;
+	serverinfo = pac->userdata;
+
+	if (NULL == si) {
+		die("couldn't get server info: %s",
+				pa_strerror(pa_context_errno(ctx)));
+	}
+
+	serverinfo->default_sink = xstrdup(si->default_sink_name);
+	serverinfo->default_source = xstrdup(si->default_source_name);
+	pa_threaded_mainloop_signal(pac->mainloop, 0);
+}
+
+static void
 __sink_action_finished_callback(pa_context *ctx, int eol, void *userdata)
 {
 	PulseAudioConnection_t *pac;
@@ -205,6 +229,7 @@ pulseaudio_get_all_sinks(PulseAudioConnection_t *pac)
 {
 	pa_operation *po;
 	PulseAudioSinkList_t *sl;
+	PulseAudioServerInfo_t serverinfo;
 
 	pac->userdata = sl = pulseaudio_sink_list_new();
 
@@ -241,6 +266,41 @@ pulseaudio_get_all_sinks(PulseAudioConnection_t *pac)
 	pa_operation_unref(po);
 	pa_threaded_mainloop_wait(pac->mainloop);
 
+	pac->userdata = &serverinfo;
+
+	po = pa_context_get_server_info(pac->ctx,
+			__get_server_info_cb, pac);
+
+	if (NULL == po) {
+		die("pa_context_get_sink_input_info_list failed: %s",
+				pa_strerror(pa_context_errno(pac->ctx)));
+	}
+
+	pa_operation_unref(po);
+	pa_threaded_mainloop_wait(pac->mainloop);
+
+	PulseAudioSink_t *iterated_sink;
+	int n_sinks = pulseaudio_sink_list_get_length(sl);
+
+	for (int i = 0; i < n_sinks; ++i) {
+		iterated_sink = pulseaudio_sink_list_get(sl, i);
+		switch (iterated_sink->kind) {
+		case PULSEAUDIO_ENTITY_KIND_SINK:
+			iterated_sink->is_default = strcmp(iterated_sink->name, serverinfo.default_sink) == 0;
+			break;
+		case PULSEAUDIO_ENTITY_KIND_SINK_INPUT:
+			iterated_sink->is_default = false;
+			break;
+			break;
+		case PULSEAUDIO_ENTITY_KIND_SOURCE:
+			iterated_sink->is_default = strcmp(iterated_sink->name, serverinfo.default_source) == 0;
+			break;
+		}
+	}
+
+	free(serverinfo.default_sink);
+	free(serverinfo.default_source);
+
 	return sl;
 }
 
@@ -267,6 +327,7 @@ pulseaudio_sink_from_sink_input(const pa_sink_input_info *sink_input)
 
 	s->kind = PULSEAUDIO_ENTITY_KIND_SINK_INPUT;
 	s->id = sink_input->index;
+	s->name = xstrdup(str_fallback(sink_input->name, "unnamed"));
 	s->display_name = NULL != media_name ? str_fmt("%s - %s", app_name, media_name) : xstrdup(app_name);
 	s->icon = icon_from_name(icon_name);
 	s->volume = sink_input->volume;
@@ -294,6 +355,7 @@ pulseaudio_sink_from_sink(const pa_sink_info *sink)
 
 	s->kind = PULSEAUDIO_ENTITY_KIND_SINK;
 	s->id = sink->index;
+	s->name = xstrdup(str_fallback(sink->name, "unnamed"));
 	s->display_name = NULL != sink_name ? str_fmt("%s [Speakers]", sink_name) : xstrdup("Speakers");
 	s->icon = icon_from_name("audio-speakers");
 	s->volume = sink->volume;
@@ -321,6 +383,7 @@ pulseaudio_sink_from_source(const pa_source_info *source)
 
 	s->kind = PULSEAUDIO_ENTITY_KIND_SOURCE;
 	s->id = source->index;
+	s->name = xstrdup(str_fallback(source->name, "unnamed"));
 	s->display_name = NULL != src_name ? str_fmt("%s [Mic]", src_name) : xstrdup("Microphone");
 	s->icon = icon_from_name("audio-input-microphone");
 	s->volume = source->volume;
@@ -333,7 +396,11 @@ pulseaudio_sink_from_source(const pa_source_info *source)
 extern const char *
 pulseaudio_sink_get_display_name(const PulseAudioSink_t *s)
 {
-	return s->display_name;
+	static char display_name[512] = {0};
+	if (!s->is_default)
+		return s->display_name;
+	snprintf(&display_name[0], sizeof(display_name), "%s (default)", s->display_name);
+	return &display_name[0];
 }
 
 extern const Icon_t *
@@ -352,6 +419,12 @@ extern bool
 pulseaudio_sink_is_muted(const PulseAudioSink_t *s)
 {
 	return s->is_muted;
+}
+
+extern bool
+pulseaudio_sink_is_default(const PulseAudioSink_t *s)
+{
+	return s->is_default;
 }
 
 extern bool
