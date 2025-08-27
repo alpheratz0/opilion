@@ -318,10 +318,9 @@ h_key_press(xcb_key_press_event_t *ev)
 		should_close = true;
 		return;
 	case XKB_KEY_d:
-		if (double_key_press) {
-			pulseaudio_sink_kill(pac, sink);
-			refresh_sink_list(false);
-		}
+		if (!double_key_press || !pulseaudio_sink_is_sink_input(sink)) break;
+		pulseaudio_sink_kill(pac, sink);
+		refresh_sink_list(false);
 		break;
 	case XKB_KEY_i:
 		pulseaudio_sink_toggle_isolate(pac, sink, sinks);

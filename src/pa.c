@@ -374,6 +374,24 @@ pulseaudio_sink_is_muted(const PulseAudioSink_t *s)
 }
 
 extern bool
+pulseaudio_sink_is_sink(const PulseAudioSink_t *s)
+{
+	return s->kind == PULSEAUDIO_ENTITY_KIND_SINK;
+}
+
+extern bool
+pulseaudio_sink_is_sink_input(const PulseAudioSink_t *s)
+{
+	return s->kind == PULSEAUDIO_ENTITY_KIND_SINK_INPUT;
+}
+
+extern bool
+pulseaudio_sink_is_source(const PulseAudioSink_t *s)
+{
+	return s->kind == PULSEAUDIO_ENTITY_KIND_SOURCE;
+}
+
+extern bool
 pulseaudio_sink_is_isolated(const PulseAudioSink_t *s, PulseAudioSinkList_t *sinks)
 {
 	PulseAudioSink_t *iterated_sink;
