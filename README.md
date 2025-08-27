@@ -27,7 +27,7 @@ $ make
 $ sudo make PREFIX=/usr install
 ```
 
-Alternatively, opilion is available on the Arch User Repository (AUR)
+Alternatively, opilion is available on the Arch User Repository (AUR) (https://aur.archlinux.org/packages/opilion)
 
 ```sh
 $ yay --noconfirm -S opilion
