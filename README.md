@@ -27,6 +27,12 @@ $ make
 $ sudo make PREFIX=/usr install
 ```
 
+Alternatively, opilion is available on the Arch User Repository (AUR)
+
+```sh
+$ yay --noconfirm -S opilion
+```
+
 ## License
 
 Code is licensed under GNU's General Public License v2. See `COPYING` for details.
