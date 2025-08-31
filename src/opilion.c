@@ -317,6 +317,7 @@ h_key_press(xcb_key_press_event_t *ev)
 	case XKB_KEY_q:
 		should_close = true;
 		return;
+	case XKB_KEY_space:
 	case XKB_KEY_Return:
 	case XKB_KEY_D:
 		if (pulseaudio_sink_is_sink(sink) || pulseaudio_sink_is_source(sink))
@@ -336,17 +337,21 @@ h_key_press(xcb_key_press_event_t *ev)
 		pulseaudio_sink_toggle_mute(pac, sink);
 		break;
 	case XKB_KEY_h:
+	case XKB_KEY_Left:
 	case XKB_KEY_XF86AudioLowerVolume:
 		pulseaudio_sink_increase_volume(pac, sink, -1);
 		break;
 	case XKB_KEY_l:
+	case XKB_KEY_Right:
 	case XKB_KEY_XF86AudioRaiseVolume:
 		pulseaudio_sink_increase_volume(pac, sink, 1);
 		break;
 	case XKB_KEY_j:
+	case XKB_KEY_Down:
 		sink_selector_select_down(sink_selector);
 		break;
 	case XKB_KEY_k:
+	case XKB_KEY_Up:
 		sink_selector_select_up(sink_selector);
 		break;
 	case XKB_KEY_F5:
