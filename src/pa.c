@@ -382,6 +382,7 @@ pulseaudio_sink_from_sink_input(const pa_sink_input_info *sink_input)
 	s->id = sink_input->index;
 	s->dev_mac_address = NULL;
 	s->card_index = PA_INVALID_INDEX;
+	s->battery = 0;
 	s->name = xstrdup(str_fallback(sink_input->name, "unnamed"));
 	s->display_name = NULL != media_name ? str_fmt("%s - %s", app_name, media_name) : xstrdup(app_name);
 	s->icon = icon_from_name(icon_name);
@@ -414,6 +415,7 @@ pulseaudio_sink_from_sink(const pa_sink_info *sink)
 	s->id = sink->index;
 	s->dev_mac_address = NULL == dev_api || NULL == dev_id || 0 != strcmp(dev_api, "bluez") ? NULL : xstrdup(dev_id);
 	s->card_index = sink->card;
+	s->battery = 0;
 	s->name = xstrdup(str_fallback(sink->name, "unnamed"));
 	s->display_name = NULL != sink_name ? str_fmt("%s [Speakers]", sink_name) : xstrdup("Speakers");
 	s->icon = icon_from_name("audio-speakers");
@@ -444,6 +446,7 @@ pulseaudio_sink_from_source(const pa_source_info *source)
 	s->id = source->index;
 	s->dev_mac_address = NULL;
 	s->card_index = PA_INVALID_INDEX;
+	s->battery = 0;
 	s->name = xstrdup(str_fallback(source->name, "unnamed"));
 	s->display_name = NULL != src_name ? str_fmt("%s [Mic]", src_name) : xstrdup("Microphone");
 	s->icon = icon_from_name("audio-input-microphone");
