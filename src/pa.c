@@ -52,6 +52,9 @@ struct PulseAudioConnection {
 struct PulseAudioSink {
 	PulseAudioSinkKind kind;
 	unsigned int id;
+	char *dev_mac_address;
+	uint32_t card_index;
+	int battery;
 	char *name;
 	char *display_name;
 	const Icon_t *icon;
@@ -183,6 +186,30 @@ __get_server_info_cb(pa_context *ctx, const pa_server_info *si, void *userdata)
 }
 
 static void
+__get_card_battery_cb(pa_context *ctx, const pa_card_info *ci, int eol, void *userdata)
+{
+	PulseAudioConnection_t *pac;
+
+	pac = userdata;
+
+	if (eol < 0) {
+		die("couldn't get card battery: %s",
+				pa_strerror(pa_context_errno(ctx)));
+	}
+
+	if (eol > 0) {
+		pa_threaded_mainloop_signal(pac->mainloop, 0);
+		return;
+	}
+
+	int *battery = (int *)pac->userdata;
+	const char *battery_str = pa_proplist_gets(ci->proplist, "bluetooth.battery");
+
+	if (NULL != battery_str)
+		*battery = atoi(battery_str);
+}
+
+static void
 __sink_action_finished_callback(pa_context *ctx, int eol, void *userdata)
 {
 	PulseAudioConnection_t *pac;
@@ -222,6 +249,31 @@ pulseaudio_connect(void)
 		pa_threaded_mainloop_wait(pac->mainloop);
 
 	return pac;
+}
+
+extern int
+pulseaudio_get_device_battery(PulseAudioConnection_t *pac, uint32_t device_id)
+{
+	pa_operation *po;
+	void *prev_userdata = pac->userdata;
+	int battery = -1;
+
+	pac->userdata = (void *)&battery;
+
+	po = pa_context_get_card_info_by_index(pac->ctx, device_id,
+			__get_card_battery_cb, pac);
+
+	if (NULL == po) {
+		die("pa_context_get_card_info_by_index failed: %s",
+				pa_strerror(pa_context_errno(pac->ctx)));
+	}
+
+	pa_operation_unref(po);
+	pa_threaded_mainloop_wait(pac->mainloop);
+
+	pac->userdata = prev_userdata;
+
+	return battery;
 }
 
 extern PulseAudioSinkList_t *
@@ -287,10 +339,11 @@ pulseaudio_get_all_sinks(PulseAudioConnection_t *pac)
 		switch (iterated_sink->kind) {
 		case PULSEAUDIO_ENTITY_KIND_SINK:
 			iterated_sink->is_default = strcmp(iterated_sink->name, serverinfo.default_sink) == 0;
+			if (iterated_sink->card_index != PA_INVALID_INDEX)
+				iterated_sink->battery = pulseaudio_get_device_battery(pac, iterated_sink->card_index);
 			break;
 		case PULSEAUDIO_ENTITY_KIND_SINK_INPUT:
 			iterated_sink->is_default = false;
-			break;
 			break;
 		case PULSEAUDIO_ENTITY_KIND_SOURCE:
 			iterated_sink->is_default = strcmp(iterated_sink->name, serverinfo.default_source) == 0;
@@ -327,6 +380,8 @@ pulseaudio_sink_from_sink_input(const pa_sink_input_info *sink_input)
 
 	s->kind = PULSEAUDIO_ENTITY_KIND_SINK_INPUT;
 	s->id = sink_input->index;
+	s->dev_mac_address = NULL;
+	s->card_index = PA_INVALID_INDEX;
 	s->name = xstrdup(str_fallback(sink_input->name, "unnamed"));
 	s->display_name = NULL != media_name ? str_fmt("%s - %s", app_name, media_name) : xstrdup(app_name);
 	s->icon = icon_from_name(icon_name);
@@ -340,9 +395,11 @@ pulseaudio_sink_from_sink_input(const pa_sink_input_info *sink_input)
 extern PulseAudioSink_t *
 pulseaudio_sink_from_sink(const pa_sink_info *sink)
 {
-	const char *dev_class, *sink_name;
+	const char *dev_class, *dev_api, *dev_id, *sink_name;
 	PulseAudioSink_t *s;
 
+	dev_api = pa_proplist_gets(sink->proplist, "device.api");
+	dev_id = pa_proplist_gets(sink->proplist, "device.string");
 	dev_class = pa_proplist_gets(sink->proplist, "device.class");
 
 	if (NULL == dev_class ||
@@ -355,6 +412,8 @@ pulseaudio_sink_from_sink(const pa_sink_info *sink)
 
 	s->kind = PULSEAUDIO_ENTITY_KIND_SINK;
 	s->id = sink->index;
+	s->dev_mac_address = NULL == dev_api || NULL == dev_id || 0 != strcmp(dev_api, "bluez") ? NULL : xstrdup(dev_id);
+	s->card_index = sink->card;
 	s->name = xstrdup(str_fallback(sink->name, "unnamed"));
 	s->display_name = NULL != sink_name ? str_fmt("%s [Speakers]", sink_name) : xstrdup("Speakers");
 	s->icon = icon_from_name("audio-speakers");
@@ -383,6 +442,8 @@ pulseaudio_sink_from_source(const pa_source_info *source)
 
 	s->kind = PULSEAUDIO_ENTITY_KIND_SOURCE;
 	s->id = source->index;
+	s->dev_mac_address = NULL;
+	s->card_index = PA_INVALID_INDEX;
 	s->name = xstrdup(str_fallback(source->name, "unnamed"));
 	s->display_name = NULL != src_name ? str_fmt("%s [Mic]", src_name) : xstrdup("Microphone");
 	s->icon = icon_from_name("audio-input-microphone");
@@ -397,9 +458,11 @@ extern const char *
 pulseaudio_sink_get_display_name(const PulseAudioSink_t *s)
 {
 	static char display_name[512] = {0};
-	if (!s->is_default)
+	if (!s->is_default && s->battery <= 0)
 		return s->display_name;
-	snprintf(&display_name[0], sizeof(display_name), "%s [D]", s->display_name);
+	snprintf(&display_name[0], sizeof(display_name), "%s%s%s", s->display_name,
+			s->battery > 0 ? str_fmt(" (Battery at %d%%)", s->battery) : "",
+			s->is_default ? " [D]" : "");
 	return &display_name[0];
 }
 
