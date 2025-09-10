@@ -369,9 +369,6 @@ h_key_press(xcb_key_press_event_t *ev)
 		return;
 	}
 
-	pixbuf_clear(pb, OPILION_BACKGROUND_COLOR);
-	sink_selector_render_to(sink_selector, pb);
-	pixbuf_render(pb);
 }
 
 static void
@@ -456,16 +453,26 @@ main(int argc, char **argv)
 
 	sink_selector_render_to(sink_selector, pb);
 
-	while (!should_close && (ev = xcb_wait_for_event(conn))) {
-		switch (ev->response_type & ~0x80) {
-		case XCB_CLIENT_MESSAGE:     h_client_message((void *)(ev)); break;
-		case XCB_EXPOSE:             h_expose((void *)(ev)); break;
-		case XCB_KEY_PRESS:          h_key_press((void *)(ev)); break;
-		case XCB_CONFIGURE_NOTIFY:   h_configure_notify((void *)(ev)); break;
-		case XCB_MAPPING_NOTIFY:     h_mapping_notify((void *)(ev)); break;
+	while (!should_close) {
+		while (ev = xcb_poll_for_event(conn)) {
+			switch (ev->response_type & ~0x80) {
+			case XCB_CLIENT_MESSAGE:     h_client_message((void *)(ev)); break;
+			case XCB_EXPOSE:             h_expose((void *)(ev)); break;
+			case XCB_KEY_PRESS:          h_key_press((void *)(ev)); break;
+			case XCB_CONFIGURE_NOTIFY:   h_configure_notify((void *)(ev)); break;
+			case XCB_MAPPING_NOTIFY:     h_mapping_notify((void *)(ev)); break;
+			}
+
+			free(ev);
 		}
 
-		free(ev);
+		pixbuf_clear(pb, OPILION_BACKGROUND_COLOR);
+		sink_selector_render_to(sink_selector, pb);
+		pixbuf_fade(pb, pixbuf_get_height(pb) / 2, pixbuf_get_height(pb) / 4, OPILION_BACKGROUND_COLOR);
+		pixbuf_fade(pb, pixbuf_get_height(pb) / 2, 3 * (pixbuf_get_height(pb) / 4), OPILION_BACKGROUND_COLOR);
+		pixbuf_render(pb);
+
+		usleep(16000);
 	}
 
 	pulseaudio_sink_list_free(sinks);

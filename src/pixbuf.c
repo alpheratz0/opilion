@@ -16,6 +16,8 @@
 
 */
 
+#include <math.h>
+#include <stdio.h>
 #include <pixman.h>
 #include <sys/shm.h>
 #include <xcb/xcb.h>
@@ -201,6 +203,41 @@ pixbuf_rect(Pixbuf_t *pb, int x, int y, int w, int h, uint32_t color)
 	for (dy = 0; dy < h; ++dy)
 		for (dx = 0; dx < w; ++dx)
 			pb->px[(y+dy)*pb->width+x+dx] = color;
+}
+
+static uint32_t
+cmix(uint32_t a, uint32_t b, double mix)
+{
+	if (mix > 1.0) mix = 1.0;
+	if (mix < 0.0) mix = 0.0;
+
+	int ar = (a & 0xff0000) >> 16; int br = (b & 0xff0000) >> 16;
+	int ag = (a & 0xff00) >> 8; int bg = (b & 0xff00) >> 8;
+	int ab = (a & 0xff) >> 0; int bb = (b & 0xff) >> 0;
+
+	int rr = ((int)(ar + (br - ar) * mix)) & 0xff;
+	int rg = ((int)(ag + (bg - ag) * mix)) & 0xff;
+	int rb = ((int)(ab + (bb - ab) * mix)) & 0xff;
+
+	return (rr << 16) | (rg << 8) | rb;
+}
+
+static void
+pixbuf_fade_line(Pixbuf_t *pb, int y, double fade, uint32_t fade_color)
+{
+	for (int x = 0; x < pb->width; ++x)
+		pb->px[y*pb->width+x] = cmix(pb->px[y*pb->width+x], fade_color, fade);
+}
+
+extern void
+pixbuf_fade(Pixbuf_t *pb, int y0, int y1, uint32_t fade_color)
+{
+	int dir = y1 > y0 ? 1 : -1;
+
+	for (int y = y0; y != y1; y += dir) {
+		double fade = (double)(y - y0) / (y1 - y0);
+		pixbuf_fade_line(pb, y, fade, fade_color);
+	}
 }
 
 extern void

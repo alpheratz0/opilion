@@ -52,6 +52,9 @@ extern void
 pixbuf_rect(Pixbuf_t *pb, int x, int y, int w, int h, uint32_t color);
 
 extern void
+pixbuf_fade(Pixbuf_t *pb, int y0, int y1, uint32_t fade_color);
+
+extern void
 pixbuf_clear(Pixbuf_t *pb, uint32_t color);
 
 extern void
