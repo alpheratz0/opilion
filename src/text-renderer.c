@@ -36,6 +36,8 @@ struct TextRenderer {
 	struct fcft_font *font;
 };
 
+static int _instance_count = 0;
+
 extern TextRenderer_t *
 text_renderer_new(const char *font_family, int size)
 {
@@ -48,8 +50,10 @@ text_renderer_new(const char *font_family, int size)
 	snprintf(font_query_fallback, sizeof(font_query_fallback), "%s:size=%d",
 			"Noto Color Emoji", size);
 
-	fcft_init(FCFT_LOG_COLORIZE_ALWAYS, false, FCFT_LOG_CLASS_NONE);
+	if (!_instance_count)
+		fcft_init(FCFT_LOG_COLORIZE_ALWAYS, false, FCFT_LOG_CLASS_NONE);
 
+	_instance_count += 1;
 	tr = xcalloc(1, sizeof(TextRenderer_t));
 
 	tr->font_options = fcft_font_options_create();
@@ -145,6 +149,8 @@ extern void
 text_renderer_free(TextRenderer_t *tr)
 {
 	fcft_font_options_destroy(tr->font_options);
-	fcft_fini();
+	if (_instance_count==1)
+		fcft_fini();
+	_instance_count-=1;
 	free(tr);
 }
