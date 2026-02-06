@@ -403,7 +403,7 @@ h_mapping_notify(xcb_mapping_notify_event_t *ev)
 static void
 usage(void)
 {
-	puts("usage: opilion [-hvIsSmMaA]");
+	puts("usage: opilion [-hvIsma] [+sma]");
 	exit(0);
 }
 
