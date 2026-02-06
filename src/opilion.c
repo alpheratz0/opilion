@@ -439,17 +439,14 @@ main(int argc, char **argv)
 		char prefix = (*argv)[0];
 		if ((prefix == '-' || prefix == '+') && (*argv)[1] != '\0') {
 			const char *walk = &(*argv)[1];
-			while (*walk) {
-				switch (*walk) {
-				case 'h': usage(); break;
-				case 'v': version(); break;
-				case 'I': draw_icons = false; break;
-				case 'a': pulseaudio_sink_filter_toggle(&filter, PULSEAUDIO_SINK_FILTER_APPLICATION, prefix == '+'); break;
-				case 's': pulseaudio_sink_filter_toggle(&filter, PULSEAUDIO_SINK_FILTER_SPEAKER, prefix == '+'); break;
-				case 'm': pulseaudio_sink_filter_toggle(&filter, PULSEAUDIO_SINK_FILTER_MICROPHONE, prefix == '+'); break;
-				default: die("invalid option %s", *argv); break;
-				}
-				++walk;
+			while (*walk) switch (*walk++) {
+			case 'h': usage(); break;
+			case 'v': version(); break;
+			case 'I': draw_icons = false; break;
+			case 'a': pulseaudio_sink_filter_toggle(&filter, PULSEAUDIO_SINK_FILTER_APPLICATION, prefix == '+'); break;
+			case 's': pulseaudio_sink_filter_toggle(&filter, PULSEAUDIO_SINK_FILTER_SPEAKER, prefix == '+'); break;
+			case 'm': pulseaudio_sink_filter_toggle(&filter, PULSEAUDIO_SINK_FILTER_MICROPHONE, prefix == '+'); break;
+			default: die("invalid option %s", *argv); break;
 			}
 		} else {
 			die("unexpected argument: %s", *argv);
