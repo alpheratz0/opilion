@@ -57,6 +57,9 @@ pulseaudio_disconnect(PulseAudioConnection_t *pac);
 extern bool
 pulseaudio_sink_matches_filter(const PulseAudioSink_t *s, PulseAudioSinkFilter filter);
 
+extern void
+pulseaudio_sink_filter_toggle(PulseAudioSinkFilter *out, PulseAudioSinkFilter to_toggle, bool toggle);
+
 extern PulseAudioSink_t *
 pulseaudio_sink_from_source(const pa_source_info *source);
 

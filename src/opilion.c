@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022-2025 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2026 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -424,18 +424,20 @@ main(int argc, char **argv)
 	filter = PULSEAUDIO_SINK_FILTER_ALL;
 
 	while (++argv, --argc > 0) {
-		if ((*argv)[0] == '-' && (*argv)[1] != '\0' && (*argv)[2] == '\0') {
-			switch ((*argv)[1]) {
-			case 'h': usage(); break;
-			case 'v': version(); break;
-			case 'I': draw_icons = false; break;
-			case 'a': filter &= ~PULSEAUDIO_SINK_FILTER_APPLICATION; break;
-			case 'A': filter |= PULSEAUDIO_SINK_FILTER_APPLICATION; break;
-			case 's': filter &= ~PULSEAUDIO_SINK_FILTER_SPEAKER; break;
-			case 'S': filter |= PULSEAUDIO_SINK_FILTER_SPEAKER; break;
-			case 'm': filter &= ~PULSEAUDIO_SINK_FILTER_MICROPHONE; break;
-			case 'M': filter |= PULSEAUDIO_SINK_FILTER_MICROPHONE; break;
-			default: die("invalid option %s", *argv); break;
+		char prefix = (*argv)[0];
+		if ((prefix == '-' || prefix == '+') && (*argv)[1] != '\0') {
+			const char *walk = &(*argv)[1];
+			while (*walk) {
+				switch (*walk) {
+				case 'h': usage(); break;
+				case 'v': version(); break;
+				case 'I': draw_icons = false; break;
+				case 'a': pulseaudio_sink_filter_toggle(&filter, PULSEAUDIO_SINK_FILTER_APPLICATION, prefix == '+'); break;
+				case 's': pulseaudio_sink_filter_toggle(&filter, PULSEAUDIO_SINK_FILTER_SPEAKER, prefix == '+'); break;
+				case 'm': pulseaudio_sink_filter_toggle(&filter, PULSEAUDIO_SINK_FILTER_MICROPHONE, prefix == '+'); break;
+				default: die("invalid option %s", *argv); break;
+				}
+				++walk;
 			}
 		} else {
 			die("unexpected argument: %s", *argv);

@@ -264,6 +264,12 @@ pulseaudio_sink_matches_filter(const PulseAudioSink_t *s, PulseAudioSinkFilter f
 	return false;
 }
 
+extern void
+pulseaudio_sink_filter_toggle(PulseAudioSinkFilter *out, PulseAudioSinkFilter to_toggle, bool toggle)
+{
+	*out = toggle ?  (*out | to_toggle) : (*out & ~to_toggle);
+}
+
 extern int
 pulseaudio_get_device_battery(PulseAudioConnection_t *pac, uint32_t device_id)
 {
