@@ -358,6 +358,18 @@ h_key_press(xcb_key_press_event_t *ev)
 	case XKB_KEY_F5:
 		refresh_sink_list(true);
 		break;
+	case XKB_KEY_z:
+		filter ^= PULSEAUDIO_SINK_FILTER_SPEAKER;
+		refresh_sink_list(true);
+		break;
+	case XKB_KEY_x:
+		filter ^= PULSEAUDIO_SINK_FILTER_MICROPHONE;
+		refresh_sink_list(true);
+		break;
+	case XKB_KEY_c:
+		filter ^= PULSEAUDIO_SINK_FILTER_APPLICATION;
+		refresh_sink_list(true);
+		break;
 	case XKB_KEY_0: case XKB_KEY_1:
 	case XKB_KEY_2: case XKB_KEY_3:
 	case XKB_KEY_4: case XKB_KEY_5:
