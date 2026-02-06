@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022-2025 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2026 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -251,6 +251,19 @@ pulseaudio_connect(void)
 	return pac;
 }
 
+extern bool
+pulseaudio_sink_matches_filter(const PulseAudioSink_t *s, PulseAudioSinkFilter filter)
+{
+	if (s->kind == PULSEAUDIO_ENTITY_KIND_SINK && (filter & PULSEAUDIO_SINK_FILTER_SPEAKER))
+		return true;
+	if (s->kind == PULSEAUDIO_ENTITY_KIND_SINK_INPUT && (filter & PULSEAUDIO_SINK_FILTER_APPLICATION))
+		return true;
+	if (s->kind == PULSEAUDIO_ENTITY_KIND_SOURCE && (filter & PULSEAUDIO_SINK_FILTER_MICROPHONE))
+		return true;
+
+	return false;
+}
+
 extern int
 pulseaudio_get_device_battery(PulseAudioConnection_t *pac, uint32_t device_id)
 {
@@ -277,7 +290,7 @@ pulseaudio_get_device_battery(PulseAudioConnection_t *pac, uint32_t device_id)
 }
 
 extern PulseAudioSinkList_t *
-pulseaudio_get_all_sinks(PulseAudioConnection_t *pac)
+pulseaudio_get_all_sinks(PulseAudioConnection_t *pac, PulseAudioSinkFilter filter)
 {
 	pa_operation *po;
 	PulseAudioSinkList_t *sl;
@@ -285,38 +298,44 @@ pulseaudio_get_all_sinks(PulseAudioConnection_t *pac)
 
 	pac->userdata = sl = pulseaudio_sink_list_new();
 
-	po = pa_context_get_source_info_list(pac->ctx,
-			__get_source_cb, pac);
+	if (filter & PULSEAUDIO_SINK_FILTER_MICROPHONE) {
+		po = pa_context_get_source_info_list(pac->ctx,
+				__get_source_cb, pac);
 
-	if (NULL == po) {
-		die("pa_context_get_source_info_list failed: %s",
-				pa_strerror(pa_context_errno(pac->ctx)));
+		if (NULL == po) {
+			die("pa_context_get_source_info_list failed: %s",
+					pa_strerror(pa_context_errno(pac->ctx)));
+		}
+
+		pa_operation_unref(po);
+		pa_threaded_mainloop_wait(pac->mainloop);
 	}
 
-	pa_operation_unref(po);
-	pa_threaded_mainloop_wait(pac->mainloop);
+	if (filter & PULSEAUDIO_SINK_FILTER_SPEAKER) {
+		po = pa_context_get_sink_info_list(pac->ctx,
+				__get_sink_cb, pac);
 
-	po = pa_context_get_sink_info_list(pac->ctx,
-			__get_sink_cb, pac);
+		if (NULL == po) {
+			die("pa_context_get_sink_info_list failed: %s",
+					pa_strerror(pa_context_errno(pac->ctx)));
+		}
 
-	if (NULL == po) {
-		die("pa_context_get_sink_info_list failed: %s",
-				pa_strerror(pa_context_errno(pac->ctx)));
+		pa_operation_unref(po);
+		pa_threaded_mainloop_wait(pac->mainloop);
 	}
 
-	pa_operation_unref(po);
-	pa_threaded_mainloop_wait(pac->mainloop);
+	if (filter & PULSEAUDIO_SINK_FILTER_APPLICATION) {
+		po = pa_context_get_sink_input_info_list(pac->ctx,
+				__get_sink_input_cb, pac);
 
-	po = pa_context_get_sink_input_info_list(pac->ctx,
-			__get_sink_input_cb, pac);
+		if (NULL == po) {
+			die("pa_context_get_sink_input_info_list failed: %s",
+					pa_strerror(pa_context_errno(pac->ctx)));
+		}
 
-	if (NULL == po) {
-		die("pa_context_get_sink_input_info_list failed: %s",
-				pa_strerror(pa_context_errno(pac->ctx)));
+		pa_operation_unref(po);
+		pa_threaded_mainloop_wait(pac->mainloop);
 	}
-
-	pa_operation_unref(po);
-	pa_threaded_mainloop_wait(pac->mainloop);
 
 	pac->userdata = &serverinfo;
 

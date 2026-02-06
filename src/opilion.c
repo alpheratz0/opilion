@@ -64,6 +64,7 @@
 
 static Pixbuf_t *pb;
 static PulseAudioConnection_t *pac;
+static PulseAudioSinkFilter filter;
 static PulseAudioSinkList_t *sinks;
 static SinkSelector_t *sink_selector;
 static xcb_connection_t *conn;
@@ -289,7 +290,7 @@ refresh_sink_list(bool delay)
 	xcb_change_window_attributes(conn, win, XCB_CW_CURSOR, &curbsy);
 	xcb_flush(conn);
 	pulseaudio_sink_list_free(sinks);
-	sinks = pulseaudio_get_all_sinks(pac);
+	sinks = pulseaudio_get_all_sinks(pac, filter);
 	sink_selector_set_sink_list(sink_selector, sinks);
 	if (delay) usleep(1000*50);
 	xcb_change_window_attributes(conn, win, XCB_CW_CURSOR, &curdft);
@@ -390,7 +391,7 @@ h_mapping_notify(xcb_mapping_notify_event_t *ev)
 static void
 usage(void)
 {
-	puts("usage: opilion [-hvI]");
+	puts("usage: opilion [-hvIsSmMaA]");
 	exit(0);
 }
 
@@ -420,12 +421,20 @@ main(int argc, char **argv)
 	xcb_generic_event_t *ev;
 	bool draw_icons = true;
 
+	filter = PULSEAUDIO_SINK_FILTER_ALL;
+
 	while (++argv, --argc > 0) {
 		if ((*argv)[0] == '-' && (*argv)[1] != '\0' && (*argv)[2] == '\0') {
 			switch ((*argv)[1]) {
 			case 'h': usage(); break;
 			case 'v': version(); break;
 			case 'I': draw_icons = false; break;
+			case 'a': filter &= ~PULSEAUDIO_SINK_FILTER_APPLICATION; break;
+			case 'A': filter |= PULSEAUDIO_SINK_FILTER_APPLICATION; break;
+			case 's': filter &= ~PULSEAUDIO_SINK_FILTER_SPEAKER; break;
+			case 'S': filter |= PULSEAUDIO_SINK_FILTER_SPEAKER; break;
+			case 'm': filter &= ~PULSEAUDIO_SINK_FILTER_MICROPHONE; break;
+			case 'M': filter |= PULSEAUDIO_SINK_FILTER_MICROPHONE; break;
 			default: die("invalid option %s", *argv); break;
 			}
 		} else {
@@ -437,7 +446,7 @@ main(int argc, char **argv)
 		die("another instance is already running");
 
 	pac = pulseaudio_connect();
-	sinks = pulseaudio_get_all_sinks(pac);
+	sinks = pulseaudio_get_all_sinks(pac, filter);
 
 	if (pulseaudio_sink_list_get_length(sinks) == 0)
 		die("no sinks were found");

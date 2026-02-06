@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2022-2025 <alpheratz99@protonmail.com>
+	Copyright (C) 2022-2026 <alpheratz99@protonmail.com>
 
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU General Public License version 2 as published by
@@ -33,6 +33,14 @@ typedef struct PulseAudioSink               PulseAudioSink_t;
 typedef struct PulseAudioSinkList       PulseAudioSinkList_t;
 typedef struct PulseAudioServerInfo   PulseAudioServerInfo_t;
 
+typedef enum {
+	PULSEAUDIO_SINK_FILTER_NONE = 0,
+	PULSEAUDIO_SINK_FILTER_SPEAKER = 1UL << 0,
+	PULSEAUDIO_SINK_FILTER_MICROPHONE = 1UL << 1,
+	PULSEAUDIO_SINK_FILTER_APPLICATION = 1UL << 2,
+	PULSEAUDIO_SINK_FILTER_ALL = (PULSEAUDIO_SINK_FILTER_APPLICATION<<1)-1
+} PulseAudioSinkFilter;
+
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
@@ -41,10 +49,13 @@ extern PulseAudioConnection_t *
 pulseaudio_connect(void);
 
 extern PulseAudioSinkList_t *
-pulseaudio_get_all_sinks(PulseAudioConnection_t *pac);
+pulseaudio_get_all_sinks(PulseAudioConnection_t *pac, PulseAudioSinkFilter filter);
 
 extern void
 pulseaudio_disconnect(PulseAudioConnection_t *pac);
+
+extern bool
+pulseaudio_sink_matches_filter(const PulseAudioSink_t *s, PulseAudioSinkFilter filter);
 
 extern PulseAudioSink_t *
 pulseaudio_sink_from_source(const pa_source_info *source);
