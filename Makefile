@@ -46,7 +46,7 @@ install: all
 
 dist: clean
 	mkdir -p opilion-$(VERSION)
-	cp -R COPYING config.mk Makefile README opilion.1 src include \
+	cp -R COPYING config.mk Makefile README.md opilion.1 src include \
 		extra opilion-$(VERSION)
 	tar -cf opilion-$(VERSION).tar opilion-$(VERSION)
 	gzip opilion-$(VERSION).tar
