@@ -1,7 +1,7 @@
 # Copyright (C) 2022-2026 <alpheratz99@protonmail.com>
 # This program is free software.
 
-VERSION = 1.2.1
+VERSION = 1.2.2
 
 PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/share/man
@@ -14,7 +14,7 @@ DEPENDENCIES = fcft xcb xcb-shm xcb-image xcb-keysyms xcb-xkb xcb-cursor libpuls
 INCS = $(shell $(PKG_CONFIG) --cflags $(DEPENDENCIES)) -Iinclude
 LIBS = $(shell $(PKG_CONFIG) --libs $(DEPENDENCIES)) -lm
 
-CFLAGS = -Os $(INCS) -DVERSION=\"$(VERSION)\"
+CFLAGS = -march=native -Os $(INCS) -DVERSION=\"$(VERSION)\"
 LDFLAGS = -s $(LIBS)
 
 CC = cc
