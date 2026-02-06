@@ -446,7 +446,7 @@ main(int argc, char **argv)
 			case 'a': pulseaudio_sink_filter_toggle(&filter, PULSEAUDIO_SINK_FILTER_APPLICATION, prefix == '+'); break;
 			case 's': pulseaudio_sink_filter_toggle(&filter, PULSEAUDIO_SINK_FILTER_SPEAKER, prefix == '+'); break;
 			case 'm': pulseaudio_sink_filter_toggle(&filter, PULSEAUDIO_SINK_FILTER_MICROPHONE, prefix == '+'); break;
-			default: die("invalid option %s", *argv); break;
+			default: die("invalid option -%c", walk[-1]); break;
 			}
 		} else {
 			die("unexpected argument: %s", *argv);
