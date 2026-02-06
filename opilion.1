@@ -1,4 +1,4 @@
-.Dd February 05, 2026
+.Dd February 06, 2026
 .Dt OPILION 1
 .Sh NAME
 .Nm opilion
@@ -52,6 +52,13 @@ Toggle visibility of microphones.
 Toggle visibility of applications.
 .It Escape/q
 Exit the application.
+.El
+.Sh EXAMPLES
+.Bl -tag -width indent
+.It hide all but application sinks
+opilion -0 +a
+.It hide all but speakers and mics
+opilion -0 +sm
 .El
 .Sh SEE ALSO
 .Xr X 7
